@@ -8,7 +8,9 @@ import { MemoryGreeting } from "@/components/home/Memory";
 import { NextStep } from "@/components/home/NextStep";
 import { Opportunities } from "@/components/home/Opportunities";
 import { copy } from "@/lib/copy";
+import { hasCertificate } from "@/lib/session";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const coverage = [
   { id: "ret", label: "Retirement", score: 72 },
@@ -42,6 +44,53 @@ const opps = [
 
 export function HomeScreen() {
   const router = useRouter();
+  const [hasCert] = useState(() => hasCertificate());
+
+  if (!hasCert) {
+    return (
+      <>
+        <div className="dm-row" style={{ justifyContent: "space-between" }}>
+          <Logo />
+          <Squirrel state="idle" size={36} />
+        </div>
+
+        <MemoryGreeting
+          name="there"
+          line="Start with one document. An estimate works too."
+        />
+
+        <section className="dm-card">
+          <p className="dm-muted" style={{ margin: "0 0 12px" }}>
+            Your pension certificate (Pensionskassenausweis) is the fastest way
+            in. We explain each line in plain words.
+          </p>
+          <button
+            type="button"
+            className="dm-btn dm-btn--signal dm-btn--block"
+            onClick={() => router.push("/certificate")}
+          >
+            Add your certificate
+          </button>
+        </section>
+
+        <NextStep
+          title="Or look around with an estimate"
+          duration="About 2 minutes"
+          actionLabel="Use an estimate"
+          onAction={() => router.push("/answer")}
+        />
+
+        <AskBar
+          sticky
+          onAttach={() => router.push("/certificate")}
+          onSubmit={(value) => {
+            sessionStorage.setItem("dm-ask-q", value);
+            router.push("/ask");
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -55,7 +104,10 @@ export function HomeScreen() {
         line="One thought for this morning. Details live one tap deeper."
       />
 
-      <section className="dm-card" style={{ position: "relative", overflow: "hidden" }}>
+      <section
+        className="dm-card"
+        style={{ position: "relative", overflow: "hidden" }}
+      >
         <p className="dm-muted" style={{ margin: "0 0 12px" }}>
           {copy.home.heroLine}
         </p>
@@ -109,6 +161,7 @@ export function HomeScreen() {
 
       <AskBar
         sticky
+        onAttach={() => router.push("/certificate")}
         onSubmit={(value) => {
           sessionStorage.setItem("dm-ask-q", value);
           router.push("/ask");

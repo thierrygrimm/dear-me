@@ -52,6 +52,7 @@ export default function MePage() {
                 title: copy.me.documents,
                 subtitle: "Pension certificate",
                 icon: <FileText strokeWidth={1.75} />,
+                onClick: () => router.push("/certificate"),
               },
             ],
           },

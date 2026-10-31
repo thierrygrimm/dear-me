@@ -24,7 +24,8 @@ export default function SignUpPage() {
     window.setTimeout(() => {
       sessionStorage.setItem("dm-booted", "1");
       sessionStorage.setItem("dm-signed-in", "1");
-      router.push("/");
+      // After sign-in, start with the certificate — the usual first document.
+      router.push(provider === "guest" ? "/" : "/certificate");
     }, 2400);
   }
 
