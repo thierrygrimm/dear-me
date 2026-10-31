@@ -2,17 +2,23 @@ const CERT_KEY = "dm-has-cert";
 const CERT_VALUES_KEY = "dm-cert-values";
 const SIGNED_IN_KEY = "dm-signed-in";
 const PROVIDER_KEY = "dm-auth-provider";
-const MOMENT_KEY = "dm-moment";
+const MOMENTS_KEY = "dm-moments";
 const ONBOARDED_KEY = "dm-onboarded";
 const NAME_KEY = "dm-name";
+const INTAKE_KEY = "dm-intake";
 
 export type AuthProvider = "pax" | "apple" | "google" | "email" | "guest";
 
 export type LifeMoment =
-  | "baby"
+  | "child"
+  | "less"
+  | "home"
   | "together"
-  | "job"
-  | "checking";
+  | "firstjob"
+  | "selfemployed"
+  | "separating"
+  | "bonus"
+  | "caring";
 
 export type CertValues = {
   insuredSalary: number;
@@ -31,11 +37,38 @@ export const sampleCert: CertValues = {
   buyIn: 42800,
 };
 
+export const suggestedMoments: {
+  id: LifeMoment;
+  label: string;
+}[] = [
+  { id: "child", label: "Expecting a child" },
+  { id: "less", label: "Working less" },
+  { id: "home", label: "Buying a home" },
+  { id: "together", label: "Living together, not married" },
+];
+
+export const moreMoments: {
+  id: LifeMoment;
+  label: string;
+}[] = [
+  { id: "firstjob", label: "First job" },
+  { id: "selfemployed", label: "Going self-employed" },
+  { id: "separating", label: "Separating" },
+  { id: "bonus", label: "A bonus or inheritance" },
+  { id: "caring", label: "Caring for a parent" },
+];
+
+/** @deprecated use suggestedMoments / moreMoments */
 export const momentLabels: Record<LifeMoment, string> = {
-  baby: "We're expecting a baby",
-  together: "Moving in together",
-  job: "New job or going part-time",
-  checking: "Just checking I'm okay",
+  child: "Expecting a child",
+  less: "Working less",
+  home: "Buying a home",
+  together: "Living together, not married",
+  firstjob: "First job",
+  selfemployed: "Going self-employed",
+  separating: "Separating",
+  bonus: "A bonus or inheritance",
+  caring: "Caring for a parent",
 };
 
 export function hasCertificate(): boolean {
@@ -94,17 +127,35 @@ export function isPaxConnected(): boolean {
   return readProvider() === "pax" && hasCertificate();
 }
 
-export function readMoment(): LifeMoment | null {
-  if (typeof window === "undefined") return null;
-  const v = sessionStorage.getItem(MOMENT_KEY);
-  if (v === "baby" || v === "together" || v === "job" || v === "checking") {
-    return v;
-  }
-  return null;
+function isLifeMoment(v: string): v is LifeMoment {
+  return v in momentLabels;
 }
 
+export function readMoments(): LifeMoment[] {
+  if (typeof window === "undefined") return [];
+  const raw = sessionStorage.getItem(MOMENTS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((x): x is LifeMoment => typeof x === "string" && isLifeMoment(x));
+  } catch {
+    return [];
+  }
+}
+
+/** Primary moment for copy (first selected). */
+export function readMoment(): LifeMoment | null {
+  return readMoments()[0] ?? null;
+}
+
+export function markMoments(moments: LifeMoment[]): void {
+  sessionStorage.setItem(MOMENTS_KEY, JSON.stringify(moments));
+}
+
+/** @deprecated use markMoments */
 export function markMoment(moment: LifeMoment): void {
-  sessionStorage.setItem(MOMENT_KEY, moment);
+  markMoments([moment]);
 }
 
 export function isOnboarded(): boolean {
@@ -119,4 +170,36 @@ export function markOnboarded(): void {
 export function readName(): string {
   if (typeof window === "undefined") return "there";
   return sessionStorage.getItem(NAME_KEY) || "there";
+}
+
+/** Headline for the Your plan screen, based on selected moments. */
+export function planHeadline(name: string, moments: LifeMoment[]): string {
+  const who = name === "there" ? "Let's" : `${name}, let's`;
+  if (moments.includes("child")) return `${who} look at the baby together.`;
+  if (moments.includes("less")) return `${who} look at working less together.`;
+  if (moments.includes("home")) return `${who} look at the home together.`;
+  if (moments.includes("together")) return `${who} look at living together.`;
+  return `${who} get your plan started.`;
+}
+
+export type IntakeValues = {
+  pensumToday: number;
+  pensumAfter: number;
+  salary: number;
+  savings: number;
+};
+
+export function markIntake(values: IntakeValues): void {
+  sessionStorage.setItem(INTAKE_KEY, JSON.stringify(values));
+}
+
+export function readIntake(): IntakeValues | null {
+  if (typeof window === "undefined") return null;
+  const raw = sessionStorage.getItem(INTAKE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as IntakeValues;
+  } catch {
+    return null;
+  }
 }
