@@ -40,7 +40,9 @@ export function ShareConsent({
   onConfirm,
   className,
 }: Props) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() =>
+    categories.map((c) => c.id),
+  );
 
   function toggle(id: string) {
     setSelected((prev) =>
@@ -83,7 +85,7 @@ export function ShareConsent({
         disabled={selected.length === 0}
         onClick={() => onConfirm?.(selected)}
       >
-        Share selected
+        Continue
       </Button>
     </div>
   );
