@@ -140,6 +140,10 @@ export default function DevUiPage() {
       </Section>
 
       <Section title="Ask / Offer">
+        <p className="dm-small dm-muted" style={{ margin: 0 }}>
+          Tap the mic for the listening waveform, stop to transcribe into the
+          field, then send.
+        </p>
         <AskBar />
         <OfferCard
           title="A quiet option"
