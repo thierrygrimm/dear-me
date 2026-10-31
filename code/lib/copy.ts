@@ -2,6 +2,12 @@
 export const copy = {
   brand: "dear me",
   askPlaceholder: "What's on your mind?",
+  askWriting: "Writing it down…",
+  askCancel: "Cancel",
+  askStop: "Stop listening",
+  askSpeak: "Speak",
+  askSend: "Send",
+  askAttach: "Add a document",
   waiting: "One moment, we're doing the maths with you.",
   nothingElse: "You don't need anything else.",
   allSet: "All set for now",
