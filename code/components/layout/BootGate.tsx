@@ -1,35 +1,63 @@
 "use client";
 
 import { Splash } from "@/components/brand/Loading";
+import { isSignedIn } from "@/lib/session";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 /**
- * Cold start only: short splash, then the app.
- * Brand loader, signing-in, calculating and skeletons stay contextual
- * (sign-in, certificate read, screen fetch) — not chained here.
+ * Cold start: short splash overlay, then the app — or redirect to /signup.
+ * Children always mount so Next instant-navigation can validate segments.
  */
 export function BootGate({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("dm-booted") === "1";
-  });
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    if (ready) return;
+    if (!isSignedIn()) {
+      router.replace("/signup");
+      return;
+    }
+
+    const booted = sessionStorage.getItem("dm-booted") === "1";
+    if (booted) {
+      setShowSplash(false);
+      setReady(true);
+      return;
+    }
+
     const t = window.setTimeout(() => {
       sessionStorage.setItem("dm-booted", "1");
+      setShowSplash(false);
       setReady(true);
     }, 1200);
     return () => window.clearTimeout(t);
-  }, [ready]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (!ready) {
-    return (
-      <div className="dm-app-shell" style={{ padding: 0 }}>
-        <Splash />
+  return (
+    <>
+      <div
+        style={{ visibility: ready ? "visible" : "hidden" }}
+        aria-hidden={!ready}
+      >
+        {children}
       </div>
-    );
-  }
-
-  return <>{children}</>;
+      {showSplash || !ready ? (
+        <div
+          className="dm-app-shell"
+          style={{
+            padding: 0,
+            position: "fixed",
+            inset: 0,
+            zIndex: 80,
+            background: "var(--neonweste)",
+          }}
+        >
+          <Splash />
+        </div>
+      ) : null}
+    </>
+  );
 }
