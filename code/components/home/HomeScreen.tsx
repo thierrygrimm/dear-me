@@ -4,11 +4,11 @@ import { AskBar } from "@/components/answer/AskBar";
 import { Logo } from "@/components/brand/Logo";
 import { Squirrel } from "@/components/brand/Squirrel";
 import { Coverage } from "@/components/data/Coverage";
-import { MemoryGreeting } from "@/components/home/Memory";
+import { MemoryFacts, MemoryGreeting } from "@/components/home/Memory";
 import { NextStep } from "@/components/home/NextStep";
 import { Opportunities } from "@/components/home/Opportunities";
 import { copy } from "@/lib/copy";
-import { hasCertificate, readName } from "@/lib/session";
+import { hasCertificate, readIntake, readName } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -46,6 +46,7 @@ export function HomeScreen() {
   const router = useRouter();
   const [hasCert] = useState(() => hasCertificate());
   const [name] = useState(() => readName());
+  const [intake] = useState(() => readIntake());
 
   if (!hasCert) {
     return (
@@ -105,6 +106,23 @@ export function HomeScreen() {
         line="One thought for this morning. Details live one tap deeper."
       />
 
+      <MemoryFacts
+        facts={[
+          {
+            id: "pensum",
+            label: `${intake?.pensumAfter ?? 60} % after the baby`,
+            source: "You told us",
+            onEdit: () => router.push("/me/know"),
+          },
+          {
+            id: "salary",
+            label: `Salary about CHF ${(intake?.salary ?? 72000).toLocaleString("de-CH")}`,
+            source: "myPax",
+            onEdit: () => router.push("/me/know"),
+          },
+        ]}
+      />
+
       <section
         className="dm-card"
         style={{ position: "relative", overflow: "hidden" }}
@@ -145,6 +163,14 @@ export function HomeScreen() {
       <Opportunities
         items={opps}
         onSelect={(id) => {
+          if (id === "1") {
+            router.push("/me/book");
+            return;
+          }
+          if (id === "2") {
+            router.push("/learn?lesson=pillar-3a");
+            return;
+          }
           if (id === "learn-three-sources") {
             router.push("/learn?lesson=three-sources");
           }
