@@ -1417,9 +1417,12 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 /* edit sheet with keypad */
 .dm-ed{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
 .dm-ed .lab{font:600 15px/20px var(--font-text)}
-.dm-ed .num{display:flex;align-items:baseline;gap:6px;font:800 46px/52px var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;min-height:52px}
-.dm-ed .num i{width:2px;height:40px;background:var(--ink);align-self:center;animation:dmCaret 1s steps(1) infinite}
-.dm-ed .num small{font:600 16px/20px var(--font-text);color:var(--ink-muted)}
+.dm-ed .num{display:flex;align-items:baseline;justify-content:center;gap:6px;font:800 46px/52px var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;min-height:52px;cursor:text}
+.dm-ed .num i{display:none}
+.dm-ed .num small,.dm-ed .num .u{font:600 16px/20px var(--font-text);color:var(--ink-muted)}
+.dm-ed__input{all:unset;box-sizing:border-box;min-width:1ch;max-width:100%;font:inherit;font-variant-numeric:tabular-nums;letter-spacing:inherit;text-align:center;caret-color:var(--ink);outline:none}
+.dm-ed__input:focus{caret-color:var(--ink)}
+.dm-keys button[disabled]{opacity:.35;cursor:default;pointer-events:none}
 @keyframes dmCaret{50%{opacity:0}}
 .dm-ed .was{font:400 13px/18px var(--font-text);color:var(--ink-muted)}
 .dm-ed .was b{color:var(--ink);font-weight:600}
