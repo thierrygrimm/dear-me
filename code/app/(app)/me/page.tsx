@@ -61,6 +61,13 @@ export default function MePage() {
             title: copy.me.privacy,
             rows: [
               {
+                id: "privacy-page",
+                title: "Privacy and data",
+                subtitle: "Sharing, analytics, delete",
+                icon: <Shield strokeWidth={1.75} />,
+                onClick: () => router.push("/me/privacy"),
+              },
+              {
                 id: "share",
                 title: "Share with Pax",
                 subtitle: "Off by default",
