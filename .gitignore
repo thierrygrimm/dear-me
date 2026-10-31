@@ -83,3 +83,6 @@ blob-report/
 tmp/
 temp/
 .tmp/
+
+# Local design reference (HTML prototypes) — keep out of git
+dear-me-design-system/
