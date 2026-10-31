@@ -48,6 +48,8 @@ export { Opportunities } from "@/components/home/Opportunities";
 export { SettingsList } from "@/components/home/Settings";
 export { HomeScreen } from "@/components/home/HomeScreen";
 export { AnswerScreen } from "@/components/answer/AnswerScreen";
+export { ScenarioCompare } from "@/components/answer/ScenarioCompare";
+export { WhatWeKnow } from "@/components/home/WhatWeKnow";
 export {
   SignUp,
   WelcomeScreen,
