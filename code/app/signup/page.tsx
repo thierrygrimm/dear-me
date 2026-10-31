@@ -1,16 +1,17 @@
 "use client";
 
+import { IntakeFlow } from "@/components/auth/IntakeFlow";
 import {
   ChooseHowScreen,
   ConnectPaxScreen,
-  MomentScreen,
-  WelcomeInScreen,
   WelcomeScreen,
+  YourMomentsScreen,
+  YourPlanScreen,
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
 import {
   isSignedIn,
-  markMoment,
+  markMoments,
   markOnboarded,
   markSignedIn,
   readName,
@@ -26,8 +27,9 @@ type Step =
   | "choose"
   | "connect"
   | "signing"
-  | "moment"
-  | "welcomeIn";
+  | "moments"
+  | "plan"
+  | "intake";
 
 const signingLabels: Record<AuthProvider, string> = {
   pax: "Signing you in with myPax",
@@ -41,10 +43,10 @@ export default function SignUpPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("splash");
   const [provider, setProvider] = useState<AuthProvider>("pax");
-  const [moment, setMoment] = useState<LifeMoment>("baby");
+  const [moments, setMoments] = useState<LifeMoment[]>(["child", "less"]);
 
   useEffect(() => {
-    if (isSignedIn()) {
+    if (isSignedIn() && sessionStorage.getItem("dm-onboarded") === "1") {
       router.replace("/");
       return;
     }
@@ -58,7 +60,6 @@ export default function SignUpPage() {
       setStep("welcome");
     }, 1400);
     return () => window.clearTimeout(t);
-    // router is stable enough for replace; omit from deps so the splash timer is not reset.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -71,7 +72,7 @@ export default function SignUpPage() {
         router.replace("/");
         return;
       }
-      setStep("moment");
+      setStep("moments");
     }, 2400);
     return () => window.clearTimeout(t);
   }, [step, provider, router]);
@@ -85,15 +86,25 @@ export default function SignUpPage() {
     setStep("signing");
   }
 
-  function finishOnboarding(dest: "/" | "/answer") {
-    markMoment(moment);
+  function startPlan() {
+    markMoments(moments);
+    if (provider === "pax") {
+      setStep("intake");
+      return;
+    }
+    // Outside Pax: bring in a certificate first, then the answer path.
     markOnboarded();
-    router.replace(dest);
+    router.replace("/certificate");
+  }
+
+  function finishIntake() {
+    markOnboarded();
+    router.replace("/compare");
   }
 
   if (step === "splash") {
     return (
-      <div className="dm-app-shell" style={{ padding: 0 }}>
+      <div className="dm-stage dm-app-shell--bleed">
         <Splash />
       </div>
     );
@@ -101,7 +112,7 @@ export default function SignUpPage() {
 
   if (step === "signing") {
     return (
-      <div className="dm-app-shell" style={{ padding: 0 }}>
+      <div className="dm-stage dm-app-shell--bleed">
         <SigningIn
           label={signingLabels[provider]}
           detail={
@@ -114,8 +125,16 @@ export default function SignUpPage() {
     );
   }
 
+  if (step === "intake") {
+    return (
+      <IntakeFlow onBack={() => setStep("plan")} onDone={finishIntake} />
+    );
+  }
+
+  const name = provider === "pax" ? readName() : "there";
+
   return (
-    <div className="dm-app-shell" style={{ padding: 16 }}>
+    <div className="dm-signup-shell">
       {step === "welcome" ? (
         <WelcomeScreen
           onGetStarted={() => setStep("choose")}
@@ -142,21 +161,22 @@ export default function SignUpPage() {
         />
       ) : null}
 
-      {step === "moment" ? (
-        <MomentScreen
-          value={moment}
-          onChange={setMoment}
+      {step === "moments" ? (
+        <YourMomentsScreen
+          name={name}
+          value={moments}
+          onChange={setMoments}
           onBack={() => setStep("choose")}
-          onContinue={() => setStep("welcomeIn")}
+          onContinue={() => setStep("plan")}
         />
       ) : null}
 
-      {step === "welcomeIn" ? (
-        <WelcomeInScreen
-          name={provider === "pax" ? readName() : "there"}
-          pax={provider === "pax"}
-          onAsk={() => finishOnboarding(provider === "pax" ? "/answer" : "/")}
-          onLater={() => finishOnboarding("/")}
+      {step === "plan" ? (
+        <YourPlanScreen
+          name={name}
+          moments={moments}
+          onBack={() => setStep("moments")}
+          onStart={startPlan}
         />
       ) : null}
     </div>
