@@ -4,6 +4,13 @@ import { AskBar } from "@/components/answer/AskBar";
 import { Disclaimer } from "@/components/answer/Disclaimer";
 import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
+import { Chat } from "@/components/chat/Chat";
+import { ChatGuide } from "@/components/chat/ChatGuide";
+import { ChatSteps } from "@/components/chat/ChatSteps";
+import {
+  AnswerWidget,
+  MemoryChip,
+} from "@/components/chat/ChatWidgets";
 import {
   BrandLoader,
   CalculatingPanel,
@@ -161,6 +168,82 @@ export default function DevUiPage() {
           pax
           title="Pax partner idea"
           body="Official partner colours only here."
+        />
+      </Section>
+
+      <Section title="Chat">
+        <p className="dm-small dm-muted" style={{ margin: 0 }}>
+          Full Ask screen is at <code>/ask</code>. Pieces below.
+        </p>
+        <ChatSteps
+          defaultOpen
+          summary="Worked it out in 4.8 seconds"
+          steps={[
+            {
+              id: "1",
+              label: "Found your salary in myPax",
+              status: "done",
+              duration: "0.8 s",
+            },
+            {
+              id: "2",
+              label: "Calculated 100 % and 60 % with Logismata",
+              status: "done",
+              duration: "2.1 s",
+            },
+            {
+              id: "3",
+              label: "Checked your goal",
+              status: "run",
+            },
+          ]}
+        />
+        <MemoryChip text="Saved: baby due March 2027" />
+        <AnswerWidget
+          label="60 % after the baby"
+          cue="at 65"
+          verdict="That works."
+          detail="CHF 3'640 a month"
+        />
+        <Disclaimer>{copy.answer.disclaimerShort}</Disclaimer>
+        <div
+          style={{
+            height: 420,
+            borderRadius: 16,
+            overflow: "hidden",
+            boxShadow: "inset 0 0 0 1px var(--line)",
+            padding: 12,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Chat />
+        </div>
+        <ChatGuide
+          title="Parental leave plan"
+          intro="Let's plan your parental leave together. Four quick questions, about a minute."
+          steps={[
+            {
+              id: "due",
+              question: "When is the baby due?",
+              options: [
+                { id: "spring", label: "In spring" },
+                { id: "summer", label: "In summer" },
+                { id: "unsure", label: "Not sure yet" },
+              ],
+            },
+            {
+              id: "who",
+              question: "Who will take parental leave?",
+              options: [
+                { id: "me", label: "Me" },
+                { id: "marco", label: "Marco" },
+                { id: "both", label: "Both of us" },
+              ],
+            },
+          ]}
+          resultTitle="Your parental leave plan"
+          resultBody="Workload after the leave, pension at 65 and what to sort out first."
         />
       </Section>
 

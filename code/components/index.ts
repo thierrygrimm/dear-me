@@ -28,7 +28,12 @@ export { Verdict } from "@/components/answer/Verdict";
 export { Disclaimer } from "@/components/answer/Disclaimer";
 export { AskBar } from "@/components/answer/AskBar";
 export { OfferCard } from "@/components/answer/OfferCard";
-export { Chat, ChatWidget } from "@/components/chat/Chat";
+export {
+  Chat,
+  ChatWidget,
+  AnswerWidget,
+  MemoryChip,
+} from "@/components/chat/Chat";
 export { ChatPlan } from "@/components/chat/ChatPlan";
 export { ChatSteps } from "@/components/chat/ChatSteps";
 export { ChatGuide } from "@/components/chat/ChatGuide";
@@ -38,7 +43,14 @@ export { Opportunities } from "@/components/home/Opportunities";
 export { SettingsList } from "@/components/home/Settings";
 export { HomeScreen } from "@/components/home/HomeScreen";
 export { AnswerScreen } from "@/components/answer/AnswerScreen";
-export { SignUp } from "@/components/auth/SignUp";
+export {
+  SignUp,
+  WelcomeScreen,
+  ChooseHowScreen,
+  ConnectPaxScreen,
+  MomentScreen,
+  WelcomeInScreen,
+} from "@/components/auth/SignUp";
 export { ShareConsent } from "@/components/auth/ShareConsent";
 export { AdvisorBooking } from "@/components/auth/AdvisorBooking";
 export { CertificateFlow } from "@/components/certificate/CertificateFlow";
