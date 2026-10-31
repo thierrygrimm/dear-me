@@ -691,10 +691,18 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 .dm-dotring svg{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px;fill:var(--briefpapier)}
 
 /* Sign up and log in (refs: Acorns onboarding and log in) */
+.dm-signup{display:flex;flex-direction:column;gap:14px;min-height:calc(100dvh - 32px);flex:1}
+.dm-signup__body{display:flex;flex-direction:column;gap:12px;flex:1;padding-top:6px}
+.dm-signup__logo{font-size:18px}
+.dm-signup__cta{margin-top:auto}
+.dm-signup__link{all:unset;cursor:pointer;text-decoration:underline}
+.dm-signup--lime{background:var(--neonweste);margin:-16px;padding:28px 20px 18px;min-height:100dvh;box-sizing:border-box}
 .dm-welcome{margin:-20px -16px 0;height:330px;background:var(--neonweste);position:relative;overflow:hidden;border-radius:28px 28px 0 0}
 .dm-welcome .sun{position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:var(--abschlusspink)}
 .dm-welcome .hill{position:absolute;left:-10%;right:-10%;bottom:-120px;height:220px;border-radius:50%;background:var(--espressosatz)}
 .dm-welcome .home{position:absolute;right:40px;bottom:60px;width:96px;height:96px;background:var(--rosa-brille);border-radius:48px 48px 0 0}
+.dm-welcome .sq-lg{position:absolute;left:46px;bottom:58px;color:var(--espressosatz)}
+.dm-welcome .sq-sm{position:absolute;right:64px;bottom:60px;color:var(--espressosatz);transform:scaleX(-1)}
 .dm-sso{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;padding:0 18px;border-radius:var(--radius-pill);font:600 15px/20px var(--font-text);box-shadow:inset 0 0 0 1.5px var(--line-strong);color:var(--ink)}
 .dm-sso svg{width:20px;height:20px;flex:none}
 .dm-sso--pax{background:var(--pax-purpur);color:#fff;box-shadow:none}
