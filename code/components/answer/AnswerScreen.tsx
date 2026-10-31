@@ -10,13 +10,14 @@ import { Segmented } from "@/components/ui/Segmented";
 import { PensumSlider } from "@/components/ui/PensumSlider";
 import { copy } from "@/lib/copy";
 import { formatCHF } from "@/lib/format";
+import { readIntake } from "@/lib/session";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function AnswerScreen() {
   const router = useRouter();
   const [who, setWho] = useState("me");
-  const [pensum, setPensum] = useState(60);
+  const [pensum, setPensum] = useState(() => readIntake()?.pensumAfter ?? 60);
 
   const monthlyGap = useMemo(() => {
     // Demo curve: 100% → 0 gap, 60% → ~620
@@ -100,6 +101,14 @@ export function AnswerScreen() {
       />
 
       <PensumSlider value={pensum} onChange={setPensum} />
+
+      <button
+        type="button"
+        className="dm-btn dm-btn--secondary dm-btn--block"
+        onClick={() => router.push("/compare")}
+      >
+        See all of it
+      </button>
 
       <Disclaimer variant="plain">{copy.answer.disclaimer}</Disclaimer>
 
