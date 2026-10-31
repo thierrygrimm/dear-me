@@ -123,7 +123,14 @@ export function AnswerScreen() {
         <p className="dm-label">{copy.nothingElse}</p>
       )}
 
-      <AskBar onSubmit={() => router.push("/ask")} sticky />
+      <AskBar
+        sticky
+        onAttach={() => router.push("/certificate")}
+        onSubmit={(value) => {
+          sessionStorage.setItem("dm-ask-q", value);
+          router.push("/ask");
+        }}
+      />
     </>
   );
 }
