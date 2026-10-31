@@ -89,7 +89,7 @@ export default function PlanPage() {
       ) : (
         <ChatPlan
           title="Before March"
-          subtitle="Tap a step and we take you there."
+          subtitle={copy.plan.listHint}
           variant={mode}
           steps={wired}
         />

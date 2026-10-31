@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 import { useState } from "react";
 
 export type PlanStep = {
@@ -79,7 +80,7 @@ function ActionList({
         </div>
         <div>
           <b>{title}</b>
-          <span>{subtitle ?? "Tap a step and we take you there."}</span>
+          <span>{subtitle ?? copy.plan.listHint}</span>
         </div>
       </div>
       {steps.map((s) => (
@@ -187,14 +188,14 @@ function Stepper({
                     else s.onOpen?.();
                   }}
                 >
-                  Do it now
+                  {copy.plan.doNow}
                 </button>
                 <button
                   type="button"
                   className="dm-btn dm-btn--text dm-small"
                   onClick={() => s.onSkip?.() ?? s.onToggle?.()}
                 >
-                  Skip for now
+                  {copy.plan.skip}
                 </button>
               </div>
             </div>
