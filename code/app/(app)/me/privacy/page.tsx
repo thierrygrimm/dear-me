@@ -4,13 +4,14 @@ import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { useToast } from "@/components/feedback/Toast";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
+import { markSharePax, readSharePax } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function PrivacyPage() {
   const router = useRouter();
   const toast = useToast();
-  const [share, setShare] = useState(false);
+  const [share, setShare] = useState(() => readSharePax());
   const [analytics, setAnalytics] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -48,9 +49,12 @@ export default function PrivacyPage() {
             {
               id: "share",
               title: "Share with Pax",
-              sub: "Off by default",
+              sub: share ? "On" : "Off by default",
               checked: share,
-              onToggle: setShare,
+              onToggle: (next: boolean) => {
+                markSharePax(next);
+                setShare(next);
+              },
             },
             {
               id: "analytics",
