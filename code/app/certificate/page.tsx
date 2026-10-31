@@ -10,10 +10,6 @@ export default function CertificatePage() {
     <div className="dm-cert-shell">
       <CertificateFlow
         onClose={() => router.push("/")}
-        onEstimate={() => {
-          sessionStorage.setItem("dm-estimate-ok", "1");
-          router.push("/answer");
-        }}
         onDone={() => router.push("/answer")}
       />
     </div>
