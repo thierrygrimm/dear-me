@@ -5,5 +5,12 @@ import { useRouter } from "next/navigation";
 
 export default function BookPage() {
   const router = useRouter();
-  return <AdvisorBooking onBooked={() => router.push("/plan")} />;
+  return (
+    <div className="dm-signup-shell">
+      <AdvisorBooking
+        onBack={() => router.back()}
+        onBooked={() => router.push("/plan")}
+      />
+    </div>
+  );
 }
