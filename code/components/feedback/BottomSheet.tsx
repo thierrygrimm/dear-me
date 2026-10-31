@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 type Props = {
   open: boolean;
@@ -18,10 +18,16 @@ export function BottomSheet({
   onClose,
   title,
   description,
-  full,
+  full: fullProp = false,
   children,
   className,
 }: Props) {
+  const [full, setFull] = useState(fullProp);
+
+  useEffect(() => {
+    if (!open) setFull(fullProp);
+  }, [open, fullProp]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -45,7 +51,12 @@ export function BottomSheet({
         aria-modal="true"
         aria-labelledby={title ? "dm-bs-title" : undefined}
       >
-        <button type="button" className="grab" aria-label="Dismiss" onClick={onClose} />
+        <button
+          type="button"
+          className="grab"
+          aria-label="Expand"
+          onClick={() => setFull((v) => !v)}
+        />
         {title ? <h4 id="dm-bs-title">{title}</h4> : null}
         {description ? <p>{description}</p> : null}
         {children}
