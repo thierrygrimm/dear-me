@@ -8,7 +8,7 @@ import { MemoryGreeting } from "@/components/home/Memory";
 import { NextStep } from "@/components/home/NextStep";
 import { Opportunities } from "@/components/home/Opportunities";
 import { copy } from "@/lib/copy";
-import { hasCertificate } from "@/lib/session";
+import { hasCertificate, readName } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -45,6 +45,7 @@ const opps = [
 export function HomeScreen() {
   const router = useRouter();
   const [hasCert] = useState(() => hasCertificate());
+  const [name] = useState(() => readName());
 
   if (!hasCert) {
     return (
@@ -55,7 +56,7 @@ export function HomeScreen() {
         </div>
 
         <MemoryGreeting
-          name="there"
+          name={name}
           line="Start with one document. An estimate works too."
         />
 
@@ -100,7 +101,7 @@ export function HomeScreen() {
       </div>
 
       <MemoryGreeting
-        name="Lena"
+        name={name}
         line="One thought for this morning. Details live one tap deeper."
       />
 
