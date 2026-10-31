@@ -35,6 +35,7 @@ export const copy = {
       `About ${chf} less a month later on, for life.`,
     disclaimer:
       "Figures are calculated from what we know. Tap any number for its source.",
+    disclaimerShort: "Guidance, not advice.",
   },
   plan: {
     title: "Your plan",
@@ -56,17 +57,43 @@ export const copy = {
   signup: {
     welcome: "Welcome to dear me",
     welcomeSub: "A planner for life's big moments.",
+    promise: "Plan life's big moments. We'll handle the numbers.",
+    getStarted: "Get started",
+    haveAccount: "Already have an account?",
+    logIn: "Log in",
+    createAccount: "Create your account",
+    chooseHow: "How would you like to continue?",
+    chooseHowSub: "Pax customers: your cover is ready to use.",
     continuePax: "Continue with myPax",
     continueApple: "Continue with Apple",
     continueGoogle: "Continue with Google",
     continueEmail: "Continue with email",
     or: "or",
-    lookAround: "Just look around",
+    lookAround: "Look around first, no account",
+    terms:
+      "By continuing you agree to the terms and privacy notice. Your data is stored in Switzerland.",
+    connectTitle: "Connect myPax",
+    connectBody:
+      "You log in on myPax. We only read your pension certificate.",
+    continueToPax: "Continue to myPax",
+    useEmail: "Use email instead",
+    momentTitle: "What brings you here?",
+    momentSub: "Pick one. You can change it any time.",
+    continue: "Continue",
+    welcomeIn: (name: string) => `Welcome, ${name}.`,
+    welcomeInPax:
+      "Your Pax cover and 3a are in. Your first answer takes about 2 minutes.",
+    welcomeInGuest:
+      "You can look around now. Add a certificate when you want real numbers.",
+    askFirst: "Ask my first question",
+    finishLater: "Finish later",
   },
   chat: {
     title: "Ask",
     history: "Earlier chats",
     close: "Close",
+    back: "Back",
+    menu: "More",
   },
   states: {
     emptyTitle: "All set for now",
