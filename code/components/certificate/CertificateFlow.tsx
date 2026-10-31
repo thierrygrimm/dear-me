@@ -293,11 +293,12 @@ type EditField = "insuredSalary" | "savings" | "conversionRate";
 
 type Props = {
   onDone?: (values: CertValues) => void;
+  /** Kept for callers; estimate is reached from Home, not this footer. */
   onEstimate?: () => void;
   onClose?: () => void;
 };
 
-export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
+export function CertificateFlow({ onDone, onClose }: Props) {
   const toast = useToast();
   const [step, setStep] = useState<Step>("choose");
   const [sheet, setSheet] = useState<SheetId>(null);
@@ -888,60 +889,50 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
   /* ── A · Choose how + preview sheets ── */
   return (
     <div className="dm-cert-pane">
-      <div className="dm-cert-main">
-        <div className="dm-stack" style={{ gap: 12, flex: 1, minHeight: 0 }}>
-          <header className="dm-appbar">
-            {onClose ? (
-              <button type="button" aria-label="Back" onClick={onClose}>
-                <ChevronLeft strokeWidth={1.75} />
-              </button>
-            ) : (
-              <span />
-            )}
-            <span />
-            <span />
-          </header>
-
-          <p
-            className="dm-q"
-            style={{ fontSize: 22, lineHeight: "26px", margin: 0 }}
+      <div className="dm-cert-main dm-cert-main--choose">
+        {onClose ? (
+          <button
+            type="button"
+            className="dm-cert-back"
+            aria-label="Back"
+            onClick={onClose}
           >
-            Let&apos;s get your pension fund numbers.
-          </p>
-          <span className="dm-small dm-muted">
-            Pick what&apos;s easiest. You can always add more later.
-          </span>
+            <ChevronLeft strokeWidth={1.75} />
+          </button>
+        ) : null}
 
-          <div className="dm-stack" style={{ gap: 8 }}>
-            {ways.map((w) => (
-              <button
-                key={w.id}
-                type="button"
-                className="dm-way"
-                onClick={() => setSheet(w.id)}
-              >
-                <span className="ic">{w.icon}</span>
-                <b>{w.title}</b>
-                <small>{w.time}</small>
-                {w.fastest ? <em>Fastest</em> : null}
-              </button>
-            ))}
-          </div>
+        <p
+          className="dm-q"
+          style={{ fontSize: 22, lineHeight: "26px", margin: 0 }}
+        >
+          Let&apos;s get your pension fund numbers.
+        </p>
+        <span className="dm-small dm-muted">
+          Pick what&apos;s easiest. You can always add more later.
+        </span>
 
-          <p
-            className="dm-small dm-muted"
-            style={{ marginTop: "auto", marginBottom: 0 }}
-          >
+        <div className="dm-stack" style={{ gap: 8 }}>
+          {ways.map((w) => (
             <button
+              key={w.id}
               type="button"
-              className="dm-btn dm-btn--text"
-              style={{ padding: 0, height: "auto" }}
-              onClick={() => onEstimate?.()}
+              className="dm-way"
+              onClick={() => setSheet(w.id)}
             >
-              Don&apos;t have it? An estimate works too.
+              <span className="ic">{w.icon}</span>
+              <b>{w.title}</b>
+              <small>{w.time}</small>
+              {w.fastest ? <em>Fastest</em> : null}
             </button>
-          </p>
+          ))}
         </div>
+
+        <p
+          className="dm-small dm-muted"
+          style={{ marginTop: "auto", marginBottom: 0 }}
+        >
+          Don&apos;t have it? An estimate works too.
+        </p>
       </div>
 
       <BottomSheet
@@ -958,9 +949,13 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
           <b style={{ bottom: 30, left: 70, borderRight: 0, borderTop: 0 }} />
           <b style={{ bottom: 30, right: 70, borderLeft: 0, borderTop: 0 }} />
         </div>
-        <Button variant="primary" block onClick={startScan}>
+        <button
+          type="button"
+          className="dm-btn dm-btn--primary dm-btn--block"
+          onClick={startScan}
+        >
           Got it
-        </Button>
+        </button>
       </BottomSheet>
 
       <BottomSheet
@@ -969,7 +964,7 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
         title="Pick the PDF"
         description="From your files or email."
       >
-        <div>
+        <div className="dm-filelist">
           {pdfFiles.map((f) => (
             <button
               key={f.name}
@@ -1001,9 +996,13 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
         >
           Continue to myPax
         </button>
-        <Button variant="text" onClick={closeSheet}>
+        <button
+          type="button"
+          className="dm-btn dm-btn--text"
+          onClick={closeSheet}
+        >
           Not now
-        </Button>
+        </button>
       </BottomSheet>
 
       <BottomSheet
@@ -1062,9 +1061,9 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
             />
           </div>
         </div>
-        <Button
-          variant="primary"
-          block
+        <button
+          type="button"
+          className="dm-btn dm-btn--primary dm-btn--block"
           onClick={() => {
             const next = { ...values };
             const sal = Number(typed.insuredSalary.replace(/[^0-9.]/g, ""));
@@ -1081,7 +1080,7 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
           }}
         >
           Save
-        </Button>
+        </button>
       </BottomSheet>
 
       <BottomSheet
@@ -1101,18 +1100,19 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
             (Vorsorgeausweis) as a PDF? Thank you, Lena Meier
           </span>
         </div>
-        <Button
-          variant="primary"
-          block
+        <button
+          type="button"
+          className="dm-btn dm-btn--primary dm-btn--block"
           onClick={() => {
             closeSheet();
             toast.show({ message: "Opened in your mail app" });
           }}
         >
           Open in my mail app
-        </Button>
-        <Button
-          variant="text"
+        </button>
+        <button
+          type="button"
+          className="dm-btn dm-btn--text"
           onClick={() => {
             const text =
               "Hello, could you send me my current pension fund certificate (Vorsorgeausweis) as a PDF? Thank you, Lena Meier";
@@ -1121,7 +1121,7 @@ export function CertificateFlow({ onDone, onEstimate, onClose }: Props) {
           }}
         >
           Copy text
-        </Button>
+        </button>
       </BottomSheet>
     </div>
   );
