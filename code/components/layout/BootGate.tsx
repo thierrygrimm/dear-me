@@ -46,14 +46,8 @@ export function BootGate({ children }: { children: ReactNode }) {
       </div>
       {showSplash || !ready ? (
         <div
-          className="dm-app-shell"
-          style={{
-            padding: 0,
-            position: "fixed",
-            inset: 0,
-            zIndex: 80,
-            background: "var(--neonweste)",
-          }}
+          className="dm-stage dm-app-shell--bleed"
+          style={{ position: "fixed", inset: 0, zIndex: 80 }}
         >
           <Splash />
         </div>

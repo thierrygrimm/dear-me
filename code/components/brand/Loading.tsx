@@ -17,7 +17,7 @@ export function Splash({
   tagline = "For the big moments.",
 }: SplashProps) {
   return (
-    <div className={cn("dm-splash", className)} style={{ minHeight: "100dvh" }}>
+    <div className={cn("dm-splash", className)}>
       <Squirrel state="idle" size={96} />
       <span className="wm">{copy.brand}</span>
       <small>{tagline}</small>
@@ -38,12 +38,7 @@ export function BrandLoader({
   className,
 }: BrandLoaderProps) {
   return (
-    <div
-      className={cn("dm-loader", className)}
-      style={{ minHeight: "100dvh" }}
-      role="status"
-      aria-live="polite"
-    >
+    <div className={cn("dm-loader", className)} role="status" aria-live="polite">
       <div className="stage" aria-hidden>
         <span className="nut" />
         <span className="nut" />
@@ -83,12 +78,7 @@ export function SigningIn({
   className,
 }: SigningInProps) {
   return (
-    <div
-      className={cn("dm-loader", className)}
-      style={{ minHeight: "100dvh" }}
-      role="status"
-      aria-live="polite"
-    >
+    <div className={cn("dm-loader", className)} role="status" aria-live="polite">
       <div className="dm-dotring" aria-hidden>
         {Array.from({ length: 16 }, (_, i) => (
           <i
