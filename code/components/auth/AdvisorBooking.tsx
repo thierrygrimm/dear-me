@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui/Button";
 import { ShareConsent } from "@/components/auth/ShareConsent";
 import { Squirrel } from "@/components/brand/Squirrel";
+import { useToast } from "@/components/feedback/Toast";
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 import { useState } from "react";
 
 const days = [
@@ -46,6 +48,7 @@ export function AdvisorBooking({
   onBooked,
   onBack,
 }: Props) {
+  const toast = useToast();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [day, setDay] = useState(3);
   const [slot, setSlot] = useState<string | null>(null);
@@ -227,7 +230,11 @@ export function AdvisorBooking({
             className="dm-row"
             style={{ justifyContent: "center", marginTop: 6 }}
           >
-            <Button variant="secondary" size="sm">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => toast.show({ message: copy.toast.saved })}
+            >
               Add to calendar
             </Button>
             <Button variant="text" size="sm" onClick={() => setStep(2)}>
