@@ -4,7 +4,10 @@ import { copy } from "@/lib/copy";
 type Props = {
   markOnly?: boolean;
   className?: string;
+  /** Pixel size of the mark when markOnly; lockup scales via CSS otherwise */
   size?: number;
+  /** 32px cover/splash lockup; default in-app is 16px */
+  hero?: boolean;
 };
 
 export function Mark({ className, size }: { className?: string; size?: number }) {
@@ -22,12 +25,15 @@ export function Mark({ className, size }: { className?: string; size?: number })
   );
 }
 
-export function Logo({ markOnly, className, size }: Props) {
+export function Logo({ markOnly, className, size, hero }: Props) {
   if (markOnly) {
     return <Mark className={className} size={size} />;
   }
   return (
-    <span className={cn("dm-lockup", className)} aria-label={copy.brand}>
+    <span
+      className={cn("dm-lockup", hero && "dm-lockup--hero", className)}
+      aria-label={copy.brand}
+    >
       <Mark size={size} />
       {copy.brand}
     </span>
