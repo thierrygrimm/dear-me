@@ -9,10 +9,11 @@ import {
   readDoneLessons,
 } from "@/lib/lessons";
 import { Check } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function LearnScreen() {
+  const router = useRouter();
   const search = useSearchParams();
   const [active, setActive] = useState<LessonId | null>(null);
   const [done, setDone] = useState<LessonId[]>([]);
@@ -27,6 +28,13 @@ export function LearnScreen() {
       setActive(q as LessonId);
     }
   }, [search]);
+
+  function closeLesson() {
+    setActive(null);
+    if (search.get("lesson")) {
+      router.replace("/learn");
+    }
+  }
 
   return (
     <>
@@ -70,7 +78,7 @@ export function LearnScreen() {
             done.includes(active) ? done.length : done.length + 1
           }
           totalCount={LESSONS.length}
-          onClose={() => setActive(null)}
+          onClose={closeLesson}
           onComplete={(id) => {
             setDone((prev) =>
               prev.includes(id) ? prev : [...prev, id],
