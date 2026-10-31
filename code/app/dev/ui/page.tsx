@@ -6,6 +6,7 @@ import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
 import { Chat } from "@/components/chat/Chat";
 import { ChatGuide } from "@/components/chat/ChatGuide";
+import { ChatPlan } from "@/components/chat/ChatPlan";
 import { ChatSteps } from "@/components/chat/ChatSteps";
 import {
   AnswerWidget,
@@ -69,6 +70,7 @@ export default function DevUiPage() {
   const [pensum, setPensum] = useState(80);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [opt, setOpt] = useState("a");
+  const [planDone, setPlanDone] = useState(false);
 
   return (
     <div className="dm-app-shell" style={{ maxWidth: 520, padding: 20 }}>
@@ -244,6 +246,33 @@ export default function DevUiPage() {
           ]}
           resultTitle="Your parental leave plan"
           resultBody="Workload after the leave, pension at 65 and what to sort out first."
+        />
+        <ChatPlan
+          title="Before March"
+          steps={[
+            {
+              id: "a",
+              title: "Decide who reduces and by how much",
+              detail: "Done with the workload slider",
+              done: true,
+            },
+            {
+              id: "b",
+              title: "Name Marco as beneficiary",
+              detail: "5 min · your pension fund's form",
+              done: planDone,
+              external: true,
+              onToggle: () => setPlanDone((v) => !v),
+            },
+            {
+              id: "c",
+              title: "Top up Pillar 3a before 31 December",
+              detail: "10 min · saves about CHF 1'900 tax",
+              done: false,
+              external: true,
+              onToggle: () => undefined,
+            },
+          ]}
         />
       </Section>
 
