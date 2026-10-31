@@ -14,6 +14,7 @@ type Props = {
   items: Opportunity[];
   layout?: "list" | "cards";
   className?: string;
+  onSelect?: (id: string) => void;
 };
 
 function DefaultGlyph() {
@@ -24,12 +25,33 @@ function DefaultGlyph() {
   );
 }
 
-export function Opportunities({ items, layout = "list", className }: Props) {
+export function Opportunities({
+  items,
+  layout = "list",
+  className,
+  onSelect,
+}: Props) {
   if (layout === "cards") {
     return (
       <div className={cn("dm-oppcards", className)}>
         {items.map((item) => (
-          <div key={item.id} className={item.family ? "fam" : undefined}>
+          <div
+            key={item.id}
+            className={item.family ? "fam" : undefined}
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={onSelect ? () => onSelect(item.id) : undefined}
+            onKeyDown={
+              onSelect
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onSelect(item.id);
+                    }
+                  }
+                : undefined
+            }
+          >
             {item.glyph ?? <DefaultGlyph />}
             <b>{item.title}</b>
             <p className="dm-small" style={{ margin: 0 }}>
@@ -45,7 +67,24 @@ export function Opportunities({ items, layout = "list", className }: Props) {
   return (
     <div className={className}>
       {items.map((item) => (
-        <div key={item.id} className="dm-opp">
+        <div
+          key={item.id}
+          className="dm-opp"
+          role={onSelect ? "button" : undefined}
+          tabIndex={onSelect ? 0 : undefined}
+          onClick={onSelect ? () => onSelect(item.id) : undefined}
+          onKeyDown={
+            onSelect
+              ? (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(item.id);
+                  }
+                }
+              : undefined
+          }
+          style={onSelect ? { cursor: "pointer" } : undefined}
+        >
           {item.glyph ?? <DefaultGlyph />}
           <b>{item.title}</b>
           {item.impact ? <em>{item.impact}</em> : null}
