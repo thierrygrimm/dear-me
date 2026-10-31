@@ -51,7 +51,7 @@ export default function AskPage() {
       {ready ? (
         <Chat
           initialQuestion={seed}
-          onOpenAnswer={() => router.push("/answer")}
+          onOpenAnswer={() => router.push("/compare")}
         />
       ) : null}
     </div>
