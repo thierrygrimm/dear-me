@@ -50,9 +50,9 @@ export default function MePage() {
               {
                 id: "docs",
                 title: copy.me.documents,
-                subtitle: "Pension certificate",
+                subtitle: "Certificates, AHV, 3a",
                 icon: <FileText strokeWidth={1.75} />,
-                onClick: () => router.push("/certificate"),
+                onClick: () => router.push("/me/docs"),
               },
             ],
           },

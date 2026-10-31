@@ -7,6 +7,11 @@ export { SourcedNumber } from "@/components/data/SourcedNumber";
 export { Estimate } from "@/components/data/Estimate";
 export { PillarChart } from "@/components/data/PillarChart";
 export { Coverage } from "@/components/data/Coverage";
+export {
+  DocumentVault,
+  DocumentVaultList,
+  DocumentDetail,
+} from "@/components/data/DocumentVault";
 export { ToastProvider, useToast } from "@/components/feedback/Toast";
 export { BottomSheet, SheetOption } from "@/components/feedback/BottomSheet";
 export { States } from "@/components/feedback/States";
@@ -48,9 +53,14 @@ export {
   WelcomeScreen,
   ChooseHowScreen,
   ConnectPaxScreen,
+  YourMomentsScreen,
+  YourPlanScreen,
   MomentScreen,
   WelcomeInScreen,
 } from "@/components/auth/SignUp";
+export { IntakeFlow } from "@/components/auth/IntakeFlow";
 export { ShareConsent } from "@/components/auth/ShareConsent";
 export { AdvisorBooking } from "@/components/auth/AdvisorBooking";
 export { CertificateFlow } from "@/components/certificate/CertificateFlow";
+export { LearnScreen } from "@/components/learn/LearnScreen";
+export { LessonPlayer } from "@/components/learn/LessonPlayer";
