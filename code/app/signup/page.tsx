@@ -10,6 +10,7 @@ import {
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
 import {
+  isOnboarded,
   isSignedIn,
   markMoments,
   markOnboarded,
@@ -46,7 +47,7 @@ export default function SignUpPage() {
   const [moments, setMoments] = useState<LifeMoment[]>(["child", "less"]);
 
   useEffect(() => {
-    if (isSignedIn() && sessionStorage.getItem("dm-onboarded") === "1") {
+    if (isSignedIn() && isOnboarded()) {
       router.replace("/");
       return;
     }
@@ -99,7 +100,7 @@ export default function SignUpPage() {
 
   function finishIntake() {
     markOnboarded();
-    router.replace("/compare");
+    router.replace("/answer");
   }
 
   if (step === "splash") {
