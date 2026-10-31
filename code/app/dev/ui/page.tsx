@@ -4,7 +4,14 @@ import { AskBar } from "@/components/answer/AskBar";
 import { Disclaimer } from "@/components/answer/Disclaimer";
 import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
-import { Calculating, Skeleton, Splash } from "@/components/brand/Loading";
+import {
+  BrandLoader,
+  CalculatingPanel,
+  HomeSkeleton,
+  SigningIn,
+  Skeleton,
+  Splash,
+} from "@/components/brand/Loading";
 import { Logo } from "@/components/brand/Logo";
 import { Squirrel } from "@/components/brand/Squirrel";
 import { Coverage } from "@/components/data/Coverage";
@@ -191,8 +198,15 @@ export default function DevUiPage() {
           <Splash />
         </div>
         <div style={{ height: 220, borderRadius: 16, overflow: "hidden" }}>
-          <Calculating detail="Step 2 of 3" />
+          <BrandLoader detail="Step 2 of 3" />
         </div>
+        <div style={{ height: 220, borderRadius: 16, overflow: "hidden" }}>
+          <SigningIn />
+        </div>
+        <div style={{ height: 280, borderRadius: 16, overflow: "hidden" }}>
+          <CalculatingPanel />
+        </div>
+        <HomeSkeleton />
         <Skeleton height={48} />
       </Section>
 

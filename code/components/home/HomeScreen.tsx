@@ -107,7 +107,13 @@ export function HomeScreen() {
         </p>
       </div>
 
-      <AskBar onSubmit={() => router.push("/ask")} sticky />
+      <AskBar
+        sticky
+        onSubmit={(value) => {
+          sessionStorage.setItem("dm-ask-q", value);
+          router.push("/ask");
+        }}
+      />
     </>
   );
 }
