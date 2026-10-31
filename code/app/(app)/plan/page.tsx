@@ -56,8 +56,16 @@ export default function PlanPage() {
             prev.map((x) => (x.id === s.id ? { ...x, done: !x.done } : x)),
           ),
         onOpen: () => {
-          if (s.id === "1" || s.id === "4") {
+          if (s.id === "1") {
             router.push("/answer");
+            return;
+          }
+          if (s.id === "3") {
+            router.push("/learn?lesson=pillar-3a");
+            return;
+          }
+          if (s.id === "4") {
+            router.push("/me/book");
             return;
           }
           setSteps((prev) =>
