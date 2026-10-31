@@ -35,7 +35,7 @@ const opps = [
     impact: "About CHF 700",
   },
   {
-    id: "3",
+    id: "learn-three-sources",
     title: "Two-minute lesson",
     body: "How the three pillars fit together.",
     impact: "2 min",
@@ -130,8 +130,8 @@ export function HomeScreen() {
         title="Check what changes at 60 % after the baby"
         duration="About 3 minutes"
         actionLabel="Open the answer"
-        onAction={() => router.push("/answer")}
-      />
+          onAction={() => router.push("/compare")}
+        />
 
       <h2
         style={{
@@ -142,7 +142,14 @@ export function HomeScreen() {
       >
         {copy.home.feedHeading}
       </h2>
-      <Opportunities items={opps} />
+      <Opportunities
+        items={opps}
+        onSelect={(id) => {
+          if (id === "learn-three-sources") {
+            router.push("/learn?lesson=three-sources");
+          }
+        }}
+      />
 
       <div
         className="dm-end"
