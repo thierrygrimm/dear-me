@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "../styles/dm.css";
+
+:root {
+  --neonweste: #ecff23;
+  --espressosatz: #0a0507;
+  --nachtschicht: #292829;
+  --salbeiblatt: #e7eada;
+  --briefpapier: #faf7f0;
+  --milchschaum: #f8f4f2;
+  --neuschnee: #ffffff;
+  --hafermilch: #f2ede3;
+  --abschlusspink: #ff237e;
+  --kaugummi: #ff80ac;
+  --rosa-brille: #faeaed;
+  --pflaumenkuchen: #311823;
+  --brombeerkompott: #612f40;
+  --feuermelder: #bb1111;
+  --pax-purpur: #3e067e;
+  --pax-limette: #a3d142;
+
+  --surface: var(--neuschnee);
+  --surface-card: var(--briefpapier);
+  --ink: var(--espressosatz);
+  --ink-muted: #5f5e5a;
+  --line: #e8e2d6;
+  --line-strong: var(--espressosatz);
+  --signal: var(--neonweste);
+  --on-signal: var(--espressosatz);
+  --action: var(--espressosatz);
+  --on-action: var(--briefpapier);
+  --family: var(--pflaumenkuchen);
+  --on-family: var(--rosa-brille);
+  --family-strong: var(--brombeerkompott);
+  --on-family-strong: var(--briefpapier);
+  --family-soft: var(--rosa-brille);
+  --on-family-soft: var(--pflaumenkuchen);
+  --danger: var(--feuermelder);
+  --on-danger: var(--briefpapier);
+  --danger-ink: var(--feuermelder);
+  --joy: var(--abschlusspink);
+  --on-joy: var(--pflaumenkuchen);
+  --focus: var(--brombeerkompott);
+  --bubble-me: var(--hafermilch);
+  --tonal: var(--hafermilch);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-none: 0px;
+  --radius-card: 0px;
+  --radius-tail: 2px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --shadow-none: none;
+  --shadow-float: 0 6px 24px rgba(0, 0, 0, 0.18);
+
+  --dm-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dm-fast: 150ms;
+  --dm-mid: 300ms;
+  --dm-slow: 500ms;
+}
+
+html[data-theme="dark"] {
+  --surface: var(--espressosatz);
+  --surface-card: var(--nachtschicht);
+  --ink: var(--briefpapier);
+  --ink-muted: #a9a8a3;
+  --line: #3a3938;
+  --line-strong: var(--briefpapier);
+  --action: var(--neonweste);
+  --on-action: var(--espressosatz);
+  --family-soft: var(--brombeerkompott);
+  --on-family-soft: var(--rosa-brille);
+  --danger-ink: #ff6b6b;
+  --focus: var(--abschlusspink);
+  --bubble-me: #3a3938;
+  --tonal: #3a3938;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-card: var(--surface-card);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-signal: var(--signal);
+  --color-on-signal: var(--on-signal);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-family: var(--family);
+  --color-on-family: var(--on-family);
+  --color-family-strong: var(--family-strong);
+  --color-on-family-strong: var(--on-family-strong);
+  --color-family-soft: var(--family-soft);
+  --color-on-family-soft: var(--on-family-soft);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-joy: var(--joy);
+  --color-on-joy: var(--on-joy);
+  --color-focus: var(--focus);
+  --color-bubble-me: var(--bubble-me);
+  --color-tonal: var(--tonal);
+  --color-neonweste: var(--neonweste);
+  --color-espressosatz: var(--espressosatz);
+  --color-briefpapier: var(--briefpapier);
+  --color-hafermilch: var(--hafermilch);
+  --color-pax-purpur: var(--pax-purpur);
+  --color-pax-limette: var(--pax-limette);
+
+  --font-sans: var(--font-text);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display-family);
+
+  --radius-card: 0px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --shadow-float: 0 6px 24px rgba(0, 0, 0, 0.18);
+
+  --spacing-dm-1: 4px;
+  --spacing-dm-2: 8px;
+  --spacing-dm-3: 12px;
+  --spacing-dm-4: 16px;
+  --spacing-dm-5: 24px;
+  --spacing-dm-6: 32px;
+  --spacing-dm-7: 48px;
+  --spacing-dm-8: 64px;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 15px/22px var(--font-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(button, a, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
