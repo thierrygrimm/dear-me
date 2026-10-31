@@ -1,11 +1,15 @@
-import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { Chivo_Mono, Geist, Host_Grotesk } from "next/font/google";
 import { ToastProvider } from "@/components/feedback/Toast";
 import "./globals.css";
 
+/**
+ * Design system fonts (README → In Next.js):
+ * Display Host Grotesk, text Geist, mono Chivo Mono —
+ * exposed as --font-display / --font-text / --font-mono.
+ */
 const hostGrotesk = Host_Grotesk({
-  variable: "--font-display-family",
+  variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
@@ -33,17 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${hostGrotesk.variable} ${geist.variable} ${chivoMono.variable} h-full antialiased`}
+      className={`${hostGrotesk.variable} ${geist.variable} ${chivoMono.variable} h-full`}
     >
-      <body
-        className="min-h-full"
-        style={
-          {
-            ["--font-display" as string]:
-              "var(--font-display-family), system-ui, sans-serif",
-          } as CSSProperties
-        }
-      >
+      <body className="min-h-full">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
