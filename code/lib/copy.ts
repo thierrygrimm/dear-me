@@ -40,6 +40,9 @@ export const copy = {
   plan: {
     title: "Your plan",
     empty: "No open steps right now.",
+    listHint: "Tap a step and we take you there.",
+    doNow: "Do it now",
+    skip: "Skip for now",
   },
   learn: {
     title: "Learn",
