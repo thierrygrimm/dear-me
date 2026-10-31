@@ -1,38 +1,31 @@
 "use client";
 
 import { WhatWeKnow } from "@/components/home/WhatWeKnow";
-import { copy } from "@/lib/copy";
+import { useRouter } from "next/navigation";
 
 export default function WhatWeKnowPage() {
+  const router = useRouter();
+
   return (
     <>
-      <h1 className="dm-hello" style={{ fontSize: 24 }}>
-        {copy.me.whatWeKnow}
-      </h1>
-      <WhatWeKnow
-        facts={[
-          {
-            id: "1",
-            label: "Expecting a baby",
-            source: "Said · confirmed",
-          },
-          {
-            id: "2",
-            label: "Lives with Marco",
-            source: "Said · confirmed",
-          },
-          {
-            id: "3",
-            label: "Pensum today 100 %",
-            source: "myPax",
-          },
-          {
-            id: "4",
-            label: "Pillar 3a about CHF 18'000",
-            source: "Estimated",
-          },
-        ]}
-      />
+      <button
+        type="button"
+        className="dm-cert-back"
+        aria-label="Back"
+        onClick={() => router.push("/me")}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path
+            d="M15 5l-7 7 7 7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <WhatWeKnow />
     </>
   );
 }
