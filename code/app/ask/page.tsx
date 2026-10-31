@@ -1,92 +1,59 @@
 "use client";
 
-import { Chat, ChatWidget, type ChatMessage } from "@/components/chat/Chat";
-import { ChatSteps } from "@/components/chat/ChatSteps";
+import { Chat } from "@/components/chat/Chat";
+import { Logo } from "@/components/brand/Logo";
 import { copy } from "@/lib/copy";
-import { Clock, X } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { ChevronLeft, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AskPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Ask in your own words. I'll answer first, then we can play with the numbers.",
-    },
-  ]);
+  const router = useRouter();
+  const [seed, setSeed] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const q = sessionStorage.getItem("dm-ask-q");
+    if (q) {
+      sessionStorage.removeItem("dm-ask-q");
+      setSeed(q);
+    }
+    setReady(true);
+  }, []);
 
   return (
-    <div className="dm-app-shell" style={{ minHeight: "100dvh" }}>
-      <header className="dm-appbar" style={{ padding: "12px 16px" }}>
-        <Link href="/" aria-label={copy.chat.close}>
-          <X strokeWidth={1.75} />
-        </Link>
-        <b style={{ font: "600 15px/20px var(--font-text)" }}>
-          {copy.chat.title}
-        </b>
-        <button type="button" aria-label={copy.chat.history}>
-          <Clock strokeWidth={1.75} />
+    <div
+      className="dm-app-shell"
+      style={{
+        minHeight: "100dvh",
+        padding: "12px 16px 14px",
+        gap: 12,
+        boxSizing: "border-box",
+      }}
+    >
+      <header className="dm-appbar">
+        <button
+          type="button"
+          aria-label={copy.chat.back}
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push("/");
+          }}
+        >
+          <ChevronLeft strokeWidth={1.75} />
+        </button>
+        <Logo />
+        <button type="button" aria-label={copy.chat.menu}>
+          <MoreHorizontal strokeWidth={1.75} />
         </button>
       </header>
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          padding: "0 16px 16px",
-          minHeight: 0,
-        }}
-      >
+
+      {ready ? (
         <Chat
-          messages={messages}
-          onSend={(value) => {
-            setMessages((prev) => [
-              ...prev,
-              { id: `m-${prev.length}`, role: "me", content: value },
-              {
-                id: `a-${prev.length}`,
-                role: "assistant",
-                content: (
-                  <>
-                    <ChatSteps
-                      steps={[
-                        {
-                          id: "s1",
-                          label: "Reading what you asked",
-                          done: true,
-                        },
-                        {
-                          id: "s2",
-                          label: "Checking what we know",
-                          done: true,
-                        },
-                        {
-                          id: "s3",
-                          label: "Working out the francs",
-                          done: true,
-                        },
-                      ]}
-                      collapsedSummary="Checked against what we know."
-                    />
-                    <ChatWidget>
-                      <b>Here&apos;s a starting point</b>
-                      <p className="dm-small dm-muted" style={{ margin: 0 }}>
-                        Open the guided answer to play with workload and see the
-                        monthly difference at 65.
-                      </p>
-                      <Link href="/answer" className="dm-btn dm-btn--primary">
-                        Open the answer
-                      </Link>
-                    </ChatWidget>
-                  </>
-                ),
-              },
-            ]);
-          }}
+          initialQuestion={seed}
+          onOpenAnswer={() => router.push("/answer")}
         />
-      </div>
+      ) : null}
     </div>
   );
 }
