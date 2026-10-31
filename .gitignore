@@ -1,0 +1,85 @@
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors / IDEs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Cursor / local agent noise
+.cursor/*
+!.cursor/rules/
+!.cursor/plans/
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+!.env*.example
+*.pem
+*.p12
+*.key
+credentials.json
+service-account*.json
+
+# Logs and debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies (any package root)
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js / React build
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/
+
+# Test / coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# TypeScript / caches
+*.tsbuildinfo
+.eslintcache
+.cache/
+.parcel-cache/
+.turbo/
+
+# Optional local tooling
+.compound-engineering/config.local.yaml
+
+# Misc local
+*.local
+tmp/
+temp/
+.tmp/
