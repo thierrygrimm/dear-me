@@ -12,6 +12,7 @@ export type PlanStep = {
   external?: boolean;
   onToggle?: () => void;
   onOpen?: () => void;
+  onSkip?: () => void;
 };
 
 type Props = {
@@ -110,6 +111,100 @@ function ActionList({
   );
 }
 
+/** B · Simple checklist — for things done outside the app; tap to tick. */
+function Checklist({
+  steps,
+  className,
+}: {
+  steps: PlanStep[];
+  className?: string;
+}) {
+  const doneCount = steps.filter((s) => s.done).length;
+
+  return (
+    <div className={cn("dm-stack", className)} style={{ gap: 8 }}>
+      {steps.map((s) => (
+        <button
+          key={s.id}
+          type="button"
+          className="dm-tick"
+          role="checkbox"
+          aria-checked={s.done ?? false}
+          onClick={() => s.onToggle?.()}
+        >
+          <span>
+            {s.title}
+            {s.detail ? <small>{s.detail}</small> : null}
+          </span>
+          <i>
+            <CheckIcon />
+          </i>
+        </button>
+      ))}
+      <p className="dm-small dm-muted" style={{ margin: "4px 0 0" }}>
+        {doneCount} of {steps.length} done
+      </p>
+    </div>
+  );
+}
+
+/** C · One step at a time — only the current step shows actions. */
+function Stepper({
+  steps,
+  className,
+}: {
+  steps: PlanStep[];
+  className?: string;
+}) {
+  const firstOpen = steps.findIndex((s) => !s.done);
+  const current = firstOpen === -1 ? steps.length : firstOpen;
+
+  return (
+    <div className={cn("dm-stepper-v", className)}>
+      {steps.map((s, i) => {
+        const isDone = Boolean(s.done);
+        const isNow = i === current && !isDone;
+        return (
+          <div
+            key={s.id}
+            className={cn("dm-sv", isDone && "is-done", isNow && "is-now")}
+          >
+            <div className="rail">
+              <span className="dot">
+                {isDone ? <CheckIcon /> : i + 1}
+              </span>
+              {i < steps.length - 1 ? <span className="ln" /> : null}
+            </div>
+            <div className="body">
+              <b>{s.title}</b>
+              {s.detail ? <p>{s.detail}</p> : <p />}
+              <div className="dm-row">
+                <button
+                  type="button"
+                  className="dm-btn dm-btn--primary dm-btn--sm"
+                  onClick={() => {
+                    if (s.external) s.onToggle?.();
+                    else s.onOpen?.();
+                  }}
+                >
+                  Do it now
+                </button>
+                <button
+                  type="button"
+                  className="dm-btn dm-btn--text dm-small"
+                  onClick={() => s.onSkip?.() ?? s.onToggle?.()}
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ChatPlan({
   title,
   subtitle,
@@ -117,18 +212,12 @@ export function ChatPlan({
   variant = "actions",
   className,
 }: Props) {
-  if (variant === "actions") {
-    return (
-      <ActionList
-        title={title}
-        subtitle={subtitle}
-        steps={steps}
-        className={className}
-      />
-    );
+  if (variant === "checklist") {
+    return <Checklist steps={steps} className={className} />;
   }
-
-  // checklist / stepper land in follow-up commits
+  if (variant === "stepper") {
+    return <Stepper steps={steps} className={className} />;
+  }
   return (
     <ActionList
       title={title}
