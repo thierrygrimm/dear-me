@@ -3,12 +3,16 @@
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/brand/Logo";
 import { Squirrel } from "@/components/brand/Squirrel";
+import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
 import {
-  momentLabels,
+  moreMoments,
+  planHeadline,
+  suggestedMoments,
   type LifeMoment,
 } from "@/lib/session";
+import { useState, type ReactNode } from "react";
 
 function BackButton({ onClick }: { onClick?: () => void }) {
   return (
@@ -19,6 +23,96 @@ function BackButton({ onClick }: { onClick?: () => void }) {
     </button>
   );
 }
+
+function StepProg({
+  step,
+  of = 3,
+  onBack,
+}: {
+  step: number;
+  of?: number;
+  onBack?: () => void;
+}) {
+  const pct = Math.round((step / of) * 100);
+  return (
+    <div className="dm-qprog">
+      <button type="button" className="bk" aria-label="Back" onClick={onBack}>
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
+      </button>
+      <div className="dm-qprog__bar">
+        <i style={{ width: `${pct}%` }} />
+      </div>
+      <span>
+        {step} of {of}
+      </span>
+    </div>
+  );
+}
+
+const momentIcons: Record<LifeMoment, ReactNode> = {
+  child: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M3 10h12a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6z" />
+      <path d="M15 10a6 6 0 0 0-6-6v6" />
+      <path d="M15 10l3-4h3" />
+      <circle cx="6" cy="19.5" r="1.5" />
+      <circle cx="13" cy="19.5" r="1.5" />
+    </svg>
+  ),
+  less: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  home: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M4 11l8-7 8 7" />
+      <path d="M6 9.5V20h7" />
+      <circle cx="17" cy="15.5" r="2.5" />
+      <path d="M18.8 17.3l2.7 2.7M20.3 18.8l-1.2 1.2" />
+    </svg>
+  ),
+  together: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M4 11l8-7 8 7v9H4z" />
+      <path d="M12 17.5s-3.2-1.9-3.2-4a1.6 1.6 0 0 1 3.2-.7 1.6 1.6 0 0 1 3.2.7c0 2.1-3.2 4-3.2 4z" />
+    </svg>
+  ),
+  firstjob: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12h18" />
+    </svg>
+  ),
+  selfemployed: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M4 9l2-5h12l2 5" />
+      <path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" />
+      <path d="M5 11v9h14v-9M10 20v-5h4v5" />
+    </svg>
+  ),
+  separating: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M12 21v-8M12 13L6 6M12 13l6-7M6 6h4M6 6v4M18 6h-4M18 6v4" />
+    </svg>
+  ),
+  bonus: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <rect x="4" y="9" width="16" height="11" rx="1" />
+      <path d="M12 9v11M4 13h16M12 9c-2-4-6-3-5 0M12 9c2-4 6-3 5 0" />
+    </svg>
+  ),
+  caring: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M12 11.5s-3.6-2.2-3.6-4.6a1.8 1.8 0 0 1 3.6-.8 1.8 1.8 0 0 1 3.6.8c0 2.4-3.6 4.6-3.6 4.6z" />
+      <path d="M3 15.5h3.5l3 1.8h4.3a1.7 1.7 0 0 1 0 3.4H8.5" />
+      <path d="M13.8 17.3l4.4-2.2a1.6 1.6 0 0 1 1.9 2.5L15.5 21H3" />
+    </svg>
+  ),
+};
 
 function AppleIcon() {
   return (
@@ -66,14 +160,6 @@ function MailIcon() {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden>
-      <path d="M3 8.5l3 3 7-7" />
-    </svg>
-  );
-}
-
 /** 1 · Welcome */
 export function WelcomeScreen({
   onGetStarted,
@@ -85,7 +171,7 @@ export function WelcomeScreen({
   className?: string;
 }) {
   return (
-    <div className={cn("dm-signup", className)}>
+    <div className={cn("dm-signup dm-signup--flush-top", className)}>
       <div className="dm-welcome" aria-hidden>
         <span className="sun" />
         <span className="hill" />
@@ -256,61 +342,213 @@ export function ConnectPaxScreen({
   );
 }
 
-/** 6 · What brings you here */
-export function MomentScreen({
+function toggleMoment(list: LifeMoment[], id: LifeMoment): LifeMoment[] {
+  return list.includes(id) ? list.filter((m) => m !== id) : [...list, id];
+}
+
+/** Your moments — multi-select suggestions after sign-in */
+export function YourMomentsScreen({
+  name = "Lena",
   onBack,
   onContinue,
   value,
   onChange,
   className,
 }: {
+  name?: string;
   onBack?: () => void;
   onContinue?: () => void;
-  value: LifeMoment;
-  onChange?: (m: LifeMoment) => void;
+  value: LifeMoment[];
+  onChange?: (m: LifeMoment[]) => void;
   className?: string;
 }) {
-  const options = Object.entries(momentLabels) as [LifeMoment, string][];
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <div className={cn("dm-signup", className)}>
-      <div className="dm-appbar">
-        <BackButton onClick={onBack} />
-        <span className="dm-small dm-muted">3 of 3</span>
-        <span style={{ width: 36 }} />
-      </div>
-      <p className="dm-q">{copy.signup.momentTitle}</p>
-      <span className="dm-small dm-muted">{copy.signup.momentSub}</span>
-      <div className="dm-tiles-a">
-        {options.map(([id, label]) => (
+      <StepProg step={1} onBack={onBack} />
+      <p className="dm-q" style={{ fontSize: 24, lineHeight: "28px", margin: 0 }}>
+        {copy.signup.momentsTitle(name)}
+      </p>
+      <span className="dm-small dm-muted" style={{ marginTop: -8 }}>
+        {copy.signup.momentsSub}
+      </span>
+      <div className="dm-lmgrid">
+        {suggestedMoments.map((m) => (
           <button
-            key={id}
+            key={m.id}
             type="button"
-            className="dm-tile"
-            aria-pressed={value === id}
-            onClick={() => onChange?.(id)}
+            className="dm-lm"
+            aria-pressed={value.includes(m.id)}
+            onClick={() => onChange?.(toggleMoment(value, m.id))}
           >
-            {label}
+            {momentIcons[m.id]}
+            {m.label}
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        className="dm-more2"
+        onClick={() => setMoreOpen(true)}
+      >
+        {copy.signup.somethingElse}
+        <svg viewBox="0 0 16 16" aria-hidden>
+          <path d="M6 3l5 5-5 5" />
+        </svg>
+      </button>
       <Button
         variant="primary"
-        size="lg"
         block
         className="dm-signup__cta"
+        style={{ flex: "none" }}
+        disabled={value.length === 0}
         onClick={onContinue}
       >
         {copy.signup.continue}
+      </Button>
+
+      <BottomSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        title={copy.signup.somethingElse}
+      >
+        <div className="dm-lmlist">
+          {moreMoments.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              aria-pressed={value.includes(m.id)}
+              onClick={() => onChange?.(toggleMoment(value, m.id))}
+            >
+              {momentIcons[m.id]}
+              <span>{m.label}</span>
+              <i />
+            </button>
+          ))}
+        </div>
+        <Button variant="primary" block onClick={() => setMoreOpen(false)}>
+          {copy.signup.done}
+        </Button>
+      </BottomSheet>
+    </div>
+  );
+}
+
+/** Your plan — ready path after moments */
+export function YourPlanScreen({
+  name = "Lena",
+  moments,
+  onBack,
+  onStart,
+  className,
+}: {
+  name?: string;
+  moments: LifeMoment[];
+  onBack?: () => void;
+  onStart?: () => void;
+  className?: string;
+}) {
+  return (
+    <div className={cn("dm-signup", className)}>
+      <StepProg step={2} onBack={onBack} />
+      <div className="dm-planart" aria-hidden>
+        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+          <circle cx="62" cy="44" r="22" fill="var(--neonweste)" />
+          <path
+            d="M0 120 Q90 80 180 108 T320 96 V170 H0Z"
+            fill="var(--kaugummi)"
+          />
+          <path
+            d="M0 146 Q120 116 210 136 T320 134 V170 H0Z"
+            fill="var(--pflaumenkuchen)"
+          />
+          <path
+            className="trail"
+            d="M40 140 C90 130 110 110 160 104 S230 84 250 70"
+            fill="none"
+            stroke="var(--espressosatz)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray="2 9"
+          />
+          <circle
+            cx="40"
+            cy="140"
+            r="7"
+            fill="var(--neuschnee)"
+            stroke="var(--espressosatz)"
+            strokeWidth="3"
+          />
+          <circle
+            cx="160"
+            cy="104"
+            r="6"
+            fill="var(--neuschnee)"
+            stroke="var(--espressosatz)"
+            strokeWidth="3"
+          />
+          <g transform="translate(236 30) scale(0.72)">
+            <path
+              d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+              fill="var(--neonweste)"
+            />
+            <path
+              d="M3 21 Q3 9 20 9 Q37 9 37 21 Z"
+              fill="var(--espressosatz)"
+            />
+          </g>
+        </svg>
+      </div>
+      <div className="dm-ready">
+        <h2>{planHeadline(name, moments)}</h2>
+        <p>{copy.signup.planSub}</p>
+      </div>
+      <ol className="dm-path3">
+        <li className="on">
+          <i>1</i>
+          {copy.signup.planStep1}
+        </li>
+        <li>
+          <i>2</i>
+          {copy.signup.planStep2}
+        </li>
+        <li>
+          <i>3</i>
+          {copy.signup.planStep3}
+        </li>
+      </ol>
+      <Button
+        variant="primary"
+        block
+        className="dm-signup__cta"
+        onClick={onStart}
+      >
+        {copy.signup.letsStart}
       </Button>
     </div>
   );
 }
 
-/** 7 · Welcome in */
+/** @deprecated use YourMomentsScreen */
+export function MomentScreen(
+  props: Parameters<typeof YourMomentsScreen>[0] & {
+    value: LifeMoment | LifeMoment[];
+    onChange?: (m: LifeMoment | LifeMoment[]) => void;
+  },
+) {
+  const value = Array.isArray(props.value) ? props.value : [props.value];
+  return (
+    <YourMomentsScreen
+      {...props}
+      value={value}
+      onChange={(m) => props.onChange?.(m)}
+    />
+  );
+}
+
+/** @deprecated removed from the live flow — use YourPlanScreen */
 export function WelcomeInScreen({
-  name = "Lena",
-  pax,
   onAsk,
   onLater,
   className,
@@ -322,50 +560,12 @@ export function WelcomeInScreen({
   className?: string;
 }) {
   return (
-    <div className={cn("dm-signup dm-signup--lime", className)}>
-      <div style={{ flex: 1, display: "grid", placeItems: "center" }}>
-        <div className="ig-done">
-          <div className="medal">
-            <Squirrel state="done" size={72} />
-          </div>
-        </div>
-      </div>
-      <h4
-        style={{
-          margin: 0,
-          font: "700 30px/34px var(--font-display)",
-          letterSpacing: "-.02em",
-        }}
-      >
-        {copy.signup.welcomeIn(name)}
-      </h4>
-      <p style={{ margin: 0, font: "400 15px/22px var(--font-text)" }}>
-        {pax ? copy.signup.welcomeInPax : copy.signup.welcomeInGuest}
-      </p>
-      {pax ? (
-        <div className="dm-row" style={{ gap: 6 }}>
-          <span className="dm-srcpill is-ok">
-            <CheckIcon />
-            myPax connected
-          </span>
-          <span className="dm-srcpill is-ok">
-            <CheckIcon />
-            Cover ready
-          </span>
-        </div>
-      ) : null}
-      <Button variant="primary" size="lg" block onClick={onAsk}>
-        {copy.signup.askFirst}
-      </Button>
-      <Button
-        variant="text"
-        className="dm-small"
-        style={{ alignSelf: "center" }}
-        onClick={onLater}
-      >
-        {copy.signup.finishLater}
-      </Button>
-    </div>
+    <YourPlanScreen
+      className={className}
+      moments={["child", "less"]}
+      onStart={onAsk}
+      onBack={onLater}
+    />
   );
 }
 
