@@ -49,6 +49,7 @@ type Props = {
   /** Seed a first question (e.g. from Home AskBar) */
   initialQuestion?: string | null;
   onOpenAnswer?: () => void;
+  onAttach?: () => void;
   onSend?: (value: string) => void;
   className?: string;
   /** @deprecated layout-only mode — prefer ChatScreen behaviour */
@@ -82,6 +83,7 @@ function clearTimers(timers: number[]) {
 export function Chat({
   initialQuestion,
   onOpenAnswer,
+  onAttach,
   onSend,
   className,
   messages: legacyMessages,
@@ -320,7 +322,7 @@ export function Chat({
           ))}
           {footer}
         </div>
-        <AskBar onSubmit={onSend} sticky />
+        <AskBar onSubmit={onSend} onAttach={onAttach} sticky />
       </div>
     );
   }
@@ -369,6 +371,7 @@ export function Chat({
       <AskBar
         sticky
         disabled={busy}
+        onAttach={onAttach}
         onSubmit={(value) => runAnswer(value)}
       />
     </div>
