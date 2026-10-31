@@ -41,3 +41,4 @@ export { AnswerScreen } from "@/components/answer/AnswerScreen";
 export { SignUp } from "@/components/auth/SignUp";
 export { ShareConsent } from "@/components/auth/ShareConsent";
 export { AdvisorBooking } from "@/components/auth/AdvisorBooking";
+export { CertificateFlow } from "@/components/certificate/CertificateFlow";
