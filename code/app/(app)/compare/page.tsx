@@ -1,10 +1,13 @@
 "use client";
 
 import { ScenarioCompare } from "@/components/answer/ScenarioCompare";
+import { readIntake } from "@/lib/session";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ComparePage() {
   const router = useRouter();
+  const [pensum] = useState(() => readIntake()?.pensumAfter ?? 60);
 
   return (
     <>
@@ -27,8 +30,9 @@ export default function ComparePage() {
         </h1>
       </div>
       <ScenarioCompare
-        initialPensum={60}
+        initialPensum={pensum}
         onTalk={() => router.push("/me/book")}
+        onDone={() => router.push("/")}
       />
     </>
   );
