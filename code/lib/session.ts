@@ -6,6 +6,7 @@ const MOMENTS_KEY = "dm-moments";
 const ONBOARDED_KEY = "dm-onboarded";
 const NAME_KEY = "dm-name";
 const INTAKE_KEY = "dm-intake";
+const SHARE_PAX_KEY = "dm-share-pax";
 
 export type AuthProvider = "pax" | "apple" | "google" | "email" | "guest";
 
@@ -202,4 +203,14 @@ export function readIntake(): IntakeValues | null {
   } catch {
     return null;
   }
+}
+
+export function readSharePax(): boolean {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(SHARE_PAX_KEY) === "1";
+}
+
+export function markSharePax(on: boolean): void {
+  if (on) sessionStorage.setItem(SHARE_PAX_KEY, "1");
+  else sessionStorage.removeItem(SHARE_PAX_KEY);
 }
