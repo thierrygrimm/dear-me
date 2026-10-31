@@ -9,12 +9,13 @@ export type CertValues = {
   buyIn: number;
 };
 
+/** Fictional sample from the design-system Certificate preview */
 export const sampleCert: CertValues = {
-  insuredSalary: 78400,
-  savings: 126400,
-  pensionAt65: 2840,
-  conversionRate: 5.2,
-  buyIn: 38200,
+  insuredSalary: 61365,
+  savings: 84300,
+  pensionAt65: 1680,
+  conversionRate: 6.0,
+  buyIn: 42800,
 };
 
 export function hasCertificate(): boolean {
