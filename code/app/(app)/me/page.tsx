@@ -1,7 +1,11 @@
 "use client";
 
+import { ShareConsent } from "@/components/auth/ShareConsent";
+import { BottomSheet } from "@/components/feedback/BottomSheet";
+import { useToast } from "@/components/feedback/Toast";
 import { SettingsList } from "@/components/home/Settings";
 import { copy } from "@/lib/copy";
+import { markSharePax, readSharePax } from "@/lib/session";
 import {
   Bell,
   FileText,
@@ -15,7 +19,9 @@ import { useState } from "react";
 
 export default function MePage() {
   const router = useRouter();
-  const [share, setShare] = useState(false);
+  const toast = useToast();
+  const [share, setShare] = useState(() => readSharePax());
+  const [consentOpen, setConsentOpen] = useState(false);
 
   return (
     <>
@@ -70,16 +76,25 @@ export default function MePage() {
               {
                 id: "share",
                 title: "Share with Pax",
-                subtitle: "Off by default",
+                subtitle: share ? "On" : "Off by default",
                 icon: <Shield strokeWidth={1.75} />,
                 switchChecked: share,
-                onToggle: setShare,
+                onToggle: (next) => {
+                  if (next) {
+                    setConsentOpen(true);
+                    return;
+                  }
+                  markSharePax(false);
+                  setShare(false);
+                },
               },
               {
                 id: "reminders",
                 title: copy.me.reminders,
                 subtitle: "Email and calendar",
                 icon: <Bell strokeWidth={1.75} />,
+                onClick: () =>
+                  toast.show({ message: copy.vault.remindersNote }),
               },
             ],
           },
@@ -98,11 +113,30 @@ export default function MePage() {
                 id: "help",
                 title: copy.me.help,
                 icon: <HelpCircle strokeWidth={1.75} />,
+                onClick: () =>
+                  toast.show({
+                    message: "For demo help, ask in chat or book Sara.",
+                  }),
               },
             ],
           },
         ]}
       />
+
+      <BottomSheet
+        open={consentOpen}
+        onClose={() => setConsentOpen(false)}
+        title="Share with Pax"
+      >
+        <ShareConsent
+          onConfirm={() => {
+            markSharePax(true);
+            setShare(true);
+            setConsentOpen(false);
+            toast.show({ message: copy.toast.saved });
+          }}
+        />
+      </BottomSheet>
     </>
   );
 }
