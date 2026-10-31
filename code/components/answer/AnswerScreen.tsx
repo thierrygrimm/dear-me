@@ -101,7 +101,7 @@ export function AnswerScreen() {
 
       <PensumSlider value={pensum} onChange={setPensum} />
 
-      <Disclaimer />
+      <Disclaimer variant="plain">{copy.answer.disclaimer}</Disclaimer>
 
       {monthlyGap > 0 ? (
         <OfferCard
