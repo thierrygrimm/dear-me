@@ -3,6 +3,7 @@
 import { CalculatingPanel } from "@/components/brand/Loading";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { NumberEdit } from "@/components/ui/NumberEdit";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { cn } from "@/lib/cn";
 import { formatSwiss } from "@/lib/format";
@@ -215,42 +216,16 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
           onClose={() => setEditId(null)}
           title={editId === "today" ? "Workload today" : "After the baby"}
         >
-          <div className="dm-ed">
-            <div className="num">
-              <span className="n">{editDraft || "0"}</span>
-              <small className="u">%</small>
-            </div>
-            <div className="dm-keys">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map(
-                (k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    data-k={k}
-                    aria-label={k === "del" ? "Delete" : undefined}
-                    onClick={() => {
-                      if (k === "del") {
-                        setEditDraft((d) => d.slice(0, -1));
-                        return;
-                      }
-                      if (k === ".") return;
-                      setEditDraft((d) => (d + k).slice(0, 3));
-                    }}
-                  >
-                    {k === "del" ? "⌫" : k}
-                  </button>
-                ),
-              )}
-            </div>
-            <div className="dm-edacts">
-              <Button variant="secondary" onClick={() => setEditId(null)}>
-                Keep it
-              </Button>
-              <Button variant="primary" onClick={saveEdit}>
-                Save
-              </Button>
-            </div>
-          </div>
+          <NumberEdit
+            value={editDraft}
+            onChange={setEditDraft}
+            unit="%"
+            allowDecimal={false}
+            maxLength={3}
+            onCancel={() => setEditId(null)}
+            onSave={saveEdit}
+            saveDisabled={!editDraft}
+          />
         </BottomSheet>
       </>,
     );
