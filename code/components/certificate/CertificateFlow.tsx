@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { NumberEdit } from "@/components/ui/NumberEdit";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { ChatSteps } from "@/components/chat/ChatSteps";
 import { useToast } from "@/components/feedback/Toast";
@@ -314,7 +315,6 @@ export function CertificateFlow({ onDone, onClose }: Props) {
   });
   const [editField, setEditField] = useState<EditField | null>(null);
   const [editBuf, setEditBuf] = useState("");
-  const [editFirst, setEditFirst] = useState(true);
   const swipeX = useRef<number | null>(null);
 
   const stories = useMemo(() => storiesFrom(values), [values]);
@@ -378,7 +378,6 @@ export function CertificateFlow({ onDone, onClose }: Props) {
   function openEdit(field: EditField) {
     setEditField(field);
     setEditBuf(String(values[field]));
-    setEditFirst(true);
     setSheet("edit");
   }
 
@@ -395,22 +394,6 @@ export function CertificateFlow({ onDone, onClose }: Props) {
     setValues((v) => ({ ...v, [editField]: n }));
     closeSheet();
     toast.show({ message: "Updated · answers recalculated", undoLabel: "See" });
-  }
-
-  function onKey(k: string) {
-    setEditBuf((buf) => {
-      let next = editFirst ? "" : buf;
-      if (editFirst) setEditFirst(false);
-      if (k === "del") return next.slice(0, -1);
-      if (k === ".") {
-        if (editField !== "conversionRate" || next.includes(".")) return next;
-        return `${next || "0"}.`;
-      }
-      if (next.replace(".", "").length >= 7) return next;
-      next += k;
-      if (editField === "conversionRate" && Number(next) > 100) return buf;
-      return next;
-    });
   }
 
   const scanHint =
@@ -793,65 +776,20 @@ export function CertificateFlow({ onDone, onClose }: Props) {
           onClose={closeSheet}
         >
           {editField ? (
-            <div className="dm-ed">
-              <span className="lab">{editMeta[editField].label}</span>
-              <div className="num">
-                <span className="n">
-                  {editBuf === ""
-                    ? "0"
-                    : editBuf.includes(".")
-                      ? editBuf
-                      : formatSwiss(Number(editBuf) || 0)}
-                </span>
-                <i />
-                <small className="u">{editMeta[editField].unit}</small>
-              </div>
-              <span className="was">
-                On your certificate:{" "}
-                <b>
-                  {formatSwiss(
-                    sampleCert[editField],
-                    editMeta[editField].dec,
-                  )}
-                </b>
-              </span>
-              <div className="dm-keys">
-                {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map(
-                  (k) => (
-                    <button
-                      key={k}
-                      type="button"
-                      data-k={k}
-                      aria-label={k === "del" ? "Delete" : undefined}
-                      onClick={() => onKey(k)}
-                    >
-                      {k === "del" ? (
-                        <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden>
-                          <path d="M9 6h11v12H9l-5-6z" />
-                          <path d="M12.5 9.5l5 5M17.5 9.5l-5 5" />
-                        </svg>
-                      ) : (
-                        k
-                      )}
-                    </button>
-                  ),
-                )}
-              </div>
-              <div className="dm-edacts">
-                <Button variant="secondary" onClick={closeSheet}>
-                  Keep it
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={saveEdit}
-                  disabled={
-                    editBuf === "" || Number(editBuf) === values[editField]
-                  }
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
+            <NumberEdit
+              label={editMeta[editField].label}
+              value={editBuf}
+              onChange={setEditBuf}
+              unit={editMeta[editField].unit}
+              wasLabel={`On your certificate: ${formatSwiss(sampleCert[editField], editMeta[editField].dec)}`}
+              allowDecimal={editField === "conversionRate"}
+              maxLength={editField === "conversionRate" ? 5 : 8}
+              onCancel={closeSheet}
+              onSave={saveEdit}
+              saveDisabled={
+                editBuf === "" || Number(editBuf) === values[editField]
+              }
+            />
           ) : null}
         </BottomSheet>
 
