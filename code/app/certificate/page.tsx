@@ -10,7 +10,7 @@ export default function CertificatePage() {
     <div className="dm-cert-shell">
       <CertificateFlow
         onClose={() => router.push("/")}
-        onDone={() => router.push("/answer")}
+        onDone={() => router.push("/answer?topic=pensum")}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { useToast } from "@/components/feedback/Toast";
 import { formatSwiss } from "@/lib/format";
 import { markCertificate, sampleCert, type CertValues } from "@/lib/session";
 import { cn } from "@/lib/cn";
+import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   useEffect,
@@ -316,6 +317,13 @@ export function CertificateFlow({ onDone, onClose }: Props) {
   const [editField, setEditField] = useState<EditField | null>(null);
   const [editBuf, setEditBuf] = useState("");
   const swipeX = useRef<number | null>(null);
+  const pulseHints =
+    step === "choose"
+      ? ["Scan your certificate"]
+      : step === "confirm"
+        ? ["Yes, that"]
+        : [];
+  const pulseRef = useDemoPulse(pulseHints, [step]);
 
   const stories = useMemo(() => storiesFrom(values), [values]);
   const paperLines = useMemo(
@@ -699,7 +707,7 @@ export function CertificateFlow({ onDone, onClose }: Props) {
     };
 
     return (
-      <div className="dm-cert-pane">
+      <div className="dm-cert-pane" ref={pulseRef}>
         <div className="dm-cert-main">
           <div className="dm-read" style={{ flex: 1 }}>
             <header className="dm-appbar">
@@ -834,7 +842,7 @@ export function CertificateFlow({ onDone, onClose }: Props) {
 
   /* ── A · Choose how + preview sheets ── */
   return (
-    <div className="dm-cert-pane">
+    <div className="dm-cert-pane" ref={pulseRef}>
       <div className="dm-cert-main dm-cert-main--choose">
         {onClose ? (
           <button
