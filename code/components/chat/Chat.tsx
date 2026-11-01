@@ -63,6 +63,13 @@ type Props = {
   onAttach?: () => void;
   onSend?: (value: string) => void;
   className?: string;
+  /**
+   * Ask shell layout: render `.dm-thread` + `.dm-ask` as siblings
+   * (direct children of `.dm-app.chat`) instead of a phone-frame wrapper.
+   */
+  shell?: boolean;
+  /** Fired when the thread scrolls (used to collapse the safety net). */
+  onThreadScroll?: (scrollTop: number) => void;
   /** @deprecated layout-only mode — prefer ChatScreen behaviour */
   messages?: ChatMessage[];
   footer?: ReactNode;
@@ -113,6 +120,8 @@ export function Chat({
   onAttach,
   onSend,
   className,
+  shell,
+  onThreadScroll,
   messages: legacyMessages,
   footer,
 }: Props) {
@@ -397,6 +406,104 @@ export function Chat({
     !busy &&
     Boolean(quickReplies?.length);
 
+  const thread = (
+    <div
+      ref={scrollRef}
+      className={shell ? "dm-thread" : "dm-scroll"}
+      style={shell ? undefined : { flex: 1, minHeight: 0 }}
+      onScroll={
+        onThreadScroll
+          ? (e) => onThreadScroll(e.currentTarget.scrollTop)
+          : undefined
+      }
+    >
+      <span className={shell ? "dm-daylbl" : "dm-daytag"}>Today</span>
+
+      {pendingMoment ? (
+        <LifeMomentAsk
+          moment={pendingMoment}
+          name={personName}
+          onAttach={onAttach}
+          onBookAdvisor={onBook}
+          onDone={finishMomentAsk}
+        />
+      ) : null}
+
+      {showEmptyHint ? (
+        <div className="dm-bubble dm-bubble--us">
+          Ask in your own words. I&apos;ll answer first, then we can play with
+          the numbers.
+        </div>
+      ) : null}
+
+      {turns.map((turn) => (
+        <TurnBlock
+          key={turn.id}
+          turn={turn}
+          onOpenAnswer={onOpenAnswer}
+          onStepsOpenChange={(open) =>
+            setTurns((prev) =>
+              prev.map((t) =>
+                t.id === turn.id ? { ...t, stepsOpen: open } : t,
+              ),
+            )
+          }
+        />
+      ))}
+
+      {!pendingMoment && quickReplies && quickReplies.length > 0 && !busy ? (
+        <div className="dm-sugg dm-fadein">
+          {quickReplies.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => {
+                const nav = isNavReply(r);
+                const lastQ = turns[turns.length - 1]?.question;
+                if (nav === "compare") {
+                  onOpenAnswer?.(lastQ);
+                  return;
+                }
+                if (nav === "book") {
+                  onBook?.();
+                  return;
+                }
+                runAnswer(r);
+              }}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const ask = (
+    <AskBar
+      sticky={!shell}
+      disabled={busy}
+      onAttach={onAttach}
+      onSubmit={(value) => {
+        if (pendingMoment) {
+          markMomentAsked(pendingMoment);
+          setPendingMoment(null);
+        }
+        runAnswer(value);
+      }}
+    />
+  );
+
+  /* Shell mode: siblings of appbar/netw under `.dm-app.chat`. */
+  if (shell) {
+    return (
+      <>
+        {thread}
+        {ask}
+      </>
+    );
+  }
+
   return (
     <div
       className={cn("dm-chat", className)}
@@ -408,84 +515,8 @@ export function Chat({
         overflow: "hidden",
       }}
     >
-      <div
-        ref={scrollRef}
-        className="dm-scroll"
-        style={{ flex: 1, minHeight: 0 }}
-      >
-        <span className="dm-daytag">Today</span>
-
-        {pendingMoment ? (
-          <LifeMomentAsk
-            moment={pendingMoment}
-            name={personName}
-            onAttach={onAttach}
-            onBookAdvisor={onBook}
-            onDone={finishMomentAsk}
-          />
-        ) : null}
-
-        {showEmptyHint ? (
-          <div className="dm-bubble dm-bubble--us">
-            Ask in your own words. I&apos;ll answer first, then we can play with
-            the numbers.
-          </div>
-        ) : null}
-
-        {turns.map((turn) => (
-          <TurnBlock
-            key={turn.id}
-            turn={turn}
-            onOpenAnswer={onOpenAnswer}
-            onStepsOpenChange={(open) =>
-              setTurns((prev) =>
-                prev.map((t) =>
-                  t.id === turn.id ? { ...t, stepsOpen: open } : t,
-                ),
-              )
-            }
-          />
-        ))}
-
-        {!pendingMoment && quickReplies && quickReplies.length > 0 && !busy ? (
-          <div className="dm-sugg dm-fadein">
-            {quickReplies.map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => {
-                  const nav = isNavReply(r);
-                  const lastQ = turns[turns.length - 1]?.question;
-                  if (nav === "compare") {
-                    onOpenAnswer?.(lastQ);
-                    return;
-                  }
-                  if (nav === "book") {
-                    onBook?.();
-                    return;
-                  }
-                  runAnswer(r);
-                }}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      <AskBar
-        sticky
-        disabled={busy}
-        onAttach={onAttach}
-        onSubmit={(value) => {
-          if (pendingMoment) {
-            markMomentAsked(pendingMoment);
-            setPendingMoment(null);
-          }
-          runAnswer(value);
-        }}
-      />
+      {thread}
+      {ask}
     </div>
   );
 }
