@@ -4,6 +4,10 @@ import { AskBar } from "@/components/answer/AskBar";
 import { Logo } from "@/components/brand/Logo";
 import { Squirrel } from "@/components/brand/Squirrel";
 import { LifeSheet } from "@/components/home/LifeSheet";
+import {
+  WrappedEntry,
+  WrappedStory,
+} from "@/components/home/WrappedStory";
 import { copy } from "@/lib/copy";
 import { seedForAsk } from "@/lib/lifeMoments";
 import {
@@ -14,7 +18,11 @@ import {
   type Persona,
   type PersonaId,
 } from "@/lib/personas";
-import { readAskedMoments, readMoments } from "@/lib/session";
+import {
+  isHomeDay1,
+  readAskedMoments,
+  readMoments,
+} from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -140,23 +148,161 @@ function Chevron() {
   );
 }
 
+function HillsScene() {
+  return (
+    <svg
+      className="scene bgl"
+      data-v="hills"
+      viewBox="0 0 360 300"
+      preserveAspectRatio="xMidYMax slice"
+      aria-hidden
+    >
+      <circle cx="270" cy="150" r="40" fill="var(--neonweste)" />
+      <path d="M0 190 Q100 120 210 170 T360 150 V300 H0Z" fill="var(--kaugummi)" />
+      <path d="M0 222 Q130 170 240 210 T360 200 V300 H0Z" fill="var(--pflaumenkuchen)" />
+    </svg>
+  );
+}
+
+function AcornsScene() {
+  return (
+    <svg
+      className="scene bgl"
+      data-v="acorns"
+      viewBox="0 0 360 300"
+      preserveAspectRatio="xMidYMax slice"
+      aria-hidden
+    >
+      <path d="M0 232 Q120 204 220 222 T360 214 V300 H0Z" fill="var(--rosa-brille)" />
+      <g transform="translate(150 116) rotate(-8) scale(2.1)">
+        <path
+          d="M20 9 V2"
+          stroke="var(--espressosatz)"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+          fill="var(--neonweste)"
+        />
+        <path d="M3 21 Q3 9 20 9 Q37 9 37 21 Z" fill="var(--espressosatz)" />
+      </g>
+      <g transform="translate(236 170) rotate(14) scale(1.25)">
+        <path
+          d="M20 9 V2"
+          stroke="var(--espressosatz)"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+          fill="var(--kaugummi)"
+        />
+        <path d="M3 21 Q3 9 20 9 Q37 9 37 21 Z" fill="var(--espressosatz)" />
+      </g>
+      <g className="fall" transform="translate(0 0) rotate(0) scale(1)">
+        <path
+          d="M20 9 V2"
+          stroke="var(--espressosatz)"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+          fill="var(--brombeerkompott)"
+        />
+        <path d="M3 21 Q3 9 20 9 Q37 9 37 21 Z" fill="var(--espressosatz)" />
+      </g>
+    </svg>
+  );
+}
+
+function EveningScene() {
+  return (
+    <svg
+      className="scene bgl"
+      data-v="evening"
+      viewBox="0 0 360 300"
+      preserveAspectRatio="xMidYMax slice"
+      aria-hidden
+    >
+      <circle
+        className="star"
+        cx="40"
+        cy="120"
+        r="1.6"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "0s" }}
+      />
+      <circle
+        className="star"
+        cx="96"
+        cy="96"
+        r="1.2"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "0.8s" }}
+      />
+      <circle
+        className="star"
+        cx="176"
+        cy="128"
+        r="1.4"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "1.6s" }}
+      />
+      <circle
+        className="star"
+        cx="220"
+        cy="92"
+        r="1"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "2.2s" }}
+      />
+      <circle
+        className="star"
+        cx="320"
+        cy="120"
+        r="1.6"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "0.4s" }}
+      />
+      <circle
+        className="star"
+        cx="140"
+        cy="150"
+        r="1"
+        fill="var(--briefpapier)"
+        style={{ animationDelay: "1.2s" }}
+      />
+      <circle cx="276" cy="150" r="26" fill="var(--neonweste)" />
+      <circle cx="288" cy="142" r="24" fill="var(--pflaumenkuchen)" />
+      <path d="M0 210 Q100 160 210 196 T360 182 V300 H0Z" fill="var(--brombeerkompott)" />
+      <path d="M0 240 Q130 200 240 232 T360 226 V300 H0Z" fill="var(--espressosatz)" />
+    </svg>
+  );
+}
+
 /**
- * Home · `.dm-morn` — phone glow hero + feed; laptop calm column via dm.css.
+ * Home · `.dm-morn` — phone scene hero (hills/evening/acorns) + feed; laptop calm column via dm.css.
  */
 export function HomeHero({ onLook, onBook, onLesson }: Props) {
   const router = useRouter();
   const [hour, setHour] = useState(9);
   const [persona, setPersona] = useState<Persona>(() => getPersona("lena"));
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [wrappedOpen, setWrappedOpen] = useState(false);
+  const [day1, setDay1] = useState(false);
 
   useEffect(() => {
     setHour(new Date().getHours());
     setPersona(getPersona(readPersonaId()));
+    setDay1(isHomeDay1());
   }, []);
 
   function selectPersona(id: PersonaId) {
     applyPersona(id);
     setPersona(getPersona(id));
+    setDay1(isHomeDay1());
   }
 
   function lookAtTopic() {
@@ -182,10 +328,11 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
   }
 
   const hello = helloFor(hour);
+  const bg = hour >= 18 ? "evening" : "hills";
 
   return (
     <div className="dm-morn">
-      <div className="dm-hero" data-bg="glow">
+      <div className="dm-hero" data-bg={bg}>
         <div className="top">
           <Logo />
           <button
@@ -213,10 +360,9 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
         </h1>
         <p>{persona.sub}</p>
 
-        <div className="bgl glow" data-v="glow" aria-hidden>
-          <i />
-          <i />
-        </div>
+        <HillsScene />
+        <AcornsScene />
+        <EveningScene />
       </div>
 
       <div className="home-ask">
@@ -277,16 +423,16 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
           </button>
         </div>
 
-        <button type="button" className="dm-tsmall" onClick={openBook}>
-          <span
-            className="av"
-            style={
-              persona.appointment.avatar
-                ? undefined
-                : { background: "var(--hafermilch)" }
-            }
+        {day1 ? (
+          <button
+            type="button"
+            className="dm-tsmall"
+            onClick={() => router.push("/certificate")}
           >
-            {persona.appointment.avatar || (
+            <span
+              className="av"
+              style={{ background: "var(--hafermilch)" }}
+            >
               <svg
                 viewBox="0 0 24 24"
                 style={{
@@ -301,42 +447,62 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
                 <path d="M6 3h8l4 4v14H6z" />
                 <path d="M14 3v4h4" />
               </svg>
-            )}
-          </span>
-          <span>
-            <b>{persona.appointment.title}</b>
-            <span>{persona.appointment.meta}</span>
-          </span>
-          <Chevron />
-        </button>
+            </span>
+            <span>
+              <b>{copy.home.noCertCta}</b>
+              <span>{copy.home.estimateMeta}</span>
+            </span>
+            <Chevron />
+          </button>
+        ) : (
+          <>
+            <button type="button" className="dm-tsmall" onClick={openBook}>
+              <span
+                className="av"
+                style={
+                  persona.appointment.avatar
+                    ? undefined
+                    : { background: "var(--hafermilch)" }
+                }
+              >
+                {persona.appointment.avatar || (
+                  <svg
+                    viewBox="0 0 24 24"
+                    style={{
+                      width: 22,
+                      height: 22,
+                      fill: "none",
+                      stroke: "currentColor",
+                      strokeWidth: 1.75,
+                    }}
+                    aria-hidden
+                  >
+                    <path d="M6 3h8l4 4v14H6z" />
+                    <path d="M14 3v4h4" />
+                  </svg>
+                )}
+              </span>
+              <span>
+                <b>{persona.appointment.title}</b>
+                <span>{persona.appointment.meta}</span>
+              </span>
+              <Chevron />
+            </button>
 
-        <h2>From the two of you</h2>
-        <div className="dm-letter" style={{ margin: "10px 4px 6px" }}>
-          <small>{persona.letterTitle}</small>
-          <p>{persona.letterBody}</p>
-          <span>{persona.letterFrom}</span>
-        </div>
+            <h2>
+              {persona.avatars.length > 1
+                ? "From the two of you"
+                : "From you"}
+            </h2>
+            <div className="dm-letter" style={{ margin: "10px 4px 6px" }}>
+              <small>{persona.letterTitle}</small>
+              <p>{persona.letterBody}</p>
+              <span>{persona.letterFrom}</span>
+            </div>
 
-        <button
-          type="button"
-          className="dm-tsmall"
-          onClick={() => goAskResearch(router, "How did my year look?")}
-        >
-          <span
-            className="av"
-            style={{
-              background: "var(--neonweste)",
-              color: "var(--espressosatz)",
-            }}
-          >
-            26
-          </span>
-          <span>
-            <b>Your 2026, wrapped</b>
-            <span>One minute, just for fun</span>
-          </span>
-          <Chevron />
-        </button>
+            <WrappedEntry onOpen={() => setWrappedOpen(true)} />
+          </>
+        )}
 
         <div className="dm-end">
           <span style={{ color: "var(--ink)" }}>
@@ -351,6 +517,11 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
         current={persona.id}
         onClose={() => setSheetOpen(false)}
         onSelect={selectPersona}
+      />
+      <WrappedStory
+        open={wrappedOpen}
+        onClose={() => setWrappedOpen(false)}
+        personaId={persona.id}
       />
     </div>
   );
