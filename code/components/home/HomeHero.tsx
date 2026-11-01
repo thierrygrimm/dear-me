@@ -4,6 +4,7 @@ import { AskBar } from "@/components/answer/AskBar";
 import { Logo } from "@/components/brand/Logo";
 import { Squirrel } from "@/components/brand/Squirrel";
 import { LifeSheet } from "@/components/home/LifeSheet";
+import { Opportunities } from "@/components/home/Opportunities";
 import {
   WrappedEntry,
   WrappedStory,
@@ -37,6 +38,68 @@ const HOME_STARTERS = [
   "Am I covered if I can't work?",
   "What should I do this month?",
 ] as const;
+
+const HOME_OPPS: Record<
+  PersonaId,
+  { id: string; title: string; body: string; href: string }[]
+> = {
+  lena: [
+    {
+      id: "3a",
+      title: "Top up pillar 3a",
+      body: "Before 31 December — about CHF 1'900 tax saved.",
+      href: "/learn?lesson=pillar-3a",
+    },
+    {
+      id: "cover",
+      title: "Check cover if you couldn't work",
+      body: "The soft spot after going part-time.",
+      href: "/answer?topic=disability",
+    },
+  ],
+  noah: [
+    {
+      id: "3a",
+      title: "Open a 3a while you're young",
+      body: "CHF 100 a month compounds hard from 24.",
+      href: "/learn?lesson=pillar-3a",
+    },
+    {
+      id: "cert",
+      title: "Bring in your certificate",
+      body: "Makes every number exact.",
+      href: "/certificate",
+    },
+  ],
+  sandra: [
+    {
+      id: "3a",
+      title: "Use the bigger 3a ceiling",
+      body: "Self-employed saving without a fund.",
+      href: "/learn?lesson=pillar-3a",
+    },
+    {
+      id: "cover",
+      title: "Income if you couldn't work",
+      body: "AHV/IV alone leaves a gap.",
+      href: "/answer?topic=disability",
+    },
+  ],
+  ruth: [
+    {
+      id: "payout",
+      title: "Lump sum or pension?",
+      body: "How you take CHF 380'000 changes how long it lasts.",
+      href: "/answer?topic=retire",
+    },
+    {
+      id: "ahv",
+      title: "AHV for couples at 65",
+      body: "A four-minute lesson before you decide.",
+      href: "/learn?lesson=ahv-part-2",
+    },
+  ],
+};
 
 function helloFor(hour: number) {
   if (hour >= 18) return "Good evening,";
@@ -422,6 +485,19 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
             <span className="sub">{persona.lessonTime}</span>
           </button>
         </div>
+
+        {!day1 ? (
+          <>
+            <h2>{copy.home.feedHeading}</h2>
+            <Opportunities
+              items={HOME_OPPS[persona.id]}
+              onSelect={(id) => {
+                const hit = HOME_OPPS[persona.id].find((o) => o.id === id);
+                if (hit) router.push(hit.href);
+              }}
+            />
+          </>
+        ) : null}
 
         {day1 ? (
           <button
