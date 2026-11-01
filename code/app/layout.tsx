@@ -28,9 +28,6 @@ const chivoMono = Chivo_Mono({
 export const metadata: Metadata = {
   title: "dear me",
   description: "A planner for life's big moments.",
-  icons: {
-    icon: "/logos/app-icon-dark.svg",
-  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
