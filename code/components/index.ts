@@ -31,6 +31,9 @@ export {
 export { BootGate } from "@/components/layout/BootGate";
 export { Navigation } from "@/components/layout/Navigation";
 export { AppShell } from "@/components/layout/AppShell";
+export { FlowShell } from "@/components/layout/FlowShell";
+export { PageColumn } from "@/components/layout/PageColumn";
+export { Sidebar } from "@/components/layout/Sidebar";
 export { Verdict } from "@/components/answer/Verdict";
 export { Disclaimer } from "@/components/answer/Disclaimer";
 export { AskBar } from "@/components/answer/AskBar";
@@ -75,3 +78,4 @@ export { AdvisorBooking } from "@/components/auth/AdvisorBooking";
 export { CertificateFlow } from "@/components/certificate/CertificateFlow";
 export { LearnScreen } from "@/components/learn/LearnScreen";
 export { LessonPlayer } from "@/components/learn/LessonPlayer";
+export { LessonArt } from "@/components/learn/LessonArt";
