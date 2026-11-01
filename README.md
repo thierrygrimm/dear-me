@@ -97,16 +97,15 @@ Server routes keep the pension-engine token off the client. Household JSON in, s
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/simulate/workload` | B1 — pensum steps and pension differences |
-| `POST` | `/api/simulate/coverage` | B2 — illness / accident risk scenarios |
 | `POST` | `/api/simulate/retirement-age` | B3 — income by retirement age |
 | `POST` | `/api/simulate/tax-3a` | B4 — 3a maximum and tax saving |
-| `POST` | `/api/recommendations` | Rule-based suggestions and audit entries |
+| `POST` | `/api/recommendations` | Suggestions, coverage, and audit entries |
 | `POST` | `/api/leads` | Create an advisor lead with household brief |
 | `GET` | `/api/leads` · `/api/leads/[id]` | List or read leads |
 | `GET` | `/api/trace/[id]` | Trace record for a number |
 | `GET` | `/api/audit` | Recommendation audit log |
 
-Env: `LOGISMATA_API_TOKEN`, `LOGISMATA_BASE_URL`, `DEMO_CACHE` — see [`code/.env.example`](code/.env.example). Build notes: [`documentation/build-spec.md`](documentation/build-spec.md).
+Env: `LOGISMATA_API_TOKEN`, `LOGISMATA_BASE_URL`, `DEMO_CACHE` — see [`code/.env.example`](code/.env.example). How and when to call each route: [`documentation/api.md`](documentation/api.md). Build notes: [`documentation/build-spec.md`](documentation/build-spec.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
