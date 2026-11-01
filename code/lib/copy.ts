@@ -23,9 +23,24 @@ export const copy = {
     me: "Me",
   },
   home: {
-    greeting: (name: string) => `Good morning, ${name}`,
-    heroLine: "We're expecting a baby. Let's see what that changes.",
-    heroCta: "Start with the safety net",
+    /** Words-first HomeHero C. Pass `hour` from the client (avoid `new Date()` at module default). */
+    greeting: (name: string, hour?: number) => {
+      const h = hour ?? 9;
+      const hello =
+        h >= 18 ? "Good evening," : h >= 12 ? "Good afternoon," : "Good morning,";
+      return `${hello}\n${name}.`;
+    },
+    say: "Your safety net is strong. One spot is thin:",
+    sayMark: "if you couldn't work.",
+    heroCta: "Let's look at it",
+    appointmentTitle: "Tuesday with Sara",
+    appointmentMeta: "10:30 · video call",
+    lessonTitle: "Why part-time costs more",
+    lessonMeta: "A short lesson",
+    noCertSay: "Start with one document. An estimate works too.",
+    noCertCta: "Add your certificate",
+    estimateTitle: "Look around with an estimate",
+    estimateMeta: "About 2 minutes",
     feedHeading: "Worth a look",
     letterTitle: "A letter to future you",
   },
