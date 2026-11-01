@@ -76,8 +76,18 @@ export default function DevUiPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [opt, setOpt] = useState("a");
   const [planDone, setPlanDone] = useState(false);
-  const [momentPersona, setMomentPersona] = useState<"lena" | "ruth">("lena");
+  const [momentPersona, setMomentPersona] = useState<
+    "noah" | "lena" | "sandra" | "ruth"
+  >("lena");
   const [devMoments, setDevMoments] = useState<LifeMoment[]>([]);
+  const momentDemo =
+    momentPersona === "noah"
+      ? { name: "Noah", age: 24, story: "firstjob" }
+      : momentPersona === "sandra"
+        ? { name: "Sandra", age: 41, story: "selfemployed" }
+        : momentPersona === "ruth"
+          ? { name: "Ruth", age: 61, story: "retire" }
+          : { name: "Lena", age: 34, story: "child" };
 
   return (
     <div className="dm-app-shell" style={{ maxWidth: 520, padding: 20 }}>
@@ -100,25 +110,30 @@ export default function DevUiPage() {
       </Section>
 
       <Section title="Life moments picker">
-        <div className="dm-row">
-          <Chip
-            pressed={momentPersona === "lena"}
-            onClick={() => {
-              setMomentPersona("lena");
-              setDevMoments([]);
-            }}
-          >
-            Lena · 34
-          </Chip>
-          <Chip
-            pressed={momentPersona === "ruth"}
-            onClick={() => {
-              setMomentPersona("ruth");
-              setDevMoments([]);
-            }}
-          >
-            Ruth · 61
-          </Chip>
+        <p className="dm-small dm-muted" style={{ margin: 0 }}>
+          Distinct stories: Noah · firstjob · Lena · child · Sandra ·
+          selfemployed · Ruth · retire
+        </p>
+        <div className="dm-row" style={{ flexWrap: "wrap" }}>
+          {(
+            [
+              ["noah", "Noah · firstjob"],
+              ["lena", "Lena · child"],
+              ["sandra", "Sandra · selfemployed"],
+              ["ruth", "Ruth · retire"],
+            ] as const
+          ).map(([id, label]) => (
+            <Chip
+              key={id}
+              pressed={momentPersona === id}
+              onClick={() => {
+                setMomentPersona(id);
+                setDevMoments([]);
+              }}
+            >
+              {label}
+            </Chip>
+          ))}
         </div>
         <div
           style={{
@@ -129,8 +144,8 @@ export default function DevUiPage() {
           }}
         >
           <YourMomentsScreen
-            name={momentPersona === "lena" ? "Lena" : "Ruth"}
-            age={momentPersona === "lena" ? 34 : 61}
+            name={momentDemo.name}
+            age={momentDemo.age}
             value={devMoments}
             onChange={setDevMoments}
           />
@@ -269,39 +284,37 @@ export default function DevUiPage() {
           <Chat />
         </div>
         <p className="dm-small dm-muted" style={{ margin: 0 }}>
-          LifeMoments C1–C3 · first job (secondary idea available) and retire
-          (Auszahlungsplan only). Tap through to “What could help?”.
+          LifeMoments C1–C3 · four distinct stories. Tap through to “What could
+          help?”. Noah ≠ baby; Ruth = Auszahlungsplan only.
         </p>
-        <div
-          style={{
-            height: 480,
-            borderRadius: 16,
-            overflow: "auto",
-            boxShadow: "inset 0 0 0 1px var(--line)",
-            padding: 12,
-          }}
-        >
-          <LifeMomentAsk
-            moment="firstjob"
-            name="Noah"
-            onDone={() => undefined}
-          />
-        </div>
-        <div
-          style={{
-            height: 480,
-            borderRadius: 16,
-            overflow: "auto",
-            boxShadow: "inset 0 0 0 1px var(--line)",
-            padding: 12,
-          }}
-        >
-          <LifeMomentAsk
-            moment="retire"
-            name="Rita"
-            onDone={() => undefined}
-          />
-        </div>
+        {(
+          [
+            ["Noah · firstjob", "firstjob", "Noah"],
+            ["Lena · child", "child", "Lena"],
+            ["Sandra · selfemployed", "selfemployed", "Sandra"],
+            ["Ruth · retire", "retire", "Ruth"],
+          ] as const
+        ).map(([label, moment, name]) => (
+          <div key={moment} className="dm-stack" style={{ gap: 8 }}>
+            <span className="dm-label">{label}</span>
+            <div
+              style={{
+                height: 480,
+                borderRadius: 16,
+                overflow: "auto",
+                boxShadow: "inset 0 0 0 1px var(--line)",
+                padding: 12,
+              }}
+            >
+              <LifeMomentAsk
+                key={`dev-${moment}`}
+                moment={moment}
+                name={name}
+                onDone={() => undefined}
+              />
+            </div>
+          </div>
+        ))}
         <ChatGuide
           title="Parental leave plan"
           intro="Let's plan your parental leave together. Four quick questions, about a minute."
