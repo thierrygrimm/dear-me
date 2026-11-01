@@ -8,14 +8,15 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
 import {
-  moreMoments,
+  momentLabels,
+  momentsForAge,
   planHeadline,
-  suggestedMoments,
   type LifeMoment,
 } from "@/lib/session";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -150,6 +151,25 @@ const momentIcons: Record<LifeMoment, ReactNode> = {
       <path d="M12 11.5s-3.6-2.2-3.6-4.6a1.8 1.8 0 0 1 3.6-.8 1.8 1.8 0 0 1 3.6.8c0 2.4-3.6 4.6-3.6 4.6z" />
       <path d="M3 15.5h3.5l3 1.8h4.3a1.7 1.7 0 0 1 0 3.4H8.5" />
       <path d="M13.8 17.3l4.4-2.2a1.6 1.6 0 0 1 1.9 2.5L15.5 21H3" />
+    </svg>
+  ),
+  grandchild: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <circle cx="8" cy="6" r="2.5" />
+      <path d="M4 21v-6a4 4 0 0 1 8 0v6" />
+      <circle cx="17" cy="11.5" r="2" />
+      <path d="M14 21v-3a3 3 0 0 1 6 0v3" />
+    </svg>
+  ),
+  catchup: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <ellipse cx="12" cy="6" rx="6" ry="2.5" />
+      <path d="M6 6v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V6M6 10v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4M6 14v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4" />
+    </svg>
+  ),
+  retire: (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0M12 6.5v2.5M5.6 10.6l1.6 1.6M18.4 10.6l-1.6 1.6M8 21h8" />
     </svg>
   ),
 };
@@ -560,6 +580,7 @@ function toggleMoment(list: LifeMoment[], id: LifeMoment): LifeMoment[] {
 /** Your moments — multi-select; from 900px: onb top bar + 4-col grid */
 export function YourMomentsScreen({
   name = "Lena",
+  age = null,
   onBack,
   onContinue,
   value,
@@ -567,6 +588,8 @@ export function YourMomentsScreen({
   className,
 }: {
   name?: string;
+  /** Years; null when unknown → Lena-like defaults. */
+  age?: number | null;
   onBack?: () => void;
   onContinue?: () => void;
   value: LifeMoment[];
@@ -574,6 +597,16 @@ export function YourMomentsScreen({
   className?: string;
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
+
+  const { suggested, more } = useMemo(() => {
+    const split = momentsForAge(age ?? null);
+    return {
+      suggested: split.suggested
+        .slice(0, 4)
+        .map((id) => ({ id, label: momentLabels[id] })),
+      more: split.more.map((id) => ({ id, label: momentLabels[id] })),
+    };
+  }, [age]);
 
   return (
     <>
@@ -593,7 +626,7 @@ export function YourMomentsScreen({
           {copy.signup.momentsSub}
         </span>
         <div className="dm-lmgrid">
-          {suggestedMoments.map((m) => (
+          {suggested.map((m) => (
             <button
               key={m.id}
               type="button"
@@ -606,16 +639,18 @@ export function YourMomentsScreen({
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          className="dm-more2"
-          onClick={() => setMoreOpen(true)}
-        >
-          {copy.signup.somethingElse}
-          <svg viewBox="0 0 16 16" aria-hidden>
-            <path d="M6 3l5 5-5 5" />
-          </svg>
-        </button>
+        {more.length > 0 ? (
+          <button
+            type="button"
+            className="dm-more2"
+            onClick={() => setMoreOpen(true)}
+          >
+            {copy.signup.somethingElse}
+            <svg viewBox="0 0 16 16" aria-hidden>
+              <path d="M6 3l5 5-5 5" />
+            </svg>
+          </button>
+        ) : null}
         <Button
           variant="primary"
           block
@@ -633,7 +668,7 @@ export function YourMomentsScreen({
           title={copy.signup.somethingElse}
         >
           <div className="dm-lmlist">
-            {moreMoments.map((m) => (
+            {more.map((m) => (
               <button
                 key={m.id}
                 type="button"
