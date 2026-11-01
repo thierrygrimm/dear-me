@@ -2,6 +2,7 @@ export { Button } from "@/components/ui/Button";
 export { Chip } from "@/components/ui/Chip";
 export { Segmented } from "@/components/ui/Segmented";
 export { PensumSlider } from "@/components/ui/PensumSlider";
+export { NumberEdit } from "@/components/ui/NumberEdit";
 export { SourceTag } from "@/components/data/SourceTag";
 export { SourcedNumber } from "@/components/data/SourcedNumber";
 export { Estimate } from "@/components/data/Estimate";
