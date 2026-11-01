@@ -132,7 +132,10 @@ export function NumberEdit({
 
       {wasLabel ? (
         <span className="was">
-          {wasLabel.startsWith("Was ") || wasLabel.startsWith("On ") ? (
+          {wasLabel.startsWith("Was ") ||
+          wasLabel.startsWith("On ") ||
+          wasLabel.startsWith("We ") ||
+          wasLabel.startsWith("From ") ? (
             wasLabel
           ) : (
             <>
