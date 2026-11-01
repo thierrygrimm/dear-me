@@ -13,11 +13,48 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const coverage = [
-  { id: "ret", label: "Retirement", score: 72 },
-  { id: "dis", label: "Disability", score: 58, thin: true },
-  { id: "fam", label: "Family", score: 40, thin: true },
-  { id: "sav", label: "Savings", score: 65 },
-  { id: "tax", label: "Taxes", score: 80 },
+  {
+    id: "ret",
+    label: "Retirement",
+    score: 72,
+    explain:
+      "AHV plus your pension fund cover most of what you take home today. The rest is what pillar 3a and later savings can close.",
+    source: "Certificate · AHV scale · what you told us",
+  },
+  {
+    id: "dis",
+    label: "Disability",
+    score: 58,
+    thin: true,
+    explain:
+      "If you could no longer work, your fund and AHV would pay less than you earn now. The gap is mostly because you plan to work part-time.",
+    source: "Your certificate · AHV · salary you told us",
+  },
+  {
+    id: "fam",
+    label: "Family",
+    score: 40,
+    thin: true,
+    explain:
+      "If something happened to you, the cover for Marco and the baby looks thin. A small policy closes most of that soft spot.",
+    source: "Family situation · what we know so far",
+  },
+  {
+    id: "sav",
+    label: "Savings",
+    score: 65,
+    explain:
+      "Your 3a and reserves cover a few months. There is still room this year before the 3a limit.",
+    source: "3a room · reserves estimate",
+  },
+  {
+    id: "tax",
+    label: "Taxes",
+    score: 80,
+    explain:
+      "Buying into the fund and filling 3a already cut a useful amount. Nothing urgent on tax this year.",
+    source: "Buy-in room · 3a · Basel-Stadt rules of thumb",
+  },
 ];
 
 const opps = [
