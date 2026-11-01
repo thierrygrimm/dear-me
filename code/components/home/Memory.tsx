@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { useEffect, useState } from "react";
 
 type Props = {
   name: string;
@@ -8,9 +9,21 @@ type Props = {
 };
 
 export function MemoryGreeting({ name, line, className }: Props) {
+  const [hour, setHour] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    setHour(new Date().getHours());
+  }, []);
+  const parts = copy.home.greeting(name, hour).split("\n");
   return (
     <header className={cn(className)}>
-      <h1 className="dm-hello">{copy.home.greeting(name)}</h1>
+      <h1 className="dm-hello">
+        {parts.map((part, i) => (
+          <span key={`${i}-${part}`}>
+            {i > 0 ? <br /> : null}
+            {part}
+          </span>
+        ))}
+      </h1>
       {line ? <p className="dm-muted" style={{ margin: "6px 0 0" }}>{line}</p> : null}
     </header>
   );
