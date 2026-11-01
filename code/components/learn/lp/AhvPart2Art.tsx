@@ -2,26 +2,206 @@ type Props = {
   step: number;
 };
 
+function CapBars() {
+  return (
+    <svg className="lp" viewBox="0 0 340 280" aria-hidden="true">
+      <g className="lp-grow">
+        <rect
+          x={40}
+          y={70}
+          width={80}
+          height={170}
+          rx={12}
+          fill="var(--espressosatz)"
+        />
+        <rect
+          x={134}
+          y={70}
+          width={80}
+          height={170}
+          rx={12}
+          fill="var(--espressosatz)"
+        />
+      </g>
+      <rect
+        className="lp-cut"
+        x={40}
+        y={70}
+        width={174}
+        height={56}
+        fill="var(--rosa-brille)"
+      />
+      <path
+        d="M28 126 H226"
+        stroke="var(--kaugummi)"
+        strokeWidth={4}
+        strokeDasharray="8 6"
+      />
+      <text
+        x={236}
+        y={134}
+        textAnchor="start"
+        fontFamily="var(--font-display)"
+        fontWeight={700}
+        fontSize={24}
+        fill="var(--espressosatz)"
+      >
+        150 %
+      </text>
+    </svg>
+  );
+}
+
+function ThirteenCalendar() {
+  const tiles = [
+    [34, 56],
+    [81, 56],
+    [128, 56],
+    [175, 56],
+    [222, 56],
+    [269, 56],
+    [34, 108],
+    [81, 108],
+    [128, 108],
+    [175, 108],
+    [222, 108],
+    [269, 108],
+  ] as const;
+
+  return (
+    <svg className="lp" viewBox="0 0 340 280" aria-hidden="true">
+      {tiles.map(([x, y]) => (
+        <rect
+          key={`${x}-${y}`}
+          x={x}
+          y={y}
+          width={38}
+          height={42}
+          rx={9}
+          fill="var(--briefpapier)"
+        />
+      ))}
+      <g className="lp-pop">
+        <rect
+          x={122}
+          y={176}
+          width={96}
+          height={76}
+          rx={14}
+          fill="var(--espressosatz)"
+        />
+        <text
+          x={170}
+          y={226}
+          textAnchor="middle"
+          fontFamily="var(--font-display)"
+          fontWeight={700}
+          fontSize={34}
+          fill="var(--neonweste)"
+        >
+          13
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+function AgeStrip({ withTradeoff }: { withTradeoff?: boolean }) {
+  const ages = [63, 64, 65, 66, 67, 68, 69, 70] as const;
+  const xs = [30, 70, 110, 150, 190, 230, 270, 310] as const;
+
+  return (
+    <svg className="lp" viewBox="0 0 340 280" aria-hidden="true">
+      {withTradeoff ? (
+        <>
+          <text
+            x={30}
+            y={100}
+            textAnchor="start"
+            fontFamily="var(--font-display)"
+            fontWeight={700}
+            fontSize={17}
+            fill="var(--espressosatz)"
+          >
+            −6.8 % a year
+          </text>
+          <text
+            x={310}
+            y={100}
+            textAnchor="end"
+            fontFamily="var(--font-display)"
+            fontWeight={700}
+            fontSize={17}
+            fill="var(--espressosatz)"
+          >
+            more
+          </text>
+          <rect
+            x={30}
+            y={124}
+            width={80}
+            height={14}
+            rx={7}
+            fill="var(--kaugummi)"
+          />
+          <rect
+            className="lp-band"
+            x={110}
+            y={124}
+            width={200}
+            height={14}
+            rx={7}
+            fill="var(--neonweste)"
+            stroke="var(--espressosatz)"
+            strokeWidth={1.5}
+          />
+        </>
+      ) : (
+        <rect
+          x={30}
+          y={124}
+          width={280}
+          height={14}
+          rx={7}
+          fill="var(--briefpapier)"
+        />
+      )}
+      {ages.map((age, i) => (
+        <text
+          key={age}
+          x={xs[i]}
+          y={176}
+          textAnchor="middle"
+          fontFamily="var(--font-text)"
+          fontWeight={age === 65 ? 600 : 400}
+          fontSize={14}
+          fill="var(--espressosatz)"
+        >
+          {age}
+        </text>
+      ))}
+      <g className="lp-pin">
+        <circle cx={110} cy={131} r={20} fill="var(--espressosatz)" />
+        <text
+          x={110}
+          y={137}
+          textAnchor="middle"
+          fontFamily="var(--font-display)"
+          fontWeight={700}
+          fontSize={15}
+          fill="var(--neonweste)"
+        >
+          65
+        </text>
+      </g>
+    </svg>
+  );
+}
+
 export function AhvPart2Art({ step }: Props) {
-  if (step === 0) {
-    return (
-      <svg className="lp" viewBox="0 0 340 300" aria-hidden="true"><g className="lp-grow"><rect x={50} y={90} width={70} height={150} rx={8} fill="var(--espressosatz)" /><rect x={134} y={90} width={70} height={150} rx={8} fill="var(--espressosatz)" /></g><rect x={40} y={128} width={174} height={0} /><path d="M36 128 H218" stroke="var(--kaugummi)" strokeWidth={4} strokeDasharray="8 6" /><rect className="lp-cut" x={50} y={90} width={154} height={38} fill="var(--rosa-brille)" opacity=".85" /><text x={85} y={262} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">You</text><text x={169} y={262} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">Partner</text><text x={232} y={122} fontFamily="var(--font-display)" fontWeight={700} fontSize={20} fill="var(--espressosatz)">150 %</text><text x={232} y={142} fontFamily="var(--font-text)" fontSize={11} fill="var(--espressosatz)">CHF 3'780</text><text x={232} y={158} fontFamily="var(--font-text)" fontSize={11} fill="var(--espressosatz)">a month, married</text></svg>
-    );
-  }
-  if (step === 1) {
-    return (
-      <svg className="lp" viewBox="0 0 340 300" aria-hidden="true"><rect x={30} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={50} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">1</text><rect x={78} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={98} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">2</text><rect x={126} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={146} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">3</text><rect x={174} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={194} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">4</text><rect x={222} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={242} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">5</text><rect x={270} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={290} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">6</text><rect x={30} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={50} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">7</text><rect x={78} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={98} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">8</text><rect x={126} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={146} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">9</text><rect x={174} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={194} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">10</text><rect x={222} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={242} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">11</text><rect x={270} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={290} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">12</text><g className="lp-pop"><rect x={126} y={196} width={88} height={70} rx={12} fill="var(--neonweste)" stroke="var(--espressosatz)" strokeWidth={2.5} /><text x={170} y={242} textAnchor="middle" fontFamily="var(--font-display)" fontWeight={700} fontSize={30} fill="var(--espressosatz)">13</text></g></svg>
-    );
-  }
-  if (step === 2) {
-    return (
-      <svg className="lp" viewBox="0 0 340 300" aria-hidden="true"><rect x={30} y={140} width={280} height={10} rx={5} fill="var(--briefpapier)" /><rect x={30} y={140} width={80} height={10} rx={5} fill="var(--kaugummi)" /><rect x={110} y={140} width={200} height={10} rx={5} fill="var(--neonweste)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={30} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">63</text><text x={70} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">64</text><text x={110} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">65</text><text x={150} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">66</text><text x={190} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">67</text><text x={230} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">68</text><text x={270} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">69</text><text x={310} y={190} textAnchor="middle" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">70</text><g className="lp-pin"><circle cx={110} cy={145} r={14} fill="var(--espressosatz)" /><text x={110} y={150} textAnchor="middle" fontFamily="var(--font-display)" fontWeight={700} fontSize={12} fill="var(--neonweste)">65</text></g><text x={30} y={110} fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">Earlier: −6.8 % a year</text><text x={310} y={110} textAnchor="end" fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">Later: up to +31.5 %</text><text x={30} y={240} fontFamily="var(--font-text)" fontSize={12} fill="var(--espressosatz)">Take it all at once, or 20 to 80 % first</text></svg>
-    );
-  }
-  if (step === 3) {
-    return (
-      <svg className="lp" viewBox="0 0 340 300" aria-hidden="true"><rect x={30} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={50} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">1</text><rect x={78} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={98} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">2</text><rect x={126} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={146} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">3</text><rect x={174} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={194} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">4</text><rect x={222} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={242} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">5</text><rect x={270} y={70} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={290} y={100} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">6</text><rect x={30} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={50} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">7</text><rect x={78} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={98} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">8</text><rect x={126} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={146} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">9</text><rect x={174} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={194} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">10</text><rect x={222} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={242} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">11</text><rect x={270} y={128} width={40} height={46} rx={8} fill="var(--briefpapier)" stroke="var(--espressosatz)" strokeWidth={1.5} /><text x={290} y={158} textAnchor="middle" fontFamily="var(--font-text)" fontSize={13} fill="var(--espressosatz)">12</text><g className="lp-pop"><rect x={126} y={196} width={88} height={70} rx={12} fill="var(--neonweste)" stroke="var(--espressosatz)" strokeWidth={2.5} /><text x={170} y={242} textAnchor="middle" fontFamily="var(--font-display)" fontWeight={700} fontSize={30} fill="var(--espressosatz)">13</text></g></svg>
-    );
-  }
+  if (step === 0 || step === 4) return <CapBars />;
+  if (step === 1) return <ThirteenCalendar />;
+  if (step === 2) return <AgeStrip />;
+  if (step === 3) return <AgeStrip withTradeoff />;
   return null;
 }
