@@ -152,6 +152,7 @@ export function resolveDemoAnswer(question: string): DemoAnswer {
   return DEFAULT;
 }
 
+/** Default child-demo chips when no life-moment script applies. */
 export const STARTER_REPLIES = [
   "Can I go to 60 % after the baby?",
   "What if 80 %?",
