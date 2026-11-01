@@ -19,7 +19,7 @@ export default function WhatWeKnowPage() {
             <path d="M15 5l-7 7 7 7" />
           </svg>
         </button>
-        <b style={{ font: "600 16px/20px var(--font-text)" }}></b>
+        <b style={{ font: "600 16px/20px var(--font-text)" }}>What we know</b>
         <span style={{ width: 36 }} />
       </header>
       <WhatWeKnow />
