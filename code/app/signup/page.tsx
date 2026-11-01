@@ -182,7 +182,11 @@ export default function SignUpPage() {
 
   if (step === "signing") {
     return (
-      <div className="dm-stage dm-app-shell--bleed">
+      <FlowShell
+        step={signingLabels[provider]}
+        pane="full"
+        bleed
+      >
         <SigningIn
           label={signingLabels[provider]}
           detail={
@@ -191,7 +195,7 @@ export default function SignUpPage() {
               : "This takes a few seconds"
           }
         />
-      </div>
+      </FlowShell>
     );
   }
 
