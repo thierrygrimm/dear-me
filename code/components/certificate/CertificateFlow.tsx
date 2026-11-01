@@ -363,11 +363,19 @@ export function CertificateFlow({ onDone, onClose }: Props) {
     setStep("scan");
   }
 
-  function goExplain(message?: string) {
+  function goExplain(message?: string, delayMs = 0) {
     closeSheet();
     if (message) toast.show({ message });
-    setCard(0);
-    setStep("explain");
+    const start = () => {
+      setCard(0);
+      setStep("explain");
+    };
+    if (delayMs > 0) window.setTimeout(start, delayMs);
+    else start();
+  }
+
+  function pickPdf(file: (typeof pdfFiles)[number]) {
+    goExplain(file.toast, 900);
   }
 
   function confirm() {
@@ -899,16 +907,31 @@ export function CertificateFlow({ onDone, onClose }: Props) {
       <BottomSheet
         open={sheet === "pdf"}
         onClose={closeSheet}
-        title="Pick the PDF"
-        description="From your files or email."
+        title="Add your certificate"
+        description="A PDF or a photo of it works."
       >
+        <button
+          type="button"
+          className="dm-browse"
+          onClick={() => {
+            toast.show({ message: "Opening your files…" });
+            window.setTimeout(() => pickPdf(pdfFiles[0]), 700);
+          }}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M12 16V4M7 9l5-5 5 5M5 20h14" />
+          </svg>
+          Choose a file
+          <small>PDF, JPG or PNG · from Files, Drive or email</small>
+        </button>
+        <p className="dm-recent">Recent</p>
         <div className="dm-filelist">
           {pdfFiles.map((f) => (
             <button
               key={f.name}
               type="button"
               className="dm-file"
-              onClick={() => goExplain(f.toast)}
+              onClick={() => pickPdf(f)}
             >
               <span className="ic">PDF</span>
               <span>
@@ -1014,7 +1037,6 @@ export function CertificateFlow({ onDone, onClose }: Props) {
             markCertificate(next);
             closeSheet();
             toast.show({ message: "Saved. You can scan it later." });
-            onDone?.(next);
           }}
         >
           Save
