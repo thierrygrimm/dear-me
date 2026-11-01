@@ -30,7 +30,7 @@ export function HomeScreen() {
 
   if (!hasCert) {
     return (
-      <>
+      <div className="home-nocert">
         <div className="dm-row" style={{ justifyContent: "space-between" }}>
           <Logo />
           <Squirrel state="idle" size={36} />
@@ -68,12 +68,11 @@ export function HomeScreen() {
           sticky
           onAttach={() => router.push("/certificate")}
           onSubmit={(value) => {
-            // Their own words always win.
             sessionStorage.setItem("dm-ask-q", value);
             router.push("/ask");
           }}
         />
-      </>
+      </div>
     );
   }
 
