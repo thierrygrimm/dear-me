@@ -8,8 +8,8 @@ type Props = {
   flush?: boolean;
   hideNav?: boolean;
   className?: string;
-  /** Extra shell modifiers: chat | pgapp | set | onb | signapp */
-  variant?: "chat" | "pgapp" | "set" | "onb" | "signapp" | string;
+  /** Extra shell modifiers: chat | pgapp | set | onb | signapp | flowapp */
+  variant?: "chat" | "pgapp" | "set" | "onb" | "signapp" | "flowapp" | string;
 };
 
 export function AppShell({
@@ -20,11 +20,14 @@ export function AppShell({
   variant,
 }: Props) {
   /**
-   * Chat / sign-up / onboarding place panes as direct shell children (no main),
-   * matching design-system `.dm-app.chat|.signapp|.onb` selectors.
+   * Chat / sign-up / onboarding / start-flow place panes as direct shell
+   * children (no main), matching design-system selectors.
    */
   const bare =
-    variant === "chat" || variant === "signapp" || variant === "onb";
+    variant === "chat" ||
+    variant === "signapp" ||
+    variant === "onb" ||
+    variant === "flowapp";
 
   return (
     <div
