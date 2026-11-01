@@ -391,6 +391,11 @@ export function CertificateFlow({ onDone, onClose }: Props) {
     onDone?.(values);
   }
 
+  function startEstimate() {
+    markCertificate(values);
+    onDone?.(values);
+  }
+
   function openEdit(field: EditField) {
     setEditField(field);
     setEditBuf(String(values[field]));
@@ -843,7 +848,7 @@ export function CertificateFlow({ onDone, onClose }: Props) {
   /* ── A · Choose how + preview sheets ── */
   return (
     <div className="dm-cert-pane" ref={pulseRef}>
-      <div className="dm-cert-main dm-cert-main--choose">
+      <div className="pg cert dm-cert-main dm-cert-main--choose">
         {onClose ? (
           <button
             type="button"
@@ -887,6 +892,133 @@ export function CertificateFlow({ onDone, onClose }: Props) {
         >
           Don&apos;t have it? An estimate works too.
         </p>
+
+        {/* Laptop: drop zone + 4 ways + side panel (hidden on phone via CSS) */}
+        <div className="cert-desk">
+          <div className="cd-main">
+            <h1 className="pg-h">Let&apos;s get your pension fund numbers.</h1>
+            <p className="pg-p">
+              Pick what&apos;s easiest. You can always add more later.
+            </p>
+            <button
+              type="button"
+              className="cd-drop"
+              onClick={() => setSheet("pdf")}
+            >
+              <span className="ic">{wayIcon.pdf}</span>
+              <b>Drop your pension certificate here</b>
+              <span>PDF, JPG or PNG, up to 20 MB</span>
+              <span className="dm-btn dm-btn--secondary dm-btn--sm">
+                Choose a file
+              </span>
+            </button>
+            <p className="cd-or">Or another way</p>
+            <div className="cd-ways">
+              <button type="button" onClick={() => setSheet("scan")}>
+                <span className="qrw">
+                  <svg
+                    viewBox="0 0 21 21"
+                    className="qr"
+                    aria-hidden
+                  >
+                    <rect x="0" y="0" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <rect x="2" y="2" width="3" height="3" />
+                    <rect x="14" y="0" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <rect x="16" y="2" width="3" height="3" />
+                    <rect x="0" y="14" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <rect x="2" y="16" width="3" height="3" />
+                    <rect x="9" y="9" width="3" height="3" />
+                    <rect x="14" y="14" width="2" height="2" />
+                    <rect x="17" y="14" width="2" height="2" />
+                    <rect x="14" y="17" width="2" height="2" />
+                    <rect x="10" y="4" width="1" height="3" />
+                    <rect x="4" y="10" width="3" height="1" />
+                    <rect x="18" y="9" width="1" height="3" />
+                  </svg>
+                </span>
+                <b>Scan with your phone</b>
+                <small>Point your camera at the code</small>
+              </button>
+              <button type="button" onClick={() => setSheet("pax")}>
+                <span className="ic pax">Pax</span>
+                <b>Log in with myPax</b>
+                <small>If you&apos;re insured with Pax</small>
+              </button>
+              <button type="button" onClick={() => setSheet("type")}>
+                <span className="ic">{wayIcon.type}</span>
+                <b>Type three numbers</b>
+                <small>We show you where they are</small>
+              </button>
+              <button type="button" onClick={() => setSheet("mail")}>
+                <span className="ic">{wayIcon.mail}</span>
+                <b>Ask your employer</b>
+                <small>We write the email for you</small>
+              </button>
+            </div>
+            <p className="cd-est">
+              Don&apos;t have it?{" "}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  startEstimate();
+                }}
+              >
+                Start with an estimate
+              </a>
+              , it sharpens later.
+            </p>
+          </div>
+          <aside className="cd-side">
+            <h3>What we read</h3>
+            <svg
+              viewBox="0 0 120 150"
+              className="thumb"
+              aria-hidden
+            >
+              <rect
+                x="6"
+                y="4"
+                width="108"
+                height="142"
+                rx="6"
+                fill="var(--surface)"
+                stroke="var(--line-strong)"
+              />
+              <g fill="var(--line-strong)">
+                <rect x="18" y="18" width="60" height="6" rx="3" />
+                <rect x="18" y="34" width="84" height="4" rx="2" />
+                <rect x="18" y="44" width="70" height="4" rx="2" />
+                <rect x="18" y="74" width="80" height="4" rx="2" />
+                <rect x="18" y="104" width="76" height="4" rx="2" />
+                <rect x="18" y="126" width="50" height="4" rx="2" />
+              </g>
+              <g fill="var(--neonweste)">
+                <rect x="14" y="54" width="92" height="12" rx="3" />
+                <rect x="14" y="84" width="92" height="12" rx="3" />
+                <rect x="14" y="112" width="92" height="10" rx="3" />
+              </g>
+            </svg>
+            <ul>
+              <li>
+                <b>Insured salary</b>
+                <span>Line 4</span>
+              </li>
+              <li>
+                <b>Savings today</b>
+                <span>Line 7</span>
+              </li>
+              <li>
+                <b>Conversion rate</b>
+                <span>Line 12</span>
+              </li>
+            </ul>
+            <p>
+              Nothing else. Stored encrypted in Switzerland; only you can open
+              it.
+            </p>
+          </aside>
+        </div>
       </div>
 
       <BottomSheet
