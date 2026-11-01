@@ -216,11 +216,25 @@ export function AnswerScreen() {
 
       <div className="dm-sugg" style={{ justifyContent: "stretch" }}>
         {content.compare ? (
-          <button type="button" onClick={() => router.push("/compare")}>
+          <button
+            type="button"
+            onClick={() =>
+              router.push(
+                topic === "retire"
+                  ? "/compare?mode=retire"
+                  : topic === "disability"
+                    ? "/compare?mode=disability"
+                    : "/compare?mode=pensum",
+              )
+            }
+          >
             See all of it
           </button>
         ) : (
-          <button type="button" onClick={() => router.push("/compare")}>
+          <button
+            type="button"
+            onClick={() => router.push("/compare?mode=pensum")}
+          >
             See what changes at {after} %
           </button>
         )}

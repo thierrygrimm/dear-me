@@ -11,14 +11,23 @@ import {
   readPlanningScope,
   type PlanningScope,
 } from "@/lib/session";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+
+type CompareMode = "pensum" | "disability" | "retire";
+
+function modeFromParam(raw: string | null): CompareMode | undefined {
+  if (raw === "pensum" || raw === "disability" || raw === "retire") return raw;
+  return undefined;
+}
 
 export default function ComparePage() {
   const router = useRouter();
+  const params = useSearchParams();
   const [pensum] = useState(() => readIntake()?.pensumAfter ?? 60);
   const [scope, setScope] = useState<PlanningScope>(() => readPlanningScope());
   const [title] = useState(() => getPersona(readPersonaId()).topic);
+  const mode = modeFromParam(params.get("mode"));
 
   function changeScope(next: PlanningScope) {
     setScope(next);
@@ -58,6 +67,7 @@ export default function ComparePage() {
       </p>
       <ScenarioCompare
         initialPensum={pensum}
+        mode={mode}
         onTalk={() => router.push("/me/book")}
         onDone={() => router.push("/")}
       />
