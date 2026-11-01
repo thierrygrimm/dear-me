@@ -92,7 +92,6 @@ type ListProps = {
   docs: VaultDoc[];
   onOpen: (id: string) => void;
   onDocsChange: (docs: VaultDoc[]) => void;
-  className?: string;
 };
 
 /** A · Filterable document list with Add FAB and sheet. */
@@ -100,7 +99,6 @@ export function DocumentVaultList({
   docs,
   onOpen,
   onDocsChange,
-  className,
 }: ListProps) {
   const toast = useToast();
   const [filter, setFilter] = useState<DocType | "all">("all");
@@ -166,7 +164,7 @@ export function DocumentVaultList({
   }
 
   return (
-    <div className={cn("dm-vault", className)}>
+    <>
       <header className="dm-appbar" style={{ margin: "0 -4px" }}>
         <span style={{ width: 36 }} />
         <b style={{ font: "600 16px/20px var(--font-text)" }}>
@@ -228,6 +226,7 @@ export function DocumentVaultList({
         {copy.vault.remindersNote}
       </p>
 
+      {/* Phone: fixed FAB. Laptop (.pg.docs): CSS lifts this into the header. */}
       <button
         type="button"
         className="dm-fab dm-fab--app"
@@ -274,7 +273,7 @@ export function DocumentVaultList({
           </Button>
         </div>
       </BottomSheet>
-    </div>
+    </>
   );
 }
 
@@ -437,7 +436,6 @@ export function DocumentVault({ className }: { className?: string }) {
       docs={docs}
       onOpen={setSelectedId}
       onDocsChange={setDocs}
-      className={className}
     />
   );
 }

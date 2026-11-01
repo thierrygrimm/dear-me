@@ -8,8 +8,11 @@ import {
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+/** Full-width shells — not the legacy 360 `.dm-phone` frame. */
 const HOST_SELECTOR =
-  ".dm-app-shell, .dm-signup-shell, .dm-cert-shell, .dm-cert-pane, .dm-phone, .dm-app-full";
+  ".dm-app-shell, .dm-app, .dm-signup-shell, .dm-cert-shell, .dm-cert-pane, .dm-app-full";
+
+const DROPDOWN_MQ = "(min-width: 900px)";
 
 type Props = {
   open: boolean;
@@ -20,12 +23,13 @@ type Props = {
 
 /**
  * DS Home · `.dm-psheet` — "Try another life".
- * Opened from the top-right `.dm-pair`. Bottom sheet on phone, dropdown on wide.
+ * Bottom sheet on phone; dropdown near `.dm-pair` on ≥900px.
  */
 export function LifeSheet({ open, current, onClose, onSelect }: Props) {
   const titleId = useId();
   const anchorRef = useRef<HTMLSpanElement>(null);
   const panRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const [host, setHost] = useState<Element | null>(null);
   const [mounted, setMounted] = useState(false);
   const [present, setPresent] = useState(false);
@@ -39,8 +43,48 @@ export function LifeSheet({ open, current, onClose, onSelect }: Props) {
     if (!open) return;
     const el = anchorRef.current;
     if (!el) return;
-    setHost(el.closest(HOST_SELECTOR));
+    const found = el.closest(HOST_SELECTOR);
+    setHost(found);
+    triggerRef.current =
+      (el.parentElement?.querySelector(
+        'button.dm-pair[data-ps], button.dm-pair',
+      ) as HTMLElement | null) ??
+      (document.querySelector(
+        'button.dm-pair[data-ps="1"]',
+      ) as HTMLElement | null);
   }, [open]);
+
+  /** Pin dropdown under the pair trigger on laptop. */
+  useLayoutEffect(() => {
+    const pan = panRef.current;
+    if (!pan || !present) return;
+
+    const place = () => {
+      if (!window.matchMedia(DROPDOWN_MQ).matches) {
+        pan.style.top = "";
+        pan.style.right = "";
+        pan.style.left = "";
+        return;
+      }
+      const trigger = triggerRef.current;
+      const root = (host as HTMLElement | null) ?? document.body;
+      if (!trigger) return;
+      const tr = trigger.getBoundingClientRect();
+      const hr = root.getBoundingClientRect();
+      pan.style.top = `${Math.round(tr.bottom - hr.top + 8)}px`;
+      pan.style.right = `${Math.round(hr.right - tr.right)}px`;
+      pan.style.left = "auto";
+    };
+
+    place();
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("resize", place);
+      pan.style.top = "";
+      pan.style.right = "";
+      pan.style.left = "";
+    };
+  }, [present, visible, host]);
 
   useEffect(() => {
     if (open) {
@@ -66,8 +110,10 @@ export function LifeSheet({ open, current, onClose, onSelect }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const portalTarget = host ?? (mounted ? document.body : null);
+
   const sheet =
-    present && host ? (
+    present && portalTarget ? (
       <div className={`dm-psheet${visible ? " open" : ""}`}>
         <div className="scr" onClick={onClose} aria-hidden />
         <div
@@ -120,7 +166,9 @@ export function LifeSheet({ open, current, onClose, onSelect }: Props) {
   return (
     <>
       <span ref={anchorRef} hidden aria-hidden />
-      {mounted && host && sheet ? createPortal(sheet, host) : null}
+      {mounted && sheet && portalTarget
+        ? createPortal(sheet, portalTarget)
+        : null}
     </>
   );
 }

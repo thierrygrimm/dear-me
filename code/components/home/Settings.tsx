@@ -1,11 +1,12 @@
 "use client";
 
-import {
-  BottomSheet,
-  SheetOption,
-} from "@/components/feedback/BottomSheet";
+import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { useToast } from "@/components/feedback/Toast";
-import { LANGUAGES } from "@/components/home/LanguageFlags";
+import {
+  flagCodeFor,
+  LangFlag,
+  LANGUAGES,
+} from "@/components/home/LanguageFlags";
 import { cn } from "@/lib/cn";
 import { getPersona, readPersonaId, type Persona } from "@/lib/personas";
 import {
@@ -200,7 +201,7 @@ export function SettingsYou() {
             <path d="M14 3v4h4" />
           </Icon>
         }
-        onClick={() => router.push("/me/documents")}
+        onClick={() => router.push("/me/docs")}
       />
       <Li
         title="Connected"
@@ -286,7 +287,12 @@ export function SettingsYou() {
       />
       <Li
         title="Language"
-        value={language}
+        value={
+          <span className="dm-flagv">
+            <LangFlag code={flagCodeFor(language)} />
+            {language}
+          </span>
+        }
         icon={
           <Icon>
             <circle cx="12" cy="12" r="9" />
@@ -342,7 +348,6 @@ export function SettingsYou() {
     </div>
 
       <BottomSheet
-        portal="body"
         open={sheet === "rem"}
         onClose={() => setSheet(null)}
         title="Reminders"
@@ -402,7 +407,6 @@ export function SettingsYou() {
         <button
           type="button"
           className="dm-btn dm-btn--primary dm-btn--block"
-          style={{ marginTop: 16 }}
           onClick={() => {
             markReminders(draftReminders);
             setReminders(draftReminders);
@@ -420,7 +424,6 @@ export function SettingsYou() {
       </BottomSheet>
 
       <BottomSheet
-        portal="body"
         open={sheet === "theme"}
         onClose={() => setSheet(null)}
         title="Appearance"
@@ -452,7 +455,6 @@ export function SettingsYou() {
         <button
           type="button"
           className="dm-btn dm-btn--primary dm-btn--block"
-          style={{ marginTop: 16 }}
           onClick={() => {
             markAppearance(draftAppearance);
             setAppearance(draftAppearance);
@@ -470,7 +472,6 @@ export function SettingsYou() {
       </BottomSheet>
 
       <BottomSheet
-        portal="body"
         open={sheet === "size"}
         onClose={() => setSheet(null)}
         title="Text size"
@@ -502,7 +503,6 @@ export function SettingsYou() {
         <button
           type="button"
           className="dm-btn dm-btn--primary dm-btn--block"
-          style={{ marginTop: 16 }}
           onClick={() => {
             markTextSize(draftSize);
             setTextSize(draftSize);
@@ -515,21 +515,32 @@ export function SettingsYou() {
       </BottomSheet>
 
       <BottomSheet
-        portal="body"
         open={sheet === "lang"}
         onClose={() => setSheet(null)}
         title="Language"
-        description="The app and your answers. Your documents stay as they are."
       >
-        <div className="dm-stack" style={{ gap: 0 }} role="radiogroup">
+        <div
+          className="dm-stack"
+          style={{ gap: 0 }}
+          role="radiogroup"
+          aria-label="Language"
+        >
           {LANGUAGES.map((lang) => (
-            <SheetOption
+            <button
               key={lang.id}
-              label={lang.id}
-              detail={lang.id === "English" ? undefined : lang.label}
-              checked={draftLanguage === lang.id}
-              onSelect={() => setDraftLanguage(lang.id)}
-            />
+              type="button"
+              className="dm-opt dm-langrow"
+              role="radio"
+              aria-checked={draftLanguage === lang.id}
+              onClick={() => setDraftLanguage(lang.id)}
+            >
+              <LangFlag code={lang.code} />
+              <span>
+                {lang.id}
+                {lang.id !== "English" ? <small>{lang.label}</small> : null}
+              </span>
+              <i aria-hidden />
+            </button>
           ))}
         </div>
         <button
