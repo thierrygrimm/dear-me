@@ -1948,9 +1948,13 @@ button.dm-covr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-
 .dm-stage>*{flex:1;width:100%;min-height:100dvh}
 .dm-app-full{position:fixed;inset:0;z-index:20;background:var(--surface);display:flex;flex-direction:column;max-width:none;margin:0;width:100%;box-sizing:border-box;border-radius:0}
 .dm-signup-shell,.dm-cert-shell{max-width:none;width:100%;margin:0;border-radius:0;box-shadow:none;height:100dvh;min-height:100dvh}
-/* Phone padding for signup split + onboarding (art / top bar appear from 900px) */
+/* Phone: full-height auth column so terms (margin:auto 0 0) pin to the bottom */
+.dm-app-shell.signapp,
+.dm-app.signapp{
+  height:100dvh;max-height:100dvh;min-height:100dvh;
+}
 .dm-app.signapp .pg.auth{
-  display:flex;flex-direction:column;gap:14px;flex:1;width:100%;min-height:100%;
+  display:flex;flex-direction:column;gap:14px;flex:1;width:100%;min-height:0;height:100%;
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   box-sizing:border-box
 }
@@ -2036,7 +2040,8 @@ html{background:var(--surface)}
 
 /* ---------- Responsive shell (container queries on .dm-vp; phones unchanged) ---------- */
 .dm-vp{container:vp/inline-size;height:100%}
-.dm-app{width:100%!important;min-height:0!important;height:100%;border-radius:0;box-shadow:none;position:relative}
+/* Preview phones only — do not collapse the real app shell's 100dvh height */
+.dm-vp .dm-app{width:100%!important;min-height:0!important;height:100%;border-radius:0;box-shadow:none;position:relative}
 .dm-app .dm-side,.dm-app .onb-top,.dm-app .pane-detail{display:none}
 .dm-app .onb-col,.dm-app .pane-list{display:contents}
 .dm-app.chat>.dm-tabbar{display:none}
@@ -2340,9 +2345,12 @@ html{background:var(--surface)}
  .auth-sq svg{width:100%!important;height:100%!important;fill:currentColor}
  .auth-sq.jump .dm-sq,
  .auth-sq.jump svg{animation:dmJump .7s var(--dm-ease) 1!important}
+ /* DS: content-hugging column, vertically centred in the split */
+ .dm-app.signapp .pg.auth,
  .dm-app .pg.auth{
-   grid-column:2;grid-row:1;align-self:stretch;justify-self:center;
-   width:100%;max-width:420px;min-height:0;height:100%;
+   grid-column:2;grid-row:1;align-self:center;justify-self:center;
+   justify-content:center;flex:none;height:auto;
+   width:100%;max-width:420px;min-height:0;max-height:100%;
    display:flex;flex-direction:column;gap:clamp(8px,1.4vh,14px);
    padding:clamp(20px,4vh,48px) clamp(20px,3vw,40px);
    overflow:auto;box-sizing:border-box;
