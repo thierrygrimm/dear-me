@@ -1,14 +1,23 @@
 "use client";
 
 import { Squirrel } from "@/components/brand/Squirrel";
+import { AhvPart1Art } from "@/components/learn/lp/AhvPart1Art";
+import { AhvPart2Art } from "@/components/learn/lp/AhvPart2Art";
+import { ThreePillarsArt } from "@/components/learn/lp/ThreePillarsArt";
 import { Button } from "@/components/ui/Button";
 import {
   LESSON_CONTENT,
   type LessonId,
+  type LessonStep,
   markLessonDone,
 } from "@/lib/lessons";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 type Props = {
   lessonId: LessonId;
@@ -37,6 +46,14 @@ const GROW = [
   { h: "96%", int: "33%", delay: "0.73s" },
 ];
 
+const LP_ART: Partial<
+  Record<LessonId, (props: { step: number }) => ReactNode>
+> = {
+  "three-pillars": ThreePillarsArt,
+  "ahv-part-1": AhvPart1Art,
+  "ahv-part-2": AhvPart2Art,
+};
+
 export function LessonPlayer({
   lessonId,
   doneCount,
@@ -49,11 +66,22 @@ export function LessonPlayer({
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const [insuredWidth, setInsuredWidth] = useState("70%");
-  const [quizPicked, setQuizPicked] = useState<null | boolean>(null);
-  const [feedback, setFeedback] = useState(lesson.steps[lesson.steps.length - 1]?.body ?? "");
+  const [quizPicked, setQuizPicked] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    setStep(0);
+    setFinished(false);
+    setQuizPicked(null);
+    setFeedback("");
+    setInsuredWidth("70%");
+  }, [lessonId]);
 
   const current = lesson.steps[step];
   const total = lesson.steps.length;
+  const isQuiz =
+    current?.kind === "quiz" || current?.kind === "lq";
+  const LpArt = LP_ART[lessonId];
 
   useEffect(() => {
     if (current?.kind !== "bars") return;
@@ -65,11 +93,25 @@ export function LessonPlayer({
   function advance() {
     if (step < total - 1) {
       setStep((s) => s + 1);
+      setQuizPicked(null);
+      setFeedback("");
       return;
     }
     markLessonDone(lessonId);
     onComplete(lessonId);
     setFinished(true);
+  }
+
+  function pickQuiz(index: number, stepDef: LessonStep) {
+    if (quizPicked !== null) return;
+    setQuizPicked(index);
+    const correct = stepDef.correctIndex ?? 0;
+    const ok = index === correct;
+    const okText =
+      stepDef.okFeedback ?? lesson.okFeedback ?? "Right.";
+    const noText =
+      stepDef.noFeedback ?? lesson.noFeedback ?? "Not quite.";
+    setFeedback(ok ? okText : noText);
   }
 
   if (finished) {
@@ -116,9 +158,18 @@ export function LessonPlayer({
     );
   }
 
+  const showLpArt =
+    (current.kind === "lp" || current.kind === "lq") && LpArt;
+
   return (
     <div className="dm-app-full">
-      <div className="dm-lesson" style={{ flex: 1, minHeight: 0 }}>
+      <div
+        className="dm-lesson"
+        style={{ flex: 1, minHeight: 0 }}
+        data-gen={lesson.dataGen}
+        data-ok={lesson.okFeedback}
+        data-no={lesson.noFeedback}
+      >
         <div className="dm-lesson__top">
           <div className="dm-lesson__bars" aria-hidden>
             {lesson.steps.map((_, i) => (
@@ -132,8 +183,15 @@ export function LessonPlayer({
           </button>
         </div>
 
-        <div className="dm-step on" style={{ flexDirection: "column", height: "100%" }}>
-          <div className="dm-lesson__art" style={{ background: current.artBg }}>
+        <div
+          className="dm-step on"
+          style={{ flexDirection: "column", height: "100%" }}
+        >
+          <div
+            className="dm-lesson__art"
+            style={{ background: current.artBg }}
+          >
+            {showLpArt ? <LpArt step={step} /> : null}
             {current.kind === "stacks" ? <StacksArt /> : null}
             {current.kind === "bars" ? (
               <BarsArt insuredWidth={insuredWidth} />
@@ -141,15 +199,20 @@ export function LessonPlayer({
             {current.kind === "grow" ? <GrowArt /> : null}
             {current.kind === "quiz" ? (
               <QuizArt
+                question={
+                  current.question ??
+                  "Quick check: which source shrinks most when you go part-time?"
+                }
+                options={
+                  current.options ?? [
+                    "The state (AHV)",
+                    "Your employer's fund",
+                    "Your own 3a",
+                  ]
+                }
+                correctIndex={current.correctIndex ?? 1}
                 answered={quizPicked !== null}
-                onPick={(ok) => {
-                  setQuizPicked(ok);
-                  setFeedback(
-                    ok
-                      ? "Right. The fixed deduction makes the fund shrink fastest."
-                      : "Close. It's the employer's fund, because of the fixed deduction.",
-                  );
-                }}
+                onPick={(index) => pickQuiz(index, current)}
               />
             ) : null}
             {current.kind === "certs" ? <CertsArt /> : null}
@@ -162,16 +225,40 @@ export function LessonPlayer({
             </small>
             <h4>{current.headline}</h4>
             <p className="qf">
-              {current.kind === "quiz" && quizPicked !== null
-                ? feedback
-                : current.body}
+              {isQuiz && quizPicked !== null ? feedback : current.body}
             </p>
+            {current.kind === "lq" && current.options ? (
+              <div className="lq">
+                {current.options.map((label, i) => {
+                  const correct = current.correctIndex ?? 0;
+                  const answered = quizPicked !== null;
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      data-r={i === correct ? "1" : "0"}
+                      className={
+                        answered
+                          ? i === correct
+                            ? "right"
+                            : "wrong"
+                          : undefined
+                      }
+                      disabled={answered}
+                      onClick={() => pickQuiz(i, current)}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
             <Button
               variant="primary"
               block
               style={{ marginTop: "auto" }}
               onClick={advance}
-              disabled={current.kind === "quiz" && quizPicked === null}
+              disabled={isQuiz && quizPicked === null}
             >
               {current.cta}
             </Button>
@@ -301,18 +388,18 @@ function GrowArt() {
 }
 
 function QuizArt({
+  question,
+  options,
+  correctIndex,
   answered,
   onPick,
 }: {
+  question: string;
+  options: string[];
+  correctIndex: number;
   answered: boolean;
-  onPick: (ok: boolean) => void;
+  onPick: (index: number) => void;
 }) {
-  const options = [
-    { label: "The state (AHV)", ok: false },
-    { label: "Your employer's fund", ok: true },
-    { label: "Your own 3a", ok: false },
-  ];
-
   return (
     <div
       className="dm-quiz"
@@ -330,17 +417,24 @@ function QuizArt({
           font: "700 20px/24px var(--font-display)",
         }}
       >
-        Quick check: which source shrinks most when you go part-time?
+        {question}
       </p>
-      {options.map((o) => (
+      {options.map((label, i) => (
         <button
-          key={o.label}
+          key={label}
           type="button"
-          className={answered ? (o.ok ? "right" : "wrong") : undefined}
+          data-r={i === correctIndex ? "1" : "0"}
+          className={
+            answered
+              ? i === correctIndex
+                ? "right"
+                : "wrong"
+              : undefined
+          }
           disabled={answered}
-          onClick={() => onPick(o.ok)}
+          onClick={() => onPick(i)}
         >
-          {o.label}
+          {label}
         </button>
       ))}
     </div>
