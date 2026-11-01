@@ -46,11 +46,8 @@ export function AnswerWidget({
         <span className="dm-label">{label}</span>
         {cue ? <span className="dm-small dm-muted">{cue}</span> : null}
       </div>
-      <div
-        className="dm-row"
-        style={{ justifyContent: "space-between", alignItems: "flex-end" }}
-      >
-        <div>
+      <div className="dm-widget__body">
+        <div className="dm-widget__copy">
           <p
             style={{
               margin: 0,
@@ -62,7 +59,7 @@ export function AnswerWidget({
           </p>
           {detail ? <span className="dm-small">{detail}</span> : null}
         </div>
-        <div className="dm-mini-bars" style={{ width: 90 }} aria-hidden>
+        <div className="dm-mini-bars" aria-hidden>
           {bars.map((b, i) => (
             <i
               key={i}
