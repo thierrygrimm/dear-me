@@ -10,6 +10,7 @@ import {
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
+import { needsNumericIntake } from "@/lib/lifeMoments";
 import {
   isOnboarded,
   isSignedIn,
@@ -119,13 +120,23 @@ export default function SignUpPage() {
 
   function startPlan() {
     markMoments(moments);
-    if (provider === "pax") {
+    // Child / working-less: numeric IntakeCard (pensum type/speak).
+    if (provider === "pax" && needsNumericIntake(moments)) {
       setStep("intake");
       return;
     }
-    // Outside Pax: bring in a certificate first, then the answer path.
     markOnboarded();
-    router.replace("/certificate");
+    // Other life moments: ask before telling in chat (LifeMoments C1).
+    if (moments.length > 0) {
+      router.replace("/ask");
+      return;
+    }
+    // Outside Pax with no moment: bring in a certificate first.
+    if (provider !== "pax") {
+      router.replace("/certificate");
+      return;
+    }
+    router.replace("/");
   }
 
   function finishIntake() {
