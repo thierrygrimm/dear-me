@@ -47,6 +47,8 @@ export type Persona = {
   letterFrom: string;
   /** Canonical life-moment story for this demo persona (order = primary first). */
   moments: LifeMoment[];
+  /** Earlier-chat seeds for Ask history and the laptop sidebar. */
+  earlierChats: string[];
 };
 
 /** Closest shipped lesson when the preferred id is not in LESSONS yet. */
@@ -96,6 +98,11 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterBody: "Before we decide who stays home.",
     letterFrom: "A letter from the two of you to later",
     moments: ["child", "less"],
+    earlierChats: [
+      "Can I go to 60 %?",
+      "Who should reduce?",
+      "Is Marco covered?",
+    ],
   },
   noah: {
     id: "noah",
@@ -128,6 +135,11 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterBody: "I started early. You're welcome.",
     letterFrom: "A letter to your future self",
     moments: ["firstjob"],
+    earlierChats: [
+      "Do I need a 3a at 24?",
+      "What does my pension fund do?",
+      "What if I can't work?",
+    ],
   },
   sandra: {
     id: "sandra",
@@ -159,6 +171,11 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterBody: "I'm my own boss now. That includes your pension.",
     letterFrom: "A letter to your future self",
     moments: ["selfemployed"],
+    earlierChats: [
+      "What replaces the pension fund?",
+      "Can I still save in 3a?",
+      "What if I couldn't work?",
+    ],
   },
   ruth: {
     id: "ruth",
@@ -196,6 +213,11 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterBody: "The money's here. Now let's make it last.",
     letterFrom: "A letter from the two of you to later",
     moments: ["retire"],
+    earlierChats: [
+      "How long will 380'000 last?",
+      "Pension or lump sum?",
+      "Can I still pay into 3a?",
+    ],
   },
 };
 

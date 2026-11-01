@@ -187,6 +187,15 @@ export function hasCertificate(): boolean {
   return sessionStorage.getItem(CERT_KEY) === "1";
 }
 
+/**
+ * First Home after signup: topic + net + lesson (+ bring certificate),
+ * before appointment, letter, and Wrapped join the feed.
+ */
+export function isHomeDay1(): boolean {
+  if (typeof window === "undefined") return false;
+  return !hasCertificate() && readAskedMoments().length === 0;
+}
+
 export function markCertificate(values: CertValues = sampleCert): void {
   sessionStorage.setItem(CERT_KEY, "1");
   sessionStorage.setItem(CERT_VALUES_KEY, JSON.stringify(values));
