@@ -15,7 +15,7 @@ import {
   readName,
 } from "@/lib/session";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function goAsk(router: ReturnType<typeof useRouter>, research?: string) {
   const seed = seedForAsk(readMoments(), readAskedMoments(), research);
@@ -31,8 +31,19 @@ function goAsk(router: ReturnType<typeof useRouter>, research?: string) {
 
 export function HomeScreen() {
   const router = useRouter();
-  const [hasCert] = useState(() => hasCertificate());
-  const [name] = useState(() => readName());
+  const [ready, setReady] = useState(false);
+  const [hasCert, setHasCert] = useState(false);
+  const [name, setName] = useState("there");
+
+  useEffect(() => {
+    setHasCert(hasCertificate());
+    setName(readName());
+    setReady(true);
+  }, []);
+
+  if (!ready) {
+    return <div className="dm-morn" aria-hidden />;
+  }
 
   if (!hasCert) {
     return (
