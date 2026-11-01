@@ -12,17 +12,23 @@ import {
   Home,
   Mic,
   User,
+  type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /** Match phone tab order: Home → Plan → Ask → Learn → Me. */
-const nav = [
-  { href: "/", id: "home", label: copy.tabs.home, Icon: Home },
-  { href: "/plan", id: "plan", label: copy.tabs.plan, Icon: ClipboardList },
-  { href: "/ask", id: "ask", label: copy.tabs.ask, Icon: Mic, ask: true },
-  { href: "/learn", id: "learn", label: copy.tabs.learn, Icon: BookOpen },
-  { href: "/me", id: "me", label: copy.tabs.me, Icon: User },
-] as const;
+const nav: {
+  href: string;
+  id: keyof typeof copy.tabs;
+  Icon: LucideIcon;
+  ask?: boolean;
+}[] = [
+  { href: "/", id: "home", Icon: Home },
+  { href: "/plan", id: "plan", Icon: ClipboardList },
+  { href: "/ask", id: "ask", Icon: Mic, ask: true },
+  { href: "/learn", id: "learn", Icon: BookOpen },
+  { href: "/me", id: "me", Icon: User },
+];
 
 type Props = {
   className?: string;
@@ -49,8 +55,8 @@ export function Sidebar({ className }: Props) {
       </Link>
 
       <nav aria-label="Main">
-        {nav.map(({ href, id, label, Icon, ...rest }) => {
-          const ask = "ask" in rest && rest.ask;
+        {nav.map(({ href, id, Icon, ask }) => {
+          const label = copy.tabs[id];
           const selected =
             href === "/"
               ? pathname === "/"
@@ -70,7 +76,7 @@ export function Sidebar({ className }: Props) {
       </nav>
 
       <div className="rec">
-        <small>Earlier chats</small>
+        <small>{copy.chat.history}</small>
         {persona.earlierChats.map((q) => (
           <Link
             key={q}

@@ -10,23 +10,29 @@ import {
   Home,
   Mic,
   User,
+  type LucideIcon,
 } from "lucide-react";
 
-const tabs = [
-  { href: "/", id: "home", label: copy.tabs.home, Icon: Home },
-  { href: "/plan", id: "plan", label: copy.tabs.plan, Icon: ClipboardList },
-  { href: "/ask", id: "ask", label: copy.tabs.ask, Icon: Mic, ask: true },
-  { href: "/learn", id: "learn", label: copy.tabs.learn, Icon: BookOpen },
-  { href: "/me", id: "me", label: copy.tabs.me, Icon: User },
-] as const;
+const tabs: {
+  href: string;
+  id: keyof typeof copy.tabs;
+  Icon: LucideIcon;
+  ask?: boolean;
+}[] = [
+  { href: "/", id: "home", Icon: Home },
+  { href: "/plan", id: "plan", Icon: ClipboardList },
+  { href: "/ask", id: "ask", Icon: Mic, ask: true },
+  { href: "/learn", id: "learn", Icon: BookOpen },
+  { href: "/me", id: "me", Icon: User },
+];
 
 export function Navigation({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
     <nav className={cn("dm-tabbar dm-app-tabbar", className)} aria-label="Main">
-      {tabs.map(({ href, id, label, Icon, ...rest }) => {
-        const ask = "ask" in rest && rest.ask;
+      {tabs.map(({ href, id, Icon, ask }) => {
+        const label = copy.tabs[id];
         const selected =
           href === "/"
             ? pathname === "/"
@@ -58,7 +64,7 @@ export function Navigation({ className }: { className?: string }) {
                   padding: 0,
                   margin: -1,
                   overflow: "hidden",
-                  clip: "rect(0,0,0,0)",
+                  clip: "rect(0, 0, 0, 0)",
                   whiteSpace: "nowrap",
                   border: 0,
                 }}
