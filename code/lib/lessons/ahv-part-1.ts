@@ -8,14 +8,13 @@ export const ahvPart1Meta = {
 };
 
 const quizOptions = [
-  "Gaps don't matter",
-  "About 2.3 % less per year",
-  "Pay them any time",
+  "Nothing",
+  "About 4.5 % less, for life",
+  "I can pay them any time",
 ] as const;
 
 const quizOk = "Right. Each missing year is 1/44, for life.";
-const quizNo =
-  "Not quite. Each missing year cuts the pension by about 2.3 %, for life.";
+const quizNo = "Not quite. Two gaps mean about 4.5 % less, for life.";
 
 export const ahvPart1Content = {
   id: "ahv-part-1" as const,
@@ -27,28 +26,35 @@ export const ahvPart1Content = {
       kind: "lp" as const,
       artBg: "var(--neonweste)",
       headline: "Today's workers pay today's pensions.",
-      body: "The AHV is no savings pot with your name on it. What everyone pays now goes straight to today's pensioners; in return you earn a right to a pension, set by law.",
+      body: "No pot with your name on it. Your right to a pension is set by law.",
       cta: "Next",
     },
     {
       kind: "lp" as const,
       artBg: "var(--rosa-brille)",
-      headline: "Everyone who lives or works here pays.",
-      body: "Employees from the January after their 17th birthday, everyone else from 20. Couples where one partner doesn't work: the other's contributions can cover both.",
+      headline: "Everyone who works pays in.",
+      body: "For AHV, IV and EO. Your employer pays half.",
       cta: "Next",
     },
     {
       kind: "lp" as const,
       artBg: "var(--briefpapier)",
-      headline: "Between CHF 1'260 and 2'520 a month.",
-      body: "That's a full single pension in 2026. Where you land depends on your average income over the years, plus credits for raising children or caring for family.",
+      headline: "A full pension: CHF 1'260 to 2'520.",
+      body: "A month, single, in 2026. Where you land depends on your average income.",
+      cta: "Next",
+    },
+    {
+      kind: "lp" as const,
+      artBg: "var(--rosa-brille)",
+      headline: "Every missing year costs 1/44.",
+      body: "That's about 2.3 % less, for life. You can fill a gap within five years.",
       cta: "Next",
     },
     {
       kind: "lq" as const,
       artBg: "var(--rosa-brille)",
-      headline: "Every missing year costs 1/44.",
-      body: "A full pension needs 44 contribution years. Each gap cuts it by about 2.3 %, for life. Missed contributions can only be paid within five years.",
+      headline: "Two missing years. What happens?",
+      body: "",
       cta: "Finish",
       options: [...quizOptions],
       correctIndex: 1,

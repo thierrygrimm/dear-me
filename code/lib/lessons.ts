@@ -186,14 +186,14 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         kind: "bars",
         artBg: "var(--neonweste)",
         headline: "Part-time hits the fund harder.",
-        body: "Your fund first takes off a fixed amount. Work 60 % and your salary drops by 40 %, but what is insured drops by more than half.",
+        body: "Your fund first takes off a fixed amount. Work 60 % and what is insured drops by more than half.",
         cta: "Next",
       },
       {
         kind: "stacks",
         artBg: "var(--rosa-brille)",
         headline: "The fund is the one that moves.",
-        body: "AHV stays roughly the same. Your own 3a stays yours. The employer's fund shrinks fastest when hours drop.",
+        body: "AHV stays put. Your 3a stays yours. The employer's fund shrinks fastest.",
         cta: "Next",
       },
       {
@@ -202,7 +202,8 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         headline: "Quick check",
         body: "One tap. No grades, just a nudge.",
         cta: "Finish",
-        question: "Quick check: when hours drop, which shrinks fastest?",
+        question:
+          "Quick check: which source shrinks most when you go part-time?",
         options: [
           "The state (AHV)",
           "Your employer's fund",
@@ -227,14 +228,14 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         kind: "certs",
         artBg: "var(--rosa-brille)",
         headline: "Five numbers that matter.",
-        body: "Insured salary, projected pension, disability cover, survivors' cover, and what you've saved so far. Everything else is detail.",
+        body: "Insured salary, projected pension, disability, survivors, and saved so far.",
         cta: "Next",
       },
       {
         kind: "grow",
         artBg: "var(--briefpapier)",
         headline: "The projection is a path, not a promise.",
-        body: "Your certificate shows where you land if nothing changes. Change your hours or pay, and that line moves with you.",
+        body: "Change your hours or pay, and that line moves with you.",
         cta: "Next",
       },
       {
@@ -265,14 +266,14 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         kind: "tax",
         artBg: "var(--brombeerkompott)",
         headline: "3a lowers this year's tax.",
-        body: "What you pay in comes off your taxable income. The room left this year is the amount that still helps.",
+        body: "What you pay in comes off your taxable income.",
         cta: "Next",
       },
       {
         kind: "grow",
         artBg: "var(--briefpapier)",
         headline: "And it keeps working later.",
-        body: "The same francs sit and grow until retirement. Tax relief now, income later — one pot, two jobs.",
+        body: "Tax relief now, income later. One pot, two jobs.",
         cta: "Next",
       },
       {
