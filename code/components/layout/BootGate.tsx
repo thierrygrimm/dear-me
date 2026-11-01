@@ -1,6 +1,7 @@
 "use client";
 
 import { Splash } from "@/components/brand/Loading";
+import { applyAppearance } from "@/lib/settingsPrefs";
 import { isOnboarded, isSignedIn } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -15,6 +16,7 @@ export function BootGate({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    applyAppearance();
     if (!isSignedIn() || !isOnboarded()) {
       router.replace("/signup");
       return;
