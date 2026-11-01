@@ -235,7 +235,22 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         artBg: "var(--briefpapier)",
         headline: "The projection is a path, not a promise.",
         body: "Your certificate shows where you land if nothing changes. Change your hours or pay, and that line moves with you.",
+        cta: "Next",
+      },
+      {
+        kind: "quiz",
+        artBg: "var(--espressosatz)",
+        headline: "Quick check",
+        body: "One tap. No grades, just a nudge.",
         cta: "Finish",
+        question:
+          "Quick check: how many numbers on your certificate matter most?",
+        options: ["Two", "Five", "All of them"],
+        correctIndex: 1,
+        okFeedback:
+          "Right. Five numbers tell the story; the rest is detail.",
+        noFeedback:
+          "Almost. Focus on five: insured salary, projected pension, disability, survivors, and saved so far.",
       },
     ],
     doneTitle: "You can read your certificate.",
@@ -258,7 +273,26 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         artBg: "var(--briefpapier)",
         headline: "And it keeps working later.",
         body: "The same francs sit and grow until retirement. Tax relief now, income later — one pot, two jobs.",
+        cta: "Next",
+      },
+      {
+        kind: "quiz",
+        artBg: "var(--espressosatz)",
+        headline: "Quick check",
+        body: "One tap. No grades, just a nudge.",
         cta: "Finish",
+        question:
+          "Quick check: what does the tax room on 3a mean this year?",
+        options: [
+          "Interest you'll earn later",
+          "How much you can still pay in for a tax cut",
+          "Your AHV contribution",
+        ],
+        correctIndex: 1,
+        okFeedback:
+          "Right. What's left in the room still lowers this year's taxable income.",
+        noFeedback:
+          "Close. Tax room is how much you can still put into 3a this year for a tax cut.",
       },
     ],
     doneTitle: "You know what 3a is for.",
