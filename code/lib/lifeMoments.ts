@@ -1,5 +1,7 @@
+import { momentScriptsDe } from "@/lib/i18n/momentScriptsDe";
 import type { LifeMoment } from "@/lib/session";
 import { offerForMoment } from "@/lib/paxProducts";
+import { readLanguage, type AppLanguage } from "@/lib/settingsPrefs";
 
 export type MomentOption = {
   id: string;
@@ -565,7 +567,15 @@ export function primaryMoment(moments: LifeMoment[]): LifeMoment | null {
   return moments[0] ?? null;
 }
 
-export function scriptFor(moment: LifeMoment): MomentScript {
+export function scriptFor(
+  moment: LifeMoment,
+  language: AppLanguage = typeof window === "undefined"
+    ? "English"
+    : readLanguage(),
+): MomentScript {
+  if (language === "Deutsch" && momentScriptsDe[moment]) {
+    return momentScriptsDe[moment]!;
+  }
   return momentScripts[moment];
 }
 
