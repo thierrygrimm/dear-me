@@ -7,20 +7,19 @@ import {
   LangFlag,
   LANGUAGES,
 } from "@/components/home/LanguageFlags";
+import { useLocale } from "@/components/locale/LocaleProvider";
 import { cn } from "@/lib/cn";
 import { getPersona, readPersonaId, type Persona } from "@/lib/personas";
 import {
   applyAppearance,
   languageToast,
   markAppearance,
-  markLanguage,
   markReminders,
   markTextSize,
   readAppearance,
-  readLanguage,
   readReminders,
   readTextSize,
-  remindersLabel,
+  remindersOn,
   textSizeZoom,
   type Appearance,
   type AppLanguage,
@@ -51,31 +50,35 @@ function Chevron() {
   );
 }
 
-function meProfile(p: Persona): { name: string; line: string; initial: string } {
+function meProfile(
+  p: Persona,
+  planningWith: (partner: string) => string,
+  planningAlone: string,
+): { name: string; line: string; initial: string } {
   if (p.id === "lena") {
     return {
       name: "Lena Meier",
-      line: "Planning with Marco · since Oct 2026",
+      line: planningWith("Marco"),
       initial: "L",
     };
   }
   if (p.id === "noah") {
     return {
       name: "Noah",
-      line: "Planning alone · since Oct 2026",
+      line: planningAlone,
       initial: "N",
     };
   }
   if (p.id === "sandra") {
     return {
       name: "Sandra",
-      line: "Planning alone · since Oct 2026",
+      line: planningAlone,
       initial: "S",
     };
   }
   return {
     name: "Ruth",
-    line: "Planning with Peter · since Oct 2026",
+    line: planningWith("Peter"),
     initial: "R",
   };
 }
@@ -125,11 +128,12 @@ function Li({
 export function SettingsYou() {
   const router = useRouter();
   const toast = useToast();
+  const { language, setLanguage, copy } = useLocale();
+  const t = copy.settings;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [persona, setPersona] = useState<Persona>(() => getPersona("lena"));
   const [appearance, setAppearance] = useState<Appearance>("System");
   const [textSize, setTextSize] = useState<TextSize>("Standard");
-  const [language, setLanguage] = useState<AppLanguage>("English");
   const [reminders, setReminders] = useState({
     deadlines: true,
     weekly: false,
@@ -150,14 +154,13 @@ export function SettingsYou() {
     setPersona(getPersona(readPersonaId()));
     const a = readAppearance();
     const s = readTextSize();
-    const l = readLanguage();
     const r = readReminders();
     setAppearance(a);
     setTextSize(s);
-    setLanguage(l);
     setReminders(r);
+    setDraftLanguage(language);
     applyAppearance(a);
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -165,8 +168,20 @@ export function SettingsYou() {
     el.style.setProperty("zoom", textSizeZoom(textSize));
   }, [textSize]);
 
-  const profile = meProfile(persona);
-  const remLabel = remindersLabel(reminders);
+  const profile = meProfile(persona, t.planningWith, t.planningAlone);
+  const remLabel = remindersOn(reminders) ? t.remLabelOn : t.remLabelOff;
+  const appearanceLabel =
+    appearance === "Light"
+      ? t.appearanceLight
+      : appearance === "Dark"
+        ? t.appearanceDark
+        : t.appearanceSystem;
+  const textSizeLabel =
+    textSize === "Smaller"
+      ? t.sizeSmaller
+      : textSize === "Larger"
+        ? t.sizeLarger
+        : t.sizeStandard;
   const showPartner = persona.id === "lena" || persona.id === "ruth";
   const partnerName = persona.id === "ruth" ? "Peter" : "Marco";
 
@@ -181,10 +196,10 @@ export function SettingsYou() {
         </span>
       </div>
 
-      <p className="dm-lgroup">What we use</p>
+      <p className="dm-lgroup">{t.groupUse}</p>
       <Li
-        title="What we know"
-        subtitle="18 facts"
+        title={t.whatWeKnow}
+        subtitle={t.factsCount(18)}
         icon={
           <Icon>
             <path d="M12 3l9 9-9 9-9-9z" />
@@ -193,8 +208,8 @@ export function SettingsYou() {
         onClick={() => router.push("/me/know")}
       />
       <Li
-        title="Documents"
-        subtitle="4 papers"
+        title={t.documents}
+        subtitle={t.papersCount(4)}
         icon={
           <Icon>
             <path d="M6 3h8l4 4v14H6z" />
@@ -204,21 +219,21 @@ export function SettingsYou() {
         onClick={() => router.push("/me/docs")}
       />
       <Li
-        title="Connected"
+        title={t.connected}
         subtitle="myPax"
         icon={
           <Icon>
             <path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1" />
           </Icon>
         }
-        onClick={() => toast.show({ message: "myPax is connected." })}
+        onClick={() => toast.show({ message: t.mypaxConnected })}
       />
 
-      <p className="dm-lgroup">People</p>
+      <p className="dm-lgroup">{t.groupPeople}</p>
       {showPartner ? (
         <Li
           title={partnerName}
-          subtitle="Shares your plans"
+          subtitle={t.sharesPlans}
           icon={
             <Icon>
               <circle cx="9" cy="8" r="3.5" />
@@ -228,14 +243,14 @@ export function SettingsYou() {
           }
           onClick={() =>
             toast.show({
-              message: `${partnerName} sees shared plans, not your salary.`,
+              message: t.partnerSees(partnerName),
             })
           }
         />
       ) : null}
       <Li
-        title="Your advisor"
-        subtitle="Sara Keller, Pax"
+        title={t.yourAdvisor}
+        subtitle={t.advisorMeta}
         icon={
           <Icon>
             <path d="M4 5h16v11H9l-5 4z" />
@@ -244,9 +259,9 @@ export function SettingsYou() {
         onClick={() => router.push("/me/book")}
       />
 
-      <p className="dm-lgroup">App</p>
+      <p className="dm-lgroup">{t.groupApp}</p>
       <Li
-        title="Reminders"
+        title={t.reminders}
         value={remLabel}
         icon={
           <Icon>
@@ -259,8 +274,8 @@ export function SettingsYou() {
         }}
       />
       <Li
-        title="Appearance"
-        value={appearance}
+        title={t.appearance}
+        value={appearanceLabel}
         icon={
           <Icon>
             <circle cx="12" cy="12" r="4" />
@@ -273,8 +288,8 @@ export function SettingsYou() {
         }}
       />
       <Li
-        title="Text size"
-        value={textSize}
+        title={t.textSize}
+        value={textSizeLabel}
         icon={
           <Icon>
             <path d="M5 6h14M12 6v13M8 19h8" />
@@ -286,7 +301,7 @@ export function SettingsYou() {
         }}
       />
       <Li
-        title="Language"
+        title={t.language}
         value={
           <span className="dm-flagv">
             <LangFlag code={flagCodeFor(language)} />
@@ -305,10 +320,10 @@ export function SettingsYou() {
         }}
       />
 
-      <p className="dm-lgroup">Privacy</p>
+      <p className="dm-lgroup">{t.groupPrivacy}</p>
       <Li
-        title="Privacy and data"
-        subtitle="Sharing is off unless you turn it on"
+        title={t.privacy}
+        subtitle={t.privacySub}
         icon={
           <Icon>
             <rect x="5" y="10" width="14" height="10" rx="2" />
@@ -318,21 +333,19 @@ export function SettingsYou() {
         onClick={() => router.push("/me/privacy")}
       />
 
-      <p className="dm-lgroup">More</p>
+      <p className="dm-lgroup">{t.groupMore}</p>
       <Li
-        title="Help"
+        title={t.help}
         icon={
           <Icon>
             <circle cx="12" cy="12" r="9" />
             <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01" />
           </Icon>
         }
-        onClick={() =>
-          toast.show({ message: "For demo help, ask in chat or book Sara." })
-        }
+        onClick={() => toast.show({ message: t.helpToast })}
       />
       <Li
-        title="Log out"
+        title={t.logOut}
         plain
         icon={
           <Icon>
@@ -340,7 +353,7 @@ export function SettingsYou() {
           </Icon>
         }
         onClick={() => {
-          toast.show({ message: "Signed out of the demo." });
+          toast.show({ message: t.logOutToast });
           router.push("/signup");
         }}
       />
@@ -350,7 +363,7 @@ export function SettingsYou() {
       <BottomSheet
         open={sheet === "rem"}
         onClose={() => setSheet(null)}
-        title="Reminders"
+        title={t.reminders}
       >
         <div className="dm-stack" style={{ gap: 0 }}>
           <div className="dm-li">
@@ -360,8 +373,8 @@ export function SettingsYou() {
               </Icon>
             </span>
             <span className="tx">
-              Deadlines and next steps
-              <small>By email and in the chat</small>
+              {t.remDeadlines}
+              <small>{t.remDeadlinesSub}</small>
             </span>
             <span className="rt">
               <button
@@ -369,7 +382,7 @@ export function SettingsYou() {
                 className="dm-switch"
                 role="switch"
                 aria-checked={draftReminders.deadlines}
-                aria-label="Deadlines and next steps"
+                aria-label={t.remDeadlines}
                 onClick={() =>
                   setDraftReminders((r) => ({
                     ...r,
@@ -387,8 +400,8 @@ export function SettingsYou() {
               </Icon>
             </span>
             <span className="tx">
-              Weekly summary
-              <small>Sunday evening</small>
+              {t.remWeekly}
+              <small>{t.remWeeklySub}</small>
             </span>
             <span className="rt">
               <button
@@ -396,7 +409,7 @@ export function SettingsYou() {
                 className="dm-switch"
                 role="switch"
                 aria-checked={draftReminders.weekly}
-                aria-label="Weekly summary"
+                aria-label={t.remWeekly}
                 onClick={() =>
                   setDraftReminders((r) => ({ ...r, weekly: !r.weekly }))
                 }
@@ -412,28 +425,29 @@ export function SettingsYou() {
             setReminders(draftReminders);
             setSheet(null);
             toast.show({
-              message:
-                remindersLabel(draftReminders) === "On"
-                  ? "Reminders on"
-                  : "Reminders off",
+              message: remindersOn(draftReminders) ? t.remOn : t.remOff,
             });
           }}
         >
-          Done
+          {t.done}
         </button>
       </BottomSheet>
 
       <BottomSheet
         open={sheet === "theme"}
         onClose={() => setSheet(null)}
-        title="Appearance"
+        title={t.appearance}
       >
         <div className="dm-stack" style={{ gap: 0 }} role="radiogroup">
           {(
             [
-              { v: "Light" as const },
-              { v: "Dark" as const },
-              { v: "System" as const, sub: "Follows your phone" },
+              { v: "Light" as const, label: t.appearanceLight },
+              { v: "Dark" as const, label: t.appearanceDark },
+              {
+                v: "System" as const,
+                label: t.appearanceSystem,
+                sub: t.appearanceSystemSub,
+              },
             ] as const
           ).map((opt) => (
             <button
@@ -445,7 +459,7 @@ export function SettingsYou() {
               onClick={() => setDraftAppearance(opt.v)}
             >
               <span>
-                {opt.v}
+                {opt.label}
                 {"sub" in opt && opt.sub ? <small>{opt.sub}</small> : null}
               </span>
               <i aria-hidden />
@@ -459,29 +473,39 @@ export function SettingsYou() {
             markAppearance(draftAppearance);
             setAppearance(draftAppearance);
             setSheet(null);
+            const label =
+              draftAppearance === "Light"
+                ? t.appearanceLight
+                : draftAppearance === "Dark"
+                  ? t.appearanceDark
+                  : t.appearanceSystem;
             toast.show({
               message:
                 draftAppearance === "Dark"
-                  ? "Dark mode on"
-                  : `Appearance: ${draftAppearance}`,
+                  ? t.appearanceDarkOn
+                  : t.appearanceToast(label),
             });
           }}
         >
-          Done
+          {t.done}
         </button>
       </BottomSheet>
 
       <BottomSheet
         open={sheet === "size"}
         onClose={() => setSheet(null)}
-        title="Text size"
+        title={t.textSize}
       >
         <div className="dm-stack" style={{ gap: 0 }} role="radiogroup">
           {(
             [
-              { v: "Smaller" as const },
-              { v: "Standard" as const },
-              { v: "Larger" as const, sub: "Easier to read" },
+              { v: "Smaller" as const, label: t.sizeSmaller },
+              { v: "Standard" as const, label: t.sizeStandard },
+              {
+                v: "Larger" as const,
+                label: t.sizeLarger,
+                sub: t.sizeLargerSub,
+              },
             ] as const
           ).map((opt) => (
             <button
@@ -493,7 +517,7 @@ export function SettingsYou() {
               onClick={() => setDraftSize(opt.v)}
             >
               <span>
-                {opt.v}
+                {opt.label}
                 {"sub" in opt && opt.sub ? <small>{opt.sub}</small> : null}
               </span>
               <i aria-hidden />
@@ -507,23 +531,29 @@ export function SettingsYou() {
             markTextSize(draftSize);
             setTextSize(draftSize);
             setSheet(null);
-            toast.show({ message: `Text size: ${draftSize}` });
+            const label =
+              draftSize === "Smaller"
+                ? t.sizeSmaller
+                : draftSize === "Larger"
+                  ? t.sizeLarger
+                  : t.sizeStandard;
+            toast.show({ message: t.sizeToast(label) });
           }}
         >
-          Done
+          {t.done}
         </button>
       </BottomSheet>
 
       <BottomSheet
         open={sheet === "lang"}
         onClose={() => setSheet(null)}
-        title="Language"
+        title={t.language}
       >
         <div
           className="dm-stack"
           style={{ gap: 0 }}
           role="radiogroup"
-          aria-label="Language"
+          aria-label={t.language}
         >
           {LANGUAGES.map((lang) => (
             <button
@@ -547,13 +577,12 @@ export function SettingsYou() {
           type="button"
           className="dm-btn dm-btn--primary dm-btn--block"
           onClick={() => {
-            markLanguage(draftLanguage);
             setLanguage(draftLanguage);
             setSheet(null);
             toast.show({ message: languageToast(draftLanguage) });
           }}
         >
-          Done
+          {t.done}
         </button>
       </BottomSheet>
     </>

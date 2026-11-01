@@ -95,9 +95,17 @@ export function markReminders(next: {
   sessionStorage.setItem(REM_WEEKLY_KEY, next.weekly ? "1" : "0");
 }
 
+export function remindersOn(r: {
+  deadlines: boolean;
+  weekly: boolean;
+}): boolean {
+  return r.deadlines || r.weekly;
+}
+
+/** @deprecated Prefer localized labels via useCopy().settings */
 export function remindersLabel(r: {
   deadlines: boolean;
   weekly: boolean;
 }): "On" | "Off" {
-  return r.deadlines || r.weekly ? "On" : "Off";
+  return remindersOn(r) ? "On" : "Off";
 }
