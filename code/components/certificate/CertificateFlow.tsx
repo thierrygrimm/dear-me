@@ -298,9 +298,13 @@ type Props = {
   /** Kept for callers; estimate is reached from Home, not this footer. */
   onEstimate?: () => void;
   onClose?: () => void;
+  /** Notify the host (FlowShell) when the step changes. */
+  onStepChange?: (step: Step) => void;
 };
 
-export function CertificateFlow({ onDone, onClose }: Props) {
+export type CertificateStep = Step;
+
+export function CertificateFlow({ onDone, onClose, onStepChange }: Props) {
   const toast = useToast();
   const [step, setStep] = useState<Step>("choose");
   const [sheet, setSheet] = useState<SheetId>(null);
@@ -324,6 +328,10 @@ export function CertificateFlow({ onDone, onClose }: Props) {
         ? ["Yes, that"]
         : [];
   const pulseRef = useDemoPulse(pulseHints, [step]);
+
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [step, onStepChange]);
 
   const stories = useMemo(() => storiesFrom(values), [values]);
   const paperLines = useMemo(
