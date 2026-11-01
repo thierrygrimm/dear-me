@@ -168,7 +168,7 @@ export function DocumentVaultList({
   }
 
   return (
-    <>
+    <div className="dm-vault">
       <header className="dm-appbar" style={{ margin: "0 -4px" }}>
         <span style={{ width: 36 }} />
         <b style={{ font: "600 16px/20px var(--font-text)" }}>
@@ -277,7 +277,7 @@ export function DocumentVaultList({
           </Button>
         </div>
       </BottomSheet>
-    </>
+    </div>
   );
 }
 
