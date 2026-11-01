@@ -8,7 +8,7 @@
 
 <p align="center">
   <b>A planner for life's big moments.</b><br>
-  BaselHack 2026 · Pax challenge · Philippe Reichen &amp; Thierry Grimm
+  BaselHack 2026 · Pax challenge · Thierry Grimm &amp; Philippe Reichen
 </p>
 
 <div align='left'>
@@ -29,6 +29,7 @@
         <li><a href="#usage">Usage</a></li>
       </ul>
     </li>
+    <li><a href="#api">API</a></li>
     <li><a href="#repository">Repository</a></li>
     <li><a href="#licence">Licence</a></li>
   </ol>
@@ -59,6 +60,7 @@ No API keys are required to run the prototype locally.
 git clone https://github.com/thierrygrimm/dear-me.git
 cd dear-me/code
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
@@ -88,12 +90,32 @@ Start at `/signup` if you have not been through onboarding yet.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## API
+
+Server routes keep the pension-engine token off the client. Household JSON in, sourced results and traces out.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/simulate/workload` | B1 — pensum steps and pension differences |
+| `POST` | `/api/simulate/coverage` | B2 — illness / accident risk scenarios |
+| `POST` | `/api/simulate/retirement-age` | B3 — income by retirement age |
+| `POST` | `/api/simulate/tax-3a` | B4 — 3a maximum and tax saving |
+| `POST` | `/api/recommendations` | Rule-based suggestions and audit entries |
+| `POST` | `/api/leads` | Create an advisor lead with household brief |
+| `GET` | `/api/leads` · `/api/leads/[id]` | List or read leads |
+| `GET` | `/api/trace/[id]` | Trace record for a number |
+| `GET` | `/api/audit` | Recommendation audit log |
+
+Env: `LOGISMATA_API_TOKEN`, `LOGISMATA_BASE_URL`, `DEMO_CACHE` — see [`code/.env.example`](code/.env.example). Build notes: [`documentation/build-spec.md`](documentation/build-spec.md).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Repository
 
 | Folder | Content |
 | --- | --- |
-| [`code/`](code) | Next.js app |
-| [`documentation/`](documentation) | Challenge material, product notes, commit style |
+| [`code/`](code) | Next.js app and `/api` engine |
+| [`documentation/`](documentation) | Build spec, challenge material, product notes |
 | [`assets/`](assets) | Logos used by this README |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -102,6 +124,6 @@ Start at `/signup` if you have not been through onboarding yet.
 
 Proprietary — all rights reserved. See [`LICENSE`](LICENSE).
 
-Copyright © 2026 Philippe Reichen and Thierry Grimm.
+Copyright © 2026 Thierry Grimm and Philippe Reichen.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
