@@ -1,0 +1,46 @@
+export const ahvPart2Content = {
+  id: "ahv-part-2",
+  dataGen: "ahv2",
+  okFeedback: "Right. Married couples are capped at 150 %.",
+  noFeedback: "Not quite. Together it's 150 % of one maximum pension.",
+  steps: [
+    {
+      kind: "lp",
+      artBg: "var(--briefpapier)",
+      headline: "Married couples: 150 % at most.",
+      body: "Two pensions together are capped at 150 % of one maximum, CHF 3'780 a month. Unmarried couples aren't capped. Incomes from the married years are split half and half.",
+      cta: "Next",
+    },
+    {
+      kind: "lp",
+      artBg: "var(--neonweste)",
+      headline: "A 13th pension, every December.",
+      body: "From December 2026 everyone with an old-age pension gets one more month's pension each year, on top. Not for disability or survivors' pensions.",
+      cta: "Next",
+    },
+    {
+      kind: "lp",
+      artBg: "var(--rosa-brille)",
+      headline: "65 for everyone, flexible from 63 to 70.",
+      body: "Women's reference age reaches 65 step by step until 2028. Draw it earlier for 6.8 % less a year, for life, or later for more, in up to three steps.",
+      cta: "Next",
+    },
+    {
+      kind: "lq",
+      artBg: "var(--neonweste)",
+      headline: "Quick check",
+      body: "Lena and Marco are married and both earned well. What do they get together at most?",
+      cta: "Finish",
+      options: [
+        "Two full pensions",
+        "150 % of one, CHF 3'780",
+        "One pension",
+      ],
+      correctIndex: 1,
+    },
+  ],
+  doneTitle: "You know the AHV at 65.",
+  doneBody: "Next: see what it means for your numbers.",
+  doneCta: "Show my numbers",
+  doneCtaHref: "/compare",
+} as const;

@@ -1,0 +1,42 @@
+export const threePillarsContent = {
+  id: "three-pillars",
+  dataGen: "pillars",
+  okFeedback: "Right. Pillar 2, through your job.",
+  noFeedback: "Not quite. It's pillar 2, your pension fund.",
+  steps: [
+    {
+      kind: "lp",
+      artBg: "var(--rosa-brille)",
+      headline: "Three pillars, three jobs.",
+      body: "The state (AHV, IV) covers basic needs. Your pension fund, through your job, keeps your standard of living. Your own savings (3a, 3b) top it up.",
+      cta: "Next",
+    },
+    {
+      kind: "lp",
+      artBg: "var(--neonweste)",
+      headline: "Together, about 60 % of your last salary.",
+      body: "That is what pillars 1 and 2 aim for when you retire. Below a middle income it's more, above it less. The gap is what pillar 3 is for.",
+      cta: "Next",
+    },
+    {
+      kind: "lp",
+      artBg: "var(--briefpapier)",
+      headline: "Each pillar also protects you.",
+      body: "Not only at 65: if you can't work, the IV and your fund pay a disability pension. If you die, your partner and children get survivors' pensions.",
+      cta: "Next",
+    },
+    {
+      kind: "lq",
+      artBg: "var(--rosa-brille)",
+      headline: "Quick check",
+      body: "Which pillar is meant to keep your standard of living?",
+      cta: "Finish",
+      options: ["The state", "Your pension fund", "Your 3a"],
+      correctIndex: 1,
+    },
+  ],
+  doneTitle: "You know the three pillars.",
+  doneBody: "Next: how the state pension (AHV) works.",
+  doneCta: "Continue",
+  doneCtaHref: "/learn?lesson=ahv-part-1",
+} as const;
