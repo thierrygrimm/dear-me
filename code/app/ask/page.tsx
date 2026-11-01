@@ -9,7 +9,18 @@ import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
-import { isSignedIn } from "@/lib/session";
+import { primaryMoment } from "@/lib/lifeMoments";
+import {
+  momentsForPersona,
+  readPersonaId,
+  type PersonaId,
+} from "@/lib/personas";
+import {
+  isSignedIn,
+  readAskedMoments,
+  readMoments,
+  type LifeMoment,
+} from "@/lib/session";
 import { Clock, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,10 +31,24 @@ const EARLIER = [
   "Is Marco covered?",
 ];
 
+function storyMoments(personaId: PersonaId): LifeMoment[] {
+  const expected = momentsForPersona(personaId);
+  const session = readMoments();
+  if (session.length && session[0] === expected[0]) return session;
+  if (expected.length) return expected;
+  return session;
+}
+
+function askBootKey(personaId: PersonaId, primary: LifeMoment | null): string {
+  return `${personaId}-${primary ?? "none"}`;
+}
+
 export default function AskPage() {
   const router = useRouter();
   const [seed, setSeed] = useState<string | null>(null);
+  const [freeQuestion, setFreeQuestion] = useState(false);
   const [ready, setReady] = useState(false);
+  const [chatKey, setChatKey] = useState("boot");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [netMin, setNetMin] = useState(false);
 
@@ -32,13 +57,40 @@ export default function AskPage() {
       router.replace("/signup");
       return;
     }
+
+    const personaId = readPersonaId();
+    const moments = storyMoments(personaId);
+    const asked = readAskedMoments();
+    const primary = primaryMoment(moments);
+    const needsAsk = Boolean(primary && !asked.includes(primary));
+
     const q = sessionStorage.getItem("dm-ask-q");
-    if (q) {
-      sessionStorage.removeItem("dm-ask-q");
+    const free = sessionStorage.getItem("dm-ask-free") === "1";
+    if (q) sessionStorage.removeItem("dm-ask-q");
+    sessionStorage.removeItem("dm-ask-free");
+
+    // Pending C1 wins over research seeds; free typed AskBar may keep seed.
+    if (q && (!needsAsk || free)) {
       setSeed(q);
+      setFreeQuestion(free);
+    } else {
+      setSeed(null);
+      setFreeQuestion(false);
     }
+
+    setChatKey(askBootKey(personaId, primary));
     setReady(true);
   }, [router]);
+
+  function remountChat(nextSeed: string | null, free = false) {
+    const personaId = readPersonaId();
+    const primary = primaryMoment(storyMoments(personaId));
+    setSeed(nextSeed);
+    setFreeQuestion(free);
+    setChatKey(`${askBootKey(personaId, primary)}-${Date.now()}`);
+    setReady(false);
+    window.setTimeout(() => setReady(true), 0);
+  }
 
   function closeChat() {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -71,9 +123,13 @@ export default function AskPage() {
 
       {ready ? (
         <Chat
+          key={chatKey}
           shell
           initialQuestion={seed}
-          onThreadScroll={(top) => setNetMin((was) => (top > 48 ? true : top < 8 ? false : was))}
+          freeQuestion={freeQuestion}
+          onThreadScroll={(top) =>
+            setNetMin((was) => (top > 48 ? true : top < 8 ? false : was))
+          }
           onOpenAnswer={(question) => {
             const q = (question || "").toLowerCase();
             if (
@@ -108,9 +164,7 @@ export default function AskPage() {
             block
             onClick={() => {
               setHistoryOpen(false);
-              setSeed(q);
-              setReady(false);
-              window.setTimeout(() => setReady(true), 0);
+              remountChat(q, true);
             }}
           >
             {q}
@@ -121,9 +175,7 @@ export default function AskPage() {
           block
           onClick={() => {
             setHistoryOpen(false);
-            setSeed(null);
-            setReady(false);
-            window.setTimeout(() => setReady(true), 0);
+            remountChat(null);
           }}
         >
           Clear chat

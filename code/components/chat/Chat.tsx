@@ -20,6 +20,11 @@ import { copy } from "@/lib/copy";
 import { emphasizeMoney } from "@/lib/emphasizeMoney";
 import { primaryMoment, scriptFor } from "@/lib/lifeMoments";
 import {
+  momentsForPersona,
+  readPersonaId,
+  type PersonaId,
+} from "@/lib/personas";
+import {
   markMomentAsked,
   readAskedMoments,
   readMoments,
@@ -33,6 +38,19 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
+/**
+ * Prefer session moments when they already match the active persona’s
+ * primary story; otherwise fall back to momentsForPersona so Noah never
+ * boots Lena’s child script from a stale dm-moments list.
+ */
+function resolveStoryMoments(personaId: PersonaId): LifeMoment[] {
+  const expected = momentsForPersona(personaId);
+  const session = readMoments();
+  if (session.length && session[0] === expected[0]) return session;
+  if (expected.length) return expected;
+  return session;
+}
 
 export type ChatMessage = {
   id: string;
@@ -57,6 +75,11 @@ type Turn = {
 type Props = {
   /** Seed a first question (e.g. from Home AskBar) */
   initialQuestion?: string | null;
+  /**
+   * True when the seed came from a user-typed AskBar (may skip pending C1).
+   * Research / topic seeds must leave this false so LifeMomentAsk wins.
+   */
+  freeQuestion?: boolean;
   onOpenAnswer?: (question?: string) => void;
   /** Navigate to advisor booking (suggestion chips) */
   onBook?: () => void;
@@ -115,6 +138,7 @@ function clearTimers(timers: number[]) {
  */
 export function Chat({
   initialQuestion,
+  freeQuestion = false,
   onOpenAnswer,
   onBook,
   onAttach,
@@ -135,6 +159,9 @@ export function Chat({
   const [quickReplies, setQuickReplies] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [pendingMoment, setPendingMoment] = useState<LifeMoment | null>(null);
+  const [personaId, setPersonaId] = useState<PersonaId>(() =>
+    typeof window === "undefined" ? "lena" : readPersonaId(),
+  );
   const [personName, setPersonName] = useState("there");
   const [ready, setReady] = useState(false);
 
@@ -326,21 +353,36 @@ export function Chat({
     [onSend, reducedMotion, setBusyBoth],
   );
 
+  /**
+   * Boot decision tree:
+   * 1. Resolve story moments for the active persona (Noah → firstjob, …).
+   * 2. If primary C1 is unasked → LifeMomentAsk, unless freeQuestion seed.
+   * 3. Else if seed → run research answer.
+   * 4. Else → starter chips for the persona story.
+   */
   useEffect(() => {
     if (bootRef.current) return;
     bootRef.current = true;
 
-    const name = readName();
-    setPersonName(name);
+    const activePersona = readPersonaId();
+    setPersonaId(activePersona);
+    setPersonName(readName());
 
-    const moments = readMoments();
+    const moments = resolveStoryMoments(activePersona);
     const asked = readAskedMoments();
     const primary = primaryMoment(moments);
     const needsAsk = Boolean(primary && !asked.includes(primary));
+    const seed = initialQuestion?.trim() || null;
 
-    const seed = initialQuestion?.trim();
+    // Pending C1 wins over research seeds; free typed AskBar may skip.
+    if (needsAsk && primary && !(seed && freeQuestion)) {
+      setPendingMoment(primary);
+      setQuickReplies(null);
+      setReady(true);
+      return undefined;
+    }
+
     if (seed) {
-      // Explicit ask from Home / AskBar wins; still remember moment for later.
       setPendingMoment(null);
       setQuickReplies(null);
       setReady(true);
@@ -348,18 +390,45 @@ export function Chat({
       return () => window.clearTimeout(id);
     }
 
-    if (needsAsk && primary) {
-      setPendingMoment(primary);
-      setQuickReplies(null);
-      setReady(true);
-      return undefined;
-    }
-
     setPendingMoment(null);
     setQuickReplies(startersFor(primary));
     setReady(true);
     return undefined;
-  }, [initialQuestion, runAnswer]);
+  }, [initialQuestion, freeQuestion, runAnswer]);
+
+  // Persona / moments changed (e.g. Try another life while Ask is open).
+  useEffect(() => {
+    function rebootFromStorage() {
+      const next = readPersonaId();
+      const moments = resolveStoryMoments(next);
+      const primary = primaryMoment(moments);
+      const asked = readAskedMoments();
+      const needsAsk = Boolean(primary && !asked.includes(primary));
+
+      setPersonaId(next);
+      setPersonName(readName());
+      clearTimers(timersRef.current);
+      setTurns([]);
+      setBusyBoth(false);
+      bootRef.current = true;
+
+      if (needsAsk && primary) {
+        setPendingMoment(primary);
+        setQuickReplies(null);
+      } else {
+        setPendingMoment(null);
+        setQuickReplies(startersFor(primary));
+      }
+      setReady(true);
+    }
+
+    window.addEventListener("storage", rebootFromStorage);
+    window.addEventListener("dm-persona", rebootFromStorage);
+    return () => {
+      window.removeEventListener("storage", rebootFromStorage);
+      window.removeEventListener("dm-persona", rebootFromStorage);
+    };
+  }, [setBusyBoth]);
 
   function finishMomentAsk(starters: string[], followUp?: string) {
     setPendingMoment(null);
@@ -421,6 +490,7 @@ export function Chat({
 
       {pendingMoment ? (
         <LifeMomentAsk
+          key={`${personaId}-${pendingMoment}`}
           moment={pendingMoment}
           name={personName}
           onAttach={onAttach}
