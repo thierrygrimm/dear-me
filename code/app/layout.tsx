@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Chivo_Mono, Geist, Host_Grotesk } from "next/font/google";
 import { ToastProvider } from "@/components/feedback/Toast";
+import {
+  LocaleGate,
+  LocaleProvider,
+} from "@/components/locale/LocaleProvider";
 import "./globals.css";
 
 /**
@@ -37,7 +41,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${hostGrotesk.variable} ${geist.variable} ${chivoMono.variable} h-full`}
     >
       <body className="h-full min-h-full">
-        <ToastProvider>{children}</ToastProvider>
+        <LocaleProvider>
+          <ToastProvider>
+            <LocaleGate>{children}</LocaleGate>
+          </ToastProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

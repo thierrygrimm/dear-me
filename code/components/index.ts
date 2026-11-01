@@ -15,6 +15,12 @@ export {
   DocumentDetail,
 } from "@/components/data/DocumentVault";
 export { ToastProvider, useToast } from "@/components/feedback/Toast";
+export {
+  LocaleProvider,
+  LocaleGate,
+  useLocale,
+  useCopy,
+} from "@/components/locale/LocaleProvider";
 export { BottomSheet, SheetOption } from "@/components/feedback/BottomSheet";
 export { States } from "@/components/feedback/States";
 export { Logo, Mark } from "@/components/brand/Logo";
