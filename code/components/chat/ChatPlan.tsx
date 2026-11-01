@@ -143,7 +143,7 @@ function Checklist({
         </button>
       ))}
       <p className="dm-small dm-muted" style={{ margin: "4px 0 0" }}>
-        {doneCount} of {steps.length} done
+        {copy.plan.doneCount(doneCount, steps.length)}
       </p>
     </div>
   );
