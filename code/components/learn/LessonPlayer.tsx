@@ -116,44 +116,29 @@ export function LessonPlayer({
 
   if (finished) {
     return (
-      <div
-        className="dm-app-full"
-        style={{
-          background: "var(--neonweste)",
-          padding: "24px 20px 18px",
-          gap: 12,
-        }}
-      >
-        <div style={{ flex: 1 }} className="ig-done">
-          <div className="medal">
-            <Squirrel state="done" size={72} />
+      <div className="dm-app-full dm-lesson-done">
+        <div className="dm-lesson-done__inner">
+          <div className="ig-done">
+            <div className="medal">
+              <Squirrel state="done" size={72} />
+            </div>
           </div>
+          <small>
+            Lesson done · {doneCount} of {totalCount}
+          </small>
+          <h4>{lesson.doneTitle}</h4>
+          <p>{lesson.doneBody}</p>
+          <Button
+            variant="primary"
+            block
+            onClick={() => router.push(lesson.doneCtaHref)}
+          >
+            {lesson.doneCta}
+          </Button>
+          <Button variant="text" className="dm-small" onClick={onClose}>
+            Back to lessons
+          </Button>
         </div>
-        <small style={{ font: "600 12px/16px var(--font-text)" }}>
-          Lesson done · {doneCount} of {totalCount}
-        </small>
-        <h4
-          style={{
-            margin: 0,
-            font: "700 26px/30px var(--font-display)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {lesson.doneTitle}
-        </h4>
-        <p style={{ margin: 0, font: "400 15px/22px var(--font-text)" }}>
-          {lesson.doneBody}
-        </p>
-        <Button
-          variant="primary"
-          block
-          onClick={() => router.push(lesson.doneCtaHref)}
-        >
-          {lesson.doneCta}
-        </Button>
-        <Button variant="text" className="dm-small" onClick={onClose}>
-          Back to lessons
-        </Button>
       </div>
     );
   }
@@ -191,14 +176,15 @@ export function LessonPlayer({
             className="dm-lesson__art"
             style={{ background: current.artBg }}
           >
-            {showLpArt ? <LpArt step={step} /> : null}
-            {current.kind === "stacks" ? <StacksArt /> : null}
+            {showLpArt ? <LpArt key={step} step={step} /> : null}
+            {current.kind === "stacks" ? <StacksArt key={step} /> : null}
             {current.kind === "bars" ? (
-              <BarsArt insuredWidth={insuredWidth} />
+              <BarsArt key={step} insuredWidth={insuredWidth} />
             ) : null}
-            {current.kind === "grow" ? <GrowArt /> : null}
+            {current.kind === "grow" ? <GrowArt key={step} /> : null}
             {current.kind === "quiz" ? (
               <QuizArt
+                key={step}
                 question={
                   current.question ??
                   "Quick check: which source shrinks most when you go part-time?"
@@ -215,14 +201,11 @@ export function LessonPlayer({
                 onPick={(index) => pickQuiz(index, current)}
               />
             ) : null}
-            {current.kind === "certs" ? <CertsArt /> : null}
-            {current.kind === "tax" ? <TaxArt /> : null}
+            {current.kind === "certs" ? <CertsArt key={step} /> : null}
+            {current.kind === "tax" ? <TaxArt key={step} /> : null}
           </div>
 
           <div className="dm-lesson__body">
-            <small>
-              {step + 1} of {total}
-            </small>
             <h4>{current.headline}</h4>
             <p className="qf">
               {isQuiz && quizPicked !== null ? feedback : current.body}
@@ -338,7 +321,10 @@ function BarsArt({ insuredWidth }: { insuredWidth: string }) {
           60 % · salary CHF 55&apos;200
           <div className="bar">
             <span className="fix" />
-            <span className="ins" style={{ width: insuredWidth }} />
+            <span
+              className="ins"
+              style={{ width: insuredWidth }}
+            />
           </div>
         </div>
       </div>
@@ -353,7 +339,7 @@ function BarsArt({ insuredWidth }: { insuredWidth: string }) {
           Fixed deduction
         </span>
         <span>
-          <i style={{ background: "#0A0507" }} />
+          <i style={{ background: "var(--espressosatz)" }} />
           What your fund insures
         </span>
       </div>
@@ -409,12 +395,12 @@ function QuizArt({
         left: 20,
         right: 20,
         top: 70,
-        color: "#FAF7F0",
+        color: "var(--briefpapier)",
       }}
     >
       <p
         style={{
-          margin: "0 0 6px",
+          margin: "0 0 10px",
           font: "700 20px/24px var(--font-display)",
         }}
       >
@@ -452,13 +438,14 @@ function CertsArt() {
   ];
   return (
     <div
+      className="ig-certs"
       style={{
         position: "absolute",
         left: 24,
         right: 24,
         top: 72,
         bottom: 24,
-        background: "#fff",
+        background: "var(--neuschnee)",
         borderRadius: 10,
         padding: "16px 14px",
         display: "flex",
@@ -476,16 +463,22 @@ function CertsArt() {
             alignItems: "center",
             gap: 8,
             font: "600 13px/16px var(--font-text)",
+            opacity: 0,
+            transform: "translateY(-16px)",
+            animation: "dm-fall 600ms cubic-bezier(.4,1.5,.6,1) forwards",
+            animationDelay: `${0.12 + i * 0.08}s`,
           }}
         >
           <span>{label}</span>
           <i
             style={{
               flex: 1,
-              height: 6,
-              borderRadius: 3,
+              height: 8,
+              borderRadius: 4,
               background: i === 1 ? "var(--neonweste)" : "var(--hafermilch)",
               maxWidth: 88,
+              boxShadow:
+                i === 1 ? "inset 0 0 0 1.5px var(--espressosatz)" : undefined,
             }}
           />
         </div>
@@ -513,6 +506,10 @@ function TaxArt() {
             margin: "0 auto 14px",
             background: "var(--kaugummi)",
             clipPath: "polygon(50% 0,100% 50%,50% 100%,0 50%)",
+            opacity: 0,
+            transform: "translateY(-48px)",
+            animation: "dm-fall 700ms cubic-bezier(.4,1.5,.6,1) forwards",
+            animationDelay: "0.12s",
           }}
         />
         <b
