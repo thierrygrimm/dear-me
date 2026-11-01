@@ -151,7 +151,7 @@ export const paxCatalog: Record<string, PaxIdea> = {
     id: "sir_selfemployed",
     tariffCodes: ["SIR"],
     family: "Erwerbsunfähigkeitsversicherung",
-    shortTitle: "Income protection while you build",
+    shortTitle: "Income protection (SIR)",
     body: "A monthly income if illness or an accident stops you working — built for people without a classic employer fund.",
     facts: [
       { label: "Tariff", value: "SIR" },
