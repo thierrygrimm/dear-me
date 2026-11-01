@@ -1,5 +1,14 @@
 /** Demo lives from DS Home · "Try another life". */
 
+import { LESSONS } from "@/lib/lessons";
+import type { LifeMoment } from "@/lib/session";
+import {
+  clearMomentAnswers,
+  clearMomentAsked,
+  markMoments,
+  syncNameFromPersona,
+} from "@/lib/session";
+
 export type PersonaId = "lena" | "noah" | "sandra" | "ruth";
 
 export type PersonaAvatar = {
@@ -23,6 +32,11 @@ export type Persona = {
   net: string;
   lesson: string;
   lessonTime: string;
+  /**
+   * Preferred Learn deep-link id (may include upcoming lessons).
+   * Use {@link lessonIdForPersona} so missing ids fall back to a shipped lesson.
+   */
+  lessonId: string;
   appointment: {
     avatar: string;
     title: string;
@@ -31,6 +45,16 @@ export type Persona = {
   letterTitle: string;
   letterBody: string;
   letterFrom: string;
+  /** Canonical life-moment story for this demo persona (order = primary first). */
+  moments: LifeMoment[];
+};
+
+/** Closest shipped lesson when the preferred id is not in LESSONS yet. */
+const LESSON_FALLBACK: Record<PersonaId, string> = {
+  lena: "part-time",
+  noah: "pillar-3a",
+  sandra: "pillar-3a",
+  ruth: "three-sources",
 };
 
 export const PERSONA_ORDER: PersonaId[] = ["lena", "noah", "sandra", "ruth"];
@@ -56,11 +80,13 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     side: "Planning together",
     hi: "Lena.",
     sub: "Most of it looks good. One thing is worth a look.",
-    topic: "If you couldn't work",
-    topicDetail: "You'd have less than half your income.",
+    topic: "If you go to 60 %",
+    topicDetail:
+      "About CHF 600 less a month at 65 — before you decide who stays home.",
     net: "Strong, with one soft spot",
     lesson: "Why part-time costs more",
     lessonTime: "3 minutes",
+    lessonId: "part-time",
     appointment: {
       avatar: "SK",
       title: "Tuesday with Sara",
@@ -69,6 +95,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterTitle: "Dear us",
     letterBody: "Before we decide who stays home.",
     letterFrom: "A letter from the two of you to later",
+    moments: ["child", "less"],
   },
   noah: {
     id: "noah",
@@ -91,6 +118,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     net: "Off to a start, one soft spot",
     lesson: "Why a 3a at 24 pays off",
     lessonTime: "2 minutes",
+    lessonId: "pillar-3a",
     appointment: {
       avatar: "",
       title: "Bring in your certificate",
@@ -99,6 +127,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterTitle: "Dear me at 65",
     letterBody: "I started early. You're welcome.",
     letterFrom: "A letter to your future self",
+    moments: ["firstjob"],
   },
   sandra: {
     id: "sandra",
@@ -120,14 +149,16 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     net: "One big gap: income",
     lesson: "The bigger 3a when you're self-employed",
     lessonTime: "3 minutes",
+    lessonId: "pillar-3a",
     appointment: {
       avatar: "JM",
       title: "Thursday with Jonas",
       meta: "14:00 · Pax office, Basel",
     },
     letterTitle: "Dear me",
-    letterBody: "I'm my own boss now. That includes my pension.",
+    letterBody: "I'm my own boss now. That includes your pension.",
     letterFrom: "A letter to your future self",
+    moments: ["selfemployed"],
   },
   ruth: {
     id: "ruth",
@@ -155,6 +186,8 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     net: "Strong, check the payout",
     lesson: "Lump sum, pension or both",
     lessonTime: "4 minutes",
+    /** Prefer AHV part 2 (couples / at 65) when that lesson ships. */
+    lessonId: "ahv-part-2",
     appointment: {
       avatar: "SK",
       title: "Friday with Sara",
@@ -163,6 +196,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     letterTitle: "Dear us",
     letterBody: "The money's here. Now let's make it last.",
     letterFrom: "A letter from the two of you to later",
+    moments: ["retire"],
   },
 };
 
@@ -185,4 +219,38 @@ export function markPersonaId(id: PersonaId): void {
 
 export function getPersona(id?: PersonaId): Persona {
   return PERSONAS[id ?? readPersonaId()];
+}
+
+/**
+ * Resolve a Learn deep-link for this persona.
+ * Uses the preferred lessonId when that module exists; otherwise the closest shipped lesson.
+ */
+export function lessonIdForPersona(id?: PersonaId): string {
+  const persona = getPersona(id);
+  if (LESSONS.some((l) => l.id === persona.lessonId)) return persona.lessonId;
+  return LESSON_FALLBACK[persona.id];
+}
+
+export function lessonPathForPersona(id?: PersonaId): string {
+  return `/learn?lesson=${lessonIdForPersona(id)}`;
+}
+
+/** Canonical dm-moments for a demo persona (order = primary first). */
+export function momentsForPersona(id: PersonaId): LifeMoment[] {
+  return [...PERSONAS[id].moments];
+}
+
+/**
+ * Switch demo life: persona id + name, sync moments, clear C1 asked/answers
+ * so Chat opens a fresh LifeMomentAsk for that story.
+ */
+export function applyPersona(id: PersonaId): void {
+  markPersonaId(id);
+  syncNameFromPersona();
+  markMoments(momentsForPersona(id));
+  clearMomentAsked();
+  clearMomentAnswers();
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dm-persona"));
+  }
 }
