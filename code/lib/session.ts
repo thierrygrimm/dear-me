@@ -190,10 +190,12 @@ export function hasCertificate(): boolean {
 /**
  * First Home after signup: topic + net + lesson (+ bring certificate),
  * before appointment, letter, and Wrapped join the feed.
+ * myPax signs in with a certificate already, so day-one is "no life
+ * moment asked yet" — not "no certificate".
  */
 export function isHomeDay1(): boolean {
   if (typeof window === "undefined") return false;
-  return !hasCertificate() && readAskedMoments().length === 0;
+  return readAskedMoments().length === 0;
 }
 
 export function markCertificate(values: CertValues = sampleCert): void {

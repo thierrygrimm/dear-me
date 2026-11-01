@@ -20,6 +20,7 @@ import {
   type PersonaId,
 } from "@/lib/personas";
 import {
+  hasCertificate,
   isHomeDay1,
   readAskedMoments,
   readMoments,
@@ -355,17 +356,20 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [wrappedOpen, setWrappedOpen] = useState(false);
   const [day1, setDay1] = useState(false);
+  const [hasCert, setHasCert] = useState(false);
 
   useEffect(() => {
     setHour(new Date().getHours());
     setPersona(getPersona(readPersonaId()));
     setDay1(isHomeDay1());
+    setHasCert(hasCertificate());
   }, []);
 
   function selectPersona(id: PersonaId) {
     applyPersona(id);
     setPersona(getPersona(id));
     setDay1(isHomeDay1());
+    setHasCert(hasCertificate());
   }
 
   function lookAtTopic() {
@@ -506,30 +510,41 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
           <button
             type="button"
             className="dm-tsmall"
-            onClick={() => router.push("/certificate")}
+            onClick={() =>
+              hasCert ? lookAtTopic() : router.push("/certificate")
+            }
           >
             <span
               className="av"
-              style={{ background: "var(--hafermilch)" }}
+              style={{
+                background: hasCert ? "var(--neonweste)" : "var(--hafermilch)",
+                color: "var(--espressosatz)",
+              }}
             >
-              <svg
-                viewBox="0 0 24 24"
-                style={{
-                  width: 22,
-                  height: 22,
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeWidth: 1.75,
-                }}
-                aria-hidden
-              >
-                <path d="M6 3h8l4 4v14H6z" />
-                <path d="M14 3v4h4" />
-              </svg>
+              {hasCert ? (
+                "1"
+              ) : (
+                <svg
+                  viewBox="0 0 24 24"
+                  style={{
+                    width: 22,
+                    height: 22,
+                    fill: "none",
+                    stroke: "currentColor",
+                    strokeWidth: 1.75,
+                  }}
+                  aria-hidden
+                >
+                  <path d="M6 3h8l4 4v14H6z" />
+                  <path d="M14 3v4h4" />
+                </svg>
+              )}
             </span>
             <span>
-              <b>{copy.home.noCertCta}</b>
-              <span>{copy.home.estimateMeta}</span>
+              <b>{hasCert ? persona.topic : copy.home.noCertCta}</b>
+              <span>
+                {hasCert ? copy.home.heroCta : copy.home.estimateMeta}
+              </span>
             </span>
             <Chevron />
           </button>
