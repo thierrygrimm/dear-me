@@ -3,7 +3,7 @@
 import { Mark } from "@/components/brand/Logo";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
-import { readName } from "@/lib/session";
+import { getPersona, readPersonaId, type Persona } from "@/lib/personas";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,19 +15,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+/** Match phone tab order: Home → Plan → Ask → Learn → Me. */
 const nav = [
   { href: "/", id: "home", label: copy.tabs.home, Icon: Home },
-  { href: "/ask", id: "ask", label: copy.tabs.ask, Icon: Mic, ask: true },
   { href: "/plan", id: "plan", label: copy.tabs.plan, Icon: ClipboardList },
+  { href: "/ask", id: "ask", label: copy.tabs.ask, Icon: Mic, ask: true },
   { href: "/learn", id: "learn", label: copy.tabs.learn, Icon: BookOpen },
   { href: "/me", id: "me", label: copy.tabs.me, Icon: User },
 ] as const;
-
-const EARLIER = [
-  "Can I go to 60 %?",
-  "Who should reduce?",
-  "Is Marco covered?",
-];
 
 type Props = {
   className?: string;
@@ -35,14 +30,11 @@ type Props = {
 
 export function Sidebar({ className }: Props) {
   const pathname = usePathname();
-  const [name, setName] = useState("Lena");
+  const [persona, setPersona] = useState<Persona>(() => getPersona("lena"));
 
   useEffect(() => {
-    const n = readName();
-    if (n && n !== "there") setName(n);
-  }, []);
-
-  const initial = name.slice(0, 1).toUpperCase();
+    setPersona(getPersona(readPersonaId()));
+  }, [pathname]);
 
   return (
     <aside className={cn("dm-side", className)} aria-label="Sidebar">
@@ -74,7 +66,7 @@ export function Sidebar({ className }: Props) {
 
       <div className="rec">
         <small>Earlier chats</small>
-        {EARLIER.map((q) => (
+        {persona.earlierChats.map((q) => (
           <Link
             key={q}
             href="/ask"
@@ -94,21 +86,18 @@ export function Sidebar({ className }: Props) {
 
       <div className="who">
         <span className="dm-pair" aria-hidden>
-          <span style={{ background: "var(--neonweste)" }}>{initial}</span>
-          <span
-            style={{
-              background: "var(--rosa-brille)",
-              color: "var(--pflaumenkuchen)",
-            }}
-          >
-            M
-          </span>
+          {persona.avatars.map((a) => (
+            <span
+              key={a.initial}
+              style={{ background: a.background, color: a.color }}
+            >
+              {a.initial}
+            </span>
+          ))}
         </span>
         <span>
-          <b>
-            {name} and Marco
-          </b>
-          <small>Planning together</small>
+          <b>{persona.name}</b>
+          <small>{persona.side}</small>
         </span>
       </div>
     </aside>
