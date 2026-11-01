@@ -24,22 +24,24 @@ const QUIZZES: Record<string, LessonQuiz> = {
   "three-sources": {
     prompt: "Quick check: which source shrinks most when you go part-time?",
     options: [
-      { label: "AHV", ok: false },
-      { label: "Employer fund", ok: true },
-      { label: "Pillar 3a", ok: false },
+      { label: "The state (AHV)", ok: false },
+      { label: "Your employer's fund", ok: true },
+      { label: "Your own 3a", ok: false },
     ],
     right: "Right. The fixed deduction makes the fund shrink fastest.",
-    wrong: "Close. It's the employer fund — the fixed deduction hits it hardest.",
+    wrong:
+      "Close. It's the employer's fund, because of the fixed deduction.",
   },
   "part-time": {
     prompt: "Quick check: which source shrinks most when you go part-time?",
     options: [
-      { label: "AHV", ok: false },
-      { label: "Employer fund", ok: true },
-      { label: "Pillar 3a", ok: false },
+      { label: "The state (AHV)", ok: false },
+      { label: "Your employer's fund", ok: true },
+      { label: "Your own 3a", ok: false },
     ],
     right: "Right. The fixed deduction makes the fund shrink fastest.",
-    wrong: "Close. It's the employer fund — the fixed deduction hits it hardest.",
+    wrong:
+      "Close. It's the employer's fund, because of the fixed deduction.",
   },
   certificate: {
     prompt: "Quick check: how many numbers on your certificate matter most?",

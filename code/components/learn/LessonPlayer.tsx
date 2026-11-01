@@ -499,6 +499,7 @@ function TaxArt() {
     >
       <div style={{ textAlign: "center", color: "var(--neuschnee)" }}>
         <i
+          className="ig-tax-nut"
           style={{
             display: "block",
             width: 84,
