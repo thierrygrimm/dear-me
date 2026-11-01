@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { ChatWidget } from "@/components/chat/ChatWidgets";
 import { cn } from "@/lib/cn";
+import { emphasizeMoney } from "@/lib/emphasizeMoney";
 import { useEffect, useState } from "react";
 
 export type GuideStep = {
@@ -134,7 +135,7 @@ export function ChatGuide({
             line.kind === "me" ? "dm-bubble--me" : "dm-bubble--us",
           )}
         >
-          {line.text}
+          {line.kind === "us" ? emphasizeMoney(line.text) : line.text}
         </div>
       ))}
 
