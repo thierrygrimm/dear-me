@@ -1,5 +1,6 @@
 /** Demo lives from DS Home · "Try another life". */
 
+import { personaTextFor } from "@/lib/i18n/personaCopy";
 import { LESSONS } from "@/lib/lessons";
 import type { LifeMoment } from "@/lib/session";
 import {
@@ -8,6 +9,7 @@ import {
   markMoments,
   syncNameFromPersona,
 } from "@/lib/session";
+import { readLanguage, type AppLanguage } from "@/lib/settingsPrefs";
 
 export type PersonaId = "lena" | "noah" | "sandra" | "ruth";
 
@@ -238,8 +240,15 @@ export function markPersonaId(id: PersonaId): void {
   sessionStorage.setItem(PERSONA_KEY, id);
 }
 
-export function getPersona(id?: PersonaId): Persona {
-  return PERSONAS[id ?? readPersonaId()];
+export function getPersona(
+  id?: PersonaId,
+  language: AppLanguage = typeof window === "undefined"
+    ? "English"
+    : readLanguage(),
+): Persona {
+  const base = PERSONAS[id ?? readPersonaId()];
+  const text = personaTextFor(base.id, language);
+  return text ? { ...base, ...text } : base;
 }
 
 /**
