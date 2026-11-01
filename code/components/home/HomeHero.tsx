@@ -16,6 +16,7 @@ import {
 import {
   readAskedMoments,
   readMoments,
+  syncNameFromPersona,
 } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -141,6 +142,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
 
   function selectPersona(id: PersonaId) {
     markPersonaId(id);
+    syncNameFromPersona();
     setPersona(getPersona(id));
   }
 
