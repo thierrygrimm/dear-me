@@ -18,7 +18,9 @@ import {
 } from "@/lib/personas";
 import {
   isSignedIn,
+  pushChatHistory,
   readAskedMoments,
+  readChatHistory,
   readMoments,
   type LifeMoment,
 } from "@/lib/session";
@@ -94,11 +96,12 @@ export default function AskPage() {
   const [historyQuery, setHistoryQuery] = useState("");
   const [netMin, setNetMin] = useState(false);
   const [personaId, setPersonaId] = useState<PersonaId>("lena");
+  const [savedChats, setSavedChats] = useState<string[]>([]);
 
-  const earlier = useMemo(
-    () => getPersona(personaId).earlierChats,
-    [personaId],
-  );
+  const earlier = useMemo(() => {
+    const seeded = getPersona(personaId).earlierChats;
+    return [...savedChats, ...seeded.filter((q) => !savedChats.includes(q))];
+  }, [personaId, savedChats]);
   const filteredEarlier = useMemo(() => {
     const q = historyQuery.trim().toLowerCase();
     if (!q) return earlier;
@@ -113,6 +116,7 @@ export default function AskPage() {
 
     const id = readPersonaId();
     setPersonaId(id);
+    setSavedChats(readChatHistory());
     const moments = storyMoments(id);
     const asked = readAskedMoments();
     const primary = primaryMoment(moments);
@@ -139,6 +143,10 @@ export default function AskPage() {
   function remountChat(nextSeed: string | null, free = false) {
     const id = readPersonaId();
     const primary = primaryMoment(storyMoments(id));
+    if (nextSeed) {
+      pushChatHistory(nextSeed);
+      setSavedChats(readChatHistory());
+    }
     setSeed(nextSeed);
     setFreeQuestion(free);
     setChatKey(`${askBootKey(id, primary)}-${Date.now()}`);
@@ -239,7 +247,7 @@ export default function AskPage() {
             remountChat(null);
           }}
         >
-          Clear chat
+          Start a new chat
         </Button>
         <Button variant="text" block onClick={closeChat}>
           {copy.chat.close}

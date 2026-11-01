@@ -29,7 +29,7 @@ export function OfferCard({
       <article className={cn("dm-pax", className)}>
         <div className="dm-pax__brand">
           <span className="dm-pax__logo">Pax</span>
-          <span className="dm-pax__label">Partner idea</span>
+          <span className="dm-pax__label">Recommendations from Pax</span>
         </div>
         <b style={{ font: "700 18px/24px var(--font-display)" }}>{title}</b>
         <p style={{ margin: 0, font: "400 14px/20px var(--font-text)" }}>
