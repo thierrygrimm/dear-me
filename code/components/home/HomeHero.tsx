@@ -7,17 +7,14 @@ import { LifeSheet } from "@/components/home/LifeSheet";
 import { copy } from "@/lib/copy";
 import { seedForAsk } from "@/lib/lifeMoments";
 import {
+  applyPersona,
   getPersona,
-  markPersonaId,
+  lessonPathForPersona,
   readPersonaId,
   type Persona,
   type PersonaId,
 } from "@/lib/personas";
-import {
-  readAskedMoments,
-  readMoments,
-  syncNameFromPersona,
-} from "@/lib/session";
+import { readAskedMoments, readMoments } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -39,11 +36,28 @@ function helloFor(hour: number) {
   return "Good morning,";
 }
 
-function goAsk(
+/** Research / topic card — suppress seed while C1 LifeMomentAsk is pending. */
+function goAskResearch(
   router: ReturnType<typeof useRouter>,
-  q: string,
+  research?: string,
 ) {
-  sessionStorage.setItem("dm-ask-q", q);
+  const seed = seedForAsk(readMoments(), readAskedMoments(), research);
+  if (seed) {
+    sessionStorage.setItem("dm-ask-q", seed);
+    sessionStorage.removeItem("dm-ask-free");
+  } else {
+    sessionStorage.removeItem("dm-ask-q");
+    sessionStorage.removeItem("dm-ask-free");
+  }
+  router.push("/ask");
+}
+
+/** User-typed AskBar — free question may skip pending C1. */
+function goAskFree(router: ReturnType<typeof useRouter>, q: string) {
+  const trimmed = q.trim();
+  if (!trimmed) return;
+  sessionStorage.setItem("dm-ask-q", trimmed);
+  sessionStorage.setItem("dm-ask-free", "1");
   router.push("/ask");
 }
 
@@ -141,8 +155,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
   }, []);
 
   function selectPersona(id: PersonaId) {
-    markPersonaId(id);
-    syncNameFromPersona();
+    applyPersona(id);
     setPersona(getPersona(id));
   }
 
@@ -151,12 +164,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
       onLook();
       return;
     }
-    const seed = seedForAsk(
-      readMoments(),
-      readAskedMoments(),
-      persona.topic,
-    );
-    goAsk(router, seed || persona.topic);
+    goAskResearch(router, persona.topic);
   }
 
   function openBook() {
@@ -170,7 +178,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
 
   function openLesson() {
     if (onLesson) onLesson();
-    else router.push("/learn?lesson=part-time");
+    else router.push(lessonPathForPersona(persona.id));
   }
 
   const hello = helloFor(hour);
@@ -215,7 +223,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
         <AskBar
           placeholder="Ask anything about your pension"
           onAttach={() => router.push("/certificate")}
-          onSubmit={(value) => goAsk(router, value)}
+          onSubmit={(value) => goAskFree(router, value)}
         />
         <div className="chips">
           {HOME_STARTERS.map((q) => (
@@ -224,7 +232,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
               type="button"
               className="dm-chip"
               aria-pressed="false"
-              onClick={() => goAsk(router, q)}
+              onClick={() => goAskResearch(router, q)}
             >
               {q}
             </button>
@@ -250,7 +258,10 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
         </button>
 
         <div className="dm-duo">
-          <button type="button" onClick={() => goAsk(router, persona.topic)}>
+          <button
+            type="button"
+            onClick={() => goAskResearch(router, persona.topic)}
+          >
             <span className="art2">
               <NetArt />
             </span>
@@ -309,7 +320,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
         <button
           type="button"
           className="dm-tsmall"
-          onClick={() => goAsk(router, "How did my year look?")}
+          onClick={() => goAskResearch(router, "How did my year look?")}
         >
           <span
             className="av"

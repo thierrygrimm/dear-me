@@ -7,6 +7,7 @@ import { HomeHero } from "@/components/home/HomeHero";
 import { NextStep } from "@/components/home/NextStep";
 import { copy } from "@/lib/copy";
 import { seedForAsk } from "@/lib/lifeMoments";
+import { lessonPathForPersona } from "@/lib/personas";
 import {
   hasCertificate,
   readAskedMoments,
@@ -18,8 +19,13 @@ import { useState } from "react";
 
 function goAsk(router: ReturnType<typeof useRouter>, research?: string) {
   const seed = seedForAsk(readMoments(), readAskedMoments(), research);
-  if (seed) sessionStorage.setItem("dm-ask-q", seed);
-  else sessionStorage.removeItem("dm-ask-q");
+  if (seed) {
+    sessionStorage.setItem("dm-ask-q", seed);
+    sessionStorage.removeItem("dm-ask-free");
+  } else {
+    sessionStorage.removeItem("dm-ask-q");
+    sessionStorage.removeItem("dm-ask-free");
+  }
   router.push("/ask");
 }
 
@@ -68,7 +74,10 @@ export function HomeScreen() {
           sticky
           onAttach={() => router.push("/certificate")}
           onSubmit={(value) => {
-            sessionStorage.setItem("dm-ask-q", value);
+            const trimmed = value.trim();
+            if (!trimmed) return;
+            sessionStorage.setItem("dm-ask-q", trimmed);
+            sessionStorage.setItem("dm-ask-free", "1");
             router.push("/ask");
           }}
         />
@@ -79,7 +88,7 @@ export function HomeScreen() {
   return (
     <HomeHero
       onBook={() => router.push("/me/book")}
-      onLesson={() => router.push("/learn?lesson=part-time")}
+      onLesson={() => router.push(lessonPathForPersona())}
     />
   );
 }
