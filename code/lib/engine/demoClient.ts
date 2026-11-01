@@ -5,10 +5,12 @@ import type {
   Household,
   Lead,
   Suggestion,
+  Tax3aResult,
   Trace,
   WorkloadSimulation,
 } from "./types";
 import { fixtureHousehold } from "./fixtures";
+import { householdForDemo } from "./householdFromSession";
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
@@ -44,6 +46,10 @@ export function demoHousehold(personaId = "lena"): Household {
   return fixtureHousehold(personaId === "lena" ? "lea" : personaId);
 }
 
+function householdOrDemo(personaId: string, household?: Household): Household {
+  return household ?? householdForDemo(personaId);
+}
+
 export async function simulateWorkloadClient(opts?: {
   household?: Household;
   personaId?: string;
@@ -51,13 +57,12 @@ export async function simulateWorkloadClient(opts?: {
   steps?: number[];
 }): Promise<WorkloadSimulation> {
   const personaId = opts?.personaId ?? "lena";
-  const data = await postJson<WorkloadSimulation>("/api/simulate/workload", {
-    household: opts?.household ?? demoHousehold(personaId),
+  return postJson<WorkloadSimulation>("/api/simulate/workload", {
+    household: householdOrDemo(personaId, opts?.household),
     personaId,
     personIndex: opts?.personIndex ?? 1,
     steps: opts?.steps ?? [100, 80, 60],
   });
-  return data;
 }
 
 export async function simulateCoverageClient(opts?: {
@@ -66,8 +71,21 @@ export async function simulateCoverageClient(opts?: {
 }): Promise<CoverageSimulation> {
   const personaId = opts?.personaId ?? "lena";
   return postJson<CoverageSimulation>("/api/simulate/coverage", {
-    household: opts?.household ?? demoHousehold(personaId),
+    household: householdOrDemo(personaId, opts?.household),
     personaId,
+  });
+}
+
+export async function simulateTax3aClient(opts?: {
+  household?: Household;
+  personaId?: string;
+  personIndex?: number;
+}): Promise<Tax3aResult> {
+  const personaId = opts?.personaId ?? "lena";
+  return postJson<Tax3aResult>("/api/simulate/tax-3a", {
+    household: householdOrDemo(personaId, opts?.household),
+    personaId,
+    personIndex: opts?.personIndex ?? 1,
   });
 }
 
@@ -76,14 +94,23 @@ export async function fetchTrace(id: string): Promise<Trace> {
   return data.trace;
 }
 
+export type RecommendationsResult = {
+  suggestions: Suggestion[];
+  tax3a?: Tax3aResult;
+  workload?: WorkloadSimulation;
+  coverage?: CoverageSimulation;
+  auditIds?: string[];
+  rulesVersion?: string;
+};
+
 export async function fetchRecommendations(opts?: {
   household?: Household;
   personaId?: string;
   askedForPerson?: boolean;
-}): Promise<{ suggestions: Suggestion[] }> {
+}): Promise<RecommendationsResult> {
   const personaId = opts?.personaId ?? "lena";
   return postJson("/api/recommendations", {
-    household: opts?.household ?? demoHousehold(personaId),
+    household: householdOrDemo(personaId, opts?.household),
     personaId,
     personIndex: 1,
     askedForPerson: opts?.askedForPerson ?? false,
@@ -103,7 +130,7 @@ export async function createLeadClient(opts: {
 }): Promise<Lead> {
   const personaId = opts.personaId ?? "lena";
   const data = await postJson<{ lead: Lead }>("/api/leads", {
-    household: opts.household ?? demoHousehold(personaId),
+    household: householdOrDemo(personaId, opts.household),
     entryPoint: opts.entryPoint ?? "book",
     contactPreference: opts.contactPreference ?? "video",
     questions: opts.questions ?? [],

@@ -15,11 +15,13 @@ export {
   demoHousehold,
   simulateWorkloadClient,
   simulateCoverageClient,
+  simulateTax3aClient,
   fetchTrace,
   fetchRecommendations,
   createLeadClient,
   fetchLead,
   fetchLeads,
   fetchAudit,
+  type RecommendationsResult,
 } from "./demoClient";
 export { householdForDemo } from "./householdFromSession";
