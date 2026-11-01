@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { partnerNameFor, readPersonaId } from "@/lib/personas";
 import {
   FILTERS,
   REQUESTED_DOCS,
@@ -142,7 +143,10 @@ export function DocumentVaultList({
           values: [
             { label: "Cover", value: "CHF 200'000" },
             { label: "Premium / year", value: "480" },
-            { label: "Beneficiary", value: "Marco" },
+            {
+              label: "Beneficiary",
+              value: partnerNameFor(readPersonaId()) ?? "—",
+            },
             { label: "Starts", value: "1 Mar 2026" },
           ],
         },
@@ -404,6 +408,24 @@ export function DocumentDetail({
         title={copy.vault.shareTitle}
         description={copy.vault.shareBody}
       >
+        <div className="dm-sharecard" style={{ marginBottom: 14 }}>
+          <b
+            style={{
+              font: "700 18px/22px var(--font-display)",
+              letterSpacing: "-.02em",
+            }}
+          >
+            {doc.title}
+          </b>
+          <dl>
+            {(doc.values ?? []).slice(0, 4).map((v) => (
+              <div key={v.label}>
+                <dt>{v.label}</dt>
+                <dd>{hideAmounts ? "···" : v.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
         <label
           className="dm-row"
           style={{

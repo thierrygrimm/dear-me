@@ -3,8 +3,9 @@
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { useToast } from "@/components/feedback/Toast";
 import { PageColumn } from "@/components/layout/PageColumn";
+import { partnerNameFor, readPersonaId } from "@/lib/personas";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode, type SVGProps } from "react";
+import { useEffect, useState, type ReactNode, type SVGProps } from "react";
 
 function Icon({ children, ...rest }: SVGProps<SVGSVGElement>) {
   return (
@@ -66,6 +67,11 @@ export default function PrivacyPage() {
   const [analytics, setAnalytics] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [partnerLabel, setPartnerLabel] = useState<string | null>("Marco");
+
+  useEffect(() => {
+    setPartnerLabel(partnerNameFor(readPersonaId()));
+  }, []);
 
   return (
     <PageColumn kind="plan">
@@ -104,19 +110,21 @@ export default function PrivacyPage() {
           </Icon>
         }
       />
-      <SwitchRow
-        title="Marco"
-        subtitle="Shared plans, not your salary"
-        checked={partner}
-        onToggle={setPartner}
-        icon={
-          <Icon>
-            <circle cx="9" cy="8" r="3.5" />
-            <circle cx="17" cy="9" r="2.5" />
-            <path d="M3 20c1-3.5 3.5-5 6-5s5 1.5 6 5M15 15c2.5 0 4.5 1.5 5.5 4" />
-          </Icon>
-        }
-      />
+      {partnerLabel ? (
+        <SwitchRow
+          title={partnerLabel}
+          subtitle="Shared plans, not your salary"
+          checked={partner}
+          onToggle={setPartner}
+          icon={
+            <Icon>
+              <circle cx="9" cy="8" r="3.5" />
+              <circle cx="17" cy="9" r="2.5" />
+              <path d="M3 20c1-3.5 3.5-5 6-5s5 1.5 6 5M15 15c2.5 0 4.5 1.5 5.5 4" />
+            </Icon>
+          }
+        />
+      ) : null}
 
       <p className="dm-lgroup">How we use it</p>
       <SwitchRow
@@ -173,21 +181,21 @@ export default function PrivacyPage() {
             try {
               const blob = new Blob(
                 [
-                  "dear me · your data export\n\nDemo PDF. In the real app this is your facts and documents.",
+                  "dear me · your data export\n\nDemo export. In the real app this is your facts and documents as a PDF.\n",
                 ],
-                { type: "application/pdf" },
+                { type: "text/plain;charset=utf-8" },
               );
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = "dear-me-data.pdf";
+              a.download = "dear-me-data.txt";
               a.click();
               URL.revokeObjectURL(url);
             } catch {
               /* ignore */
             }
             setDownloading(false);
-            toast.show({ message: "PDF downloaded." });
+            toast.show({ message: "Export downloaded." });
           }, 900);
         }}
       >

@@ -6,7 +6,12 @@ import { Squirrel } from "@/components/brand/Squirrel";
 import { useToast } from "@/components/feedback/Toast";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { useState } from "react";
+import {
+  advisorForPersona,
+  readPersonaId,
+} from "@/lib/personas";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const days = [
   { label: "Mon", n: 2, disabled: true },
@@ -33,6 +38,8 @@ const slots = [
 type Props = {
   advisorName?: string;
   advisorRole?: string;
+  about?: string;
+  noteDefault?: string;
   className?: string;
   onBooked?: () => void;
   onBack?: () => void;
@@ -43,8 +50,10 @@ type Props = {
  * `.bk-info` is the laptop left column (Calendly split); hidden on phone.
  */
 export function AdvisorBooking({
-  advisorName = "Sara Keller",
-  advisorRole = "Pension advisor at Pax · Basel",
+  advisorName: advisorNameProp,
+  advisorRole: advisorRoleProp,
+  about: aboutProp,
+  noteDefault: noteDefaultProp,
   className,
   onBooked,
   onBack,
@@ -56,6 +65,27 @@ export function AdvisorBooking({
   const [channel, setChannel] = useState<"Video" | "Phone" | "In person">(
     "Video",
   );
+  const seed = advisorForPersona(
+    typeof window !== "undefined" ? readPersonaId() : "lena",
+  );
+  const [advisorName, setAdvisorName] = useState(
+    advisorNameProp ?? seed.name,
+  );
+  const [advisorRole, setAdvisorRole] = useState(
+    advisorRoleProp ?? seed.role,
+  );
+  const [about, setAbout] = useState(aboutProp ?? seed.about);
+  const [noteDefault, setNoteDefault] = useState(
+    noteDefaultProp ?? seed.noteDefault,
+  );
+
+  useEffect(() => {
+    const a = advisorForPersona(readPersonaId());
+    if (!advisorNameProp) setAdvisorName(a.name);
+    if (!advisorRoleProp) setAdvisorRole(a.role);
+    if (!aboutProp) setAbout(a.about);
+    if (!noteDefaultProp) setNoteDefault(a.noteDefault);
+  }, [advisorNameProp, advisorRoleProp, aboutProp, noteDefaultProp]);
 
   const when = `Tue ${day} Nov · ${slot ?? "10:30"}`;
   const where =
@@ -64,6 +94,7 @@ export function AdvisorBooking({
       : channel === "In person"
         ? "At Pax, Basel"
         : "Video call or at Pax";
+  const first = advisorName.split(/\s+/)[0] || "Sara";
   const initials = advisorName
     .split(/\s+/)
     .map((p) => p[0])
@@ -88,7 +119,7 @@ export function AdvisorBooking({
           </div>
           <div>
             <dt>About</dt>
-            <dd>Can I go to 60 % after the baby?</dd>
+            <dd>{about}</dd>
           </div>
         </dl>
       </div>
@@ -228,13 +259,15 @@ export function AdvisorBooking({
           <div className="dm-field2">
             <label>Your question</label>
             <textarea
+              key={noteDefault}
               rows={2}
-              defaultValue="Can I go to 60 % from March without a gap in my pension?"
+              defaultValue={noteDefault}
             />
           </div>
           <ShareConsent onConfirm={() => setStep(4)} />
           <p className="dm-small dm-muted" style={{ margin: 0 }}>
-            So Sara doesn&apos;t start from zero. Documents and chats stay private.
+            So {first} doesn&apos;t start from zero. Documents and chats stay
+            private.
           </p>
           <Button
             variant="signal"
@@ -251,7 +284,7 @@ export function AdvisorBooking({
         <div className="dm-booked">
           <Squirrel state="done" size={72} />
           <span className="dm-label" style={{ marginTop: 6 }}>
-            You&apos;re booked with Sara
+            You&apos;re booked with {first}
           </span>
           <p className="when">
             Tue {day} Nov
@@ -280,7 +313,9 @@ export function AdvisorBooking({
               <svg viewBox="0 0 24 24" aria-hidden>
                 <path d="M5 12.5l4.5 4.5L19 7" />
               </svg>
-              <span>Sara already has your question and plan.</span>
+              <span>
+                {first} already has your question and plan.
+              </span>
             </div>
             <div>
               <svg viewBox="0 0 24 24" aria-hidden>
@@ -297,6 +332,13 @@ export function AdvisorBooking({
               <span>Afterwards, her advice lands in your plan as steps.</span>
             </div>
           </div>
+          <Link
+            href="/advisor"
+            className="dm-btn dm-btn--text dm-small"
+            style={{ alignSelf: "center" }}
+          >
+            What {first} sees
+          </Link>
           <Button
             variant="primary"
             block
