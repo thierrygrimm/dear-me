@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
 
-type Pane = "card" | "center" | "question" | "full" | "col";
+type Pane = "card" | "center" | "question" | "full" | "col" | "lesson";
 
 type Props = {
   children: ReactNode;
@@ -44,7 +44,9 @@ export function FlowShell({
           ? "fl-question"
           : pane === "full"
             ? "fl-full"
-            : "fl-col";
+            : pane === "lesson"
+              ? "lesson"
+              : "fl-col";
 
   return (
     <AppShell
@@ -71,7 +73,15 @@ export function FlowShell({
           <span />
         )}
       </div>
-      <div className={cn("pg", "fl", paneClass)}>{children}</div>
+      <div
+        className={
+          pane === "lesson"
+            ? cn("pg", "lesson")
+            : cn("pg", "fl", paneClass)
+        }
+      >
+        {children}
+      </div>
     </AppShell>
   );
 }
