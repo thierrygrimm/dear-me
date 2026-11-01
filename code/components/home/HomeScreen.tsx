@@ -46,7 +46,13 @@ export function HomeScreen() {
           title={copy.home.estimateTitle}
           duration={copy.home.estimateMeta}
           actionLabel="Use an estimate"
-          onAction={() => router.push("/answer")}
+          onAction={() => {
+            sessionStorage.setItem(
+              "dm-ask-q",
+              "Can I go to 60 % after the baby?",
+            );
+            router.push("/ask");
+          }}
         />
 
         <AskBar
