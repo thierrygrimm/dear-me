@@ -3,12 +3,9 @@
 import { ChatPlan } from "@/components/chat/ChatPlan";
 import { States } from "@/components/feedback/States";
 import { PageColumn } from "@/components/layout/PageColumn";
-import { Segmented } from "@/components/ui/Segmented";
 import { copy } from "@/lib/copy";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-
-type Mode = "actions" | "checklist" | "stepper";
 
 const seed = [
   {
@@ -43,7 +40,6 @@ const seed = [
 
 export default function PlanPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("actions");
   const [steps, setSteps] = useState(seed);
 
   const allDone = steps.every((s) => s.done);
@@ -87,22 +83,13 @@ export default function PlanPage() {
       title={copy.plan.title}
       subtitle={copy.plan.listHint}
     >
-      <Segmented
-        value={mode}
-        onChange={(v) => setMode(v as Mode)}
-        options={[
-          { value: "actions", label: "List" },
-          { value: "checklist", label: "Ticks" },
-          { value: "stepper", label: "One by one" },
-        ]}
-      />
       {allDone ? (
         <States kind="empty" title={copy.plan.empty} />
       ) : (
         <ChatPlan
           title="Before March"
           subtitle={copy.plan.listHint}
-          variant={mode}
+          variant="actions"
           steps={wired}
         />
       )}

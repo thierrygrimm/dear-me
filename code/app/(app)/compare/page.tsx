@@ -3,6 +3,7 @@
 import { ScenarioCompare } from "@/components/answer/ScenarioCompare";
 import { PageColumn } from "@/components/layout/PageColumn";
 import { WhoPlanning } from "@/components/ui/WhoPlanning";
+import { getPersona, readPersonaId } from "@/lib/personas";
 import {
   markPlanningScope,
   planningScopeHeading,
@@ -17,6 +18,7 @@ export default function ComparePage() {
   const router = useRouter();
   const [pensum] = useState(() => readIntake()?.pensumAfter ?? 60);
   const [scope, setScope] = useState<PlanningScope>(() => readPlanningScope());
+  const [title] = useState(() => getPersona(readPersonaId()).topic);
 
   function changeScope(next: PlanningScope) {
     setScope(next);
@@ -47,7 +49,7 @@ export default function ComparePage() {
           </svg>
         </button>
         <h1 className="dm-hello" style={{ fontSize: 20, margin: 0, flex: 1 }}>
-          After the baby
+          {title}
         </h1>
         <WhoPlanning variant="pill" value={scope} onChange={changeScope} />
       </div>
