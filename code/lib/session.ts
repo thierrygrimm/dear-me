@@ -21,7 +21,10 @@ export type LifeMoment =
   | "selfemployed"
   | "separating"
   | "bonus"
-  | "caring";
+  | "caring"
+  | "grandchild"
+  | "catchup"
+  | "retire";
 
 export type CertValues = {
   insuredSalary: number;
@@ -58,6 +61,9 @@ export const moreMoments: {
   { id: "selfemployed", label: "Going self-employed" },
   { id: "separating", label: "Separating" },
   { id: "bonus", label: "A bonus or inheritance" },
+  { id: "grandchild", label: "Saving for a grandchild" },
+  { id: "catchup", label: "Saving more before retirement" },
+  { id: "retire", label: "Retiring in the next few years" },
   { id: "caring", label: "Caring for a parent" },
 ];
 
@@ -71,8 +77,101 @@ export const momentLabels: Record<LifeMoment, string> = {
   selfemployed: "Going self-employed",
   separating: "Separating",
   bonus: "A bonus or inheritance",
+  grandchild: "Saving for a grandchild",
+  catchup: "Saving more before retirement",
+  retire: "Retiring in the next few years",
   caring: "Caring for a parent",
 };
+
+/**
+ * Age eligibility from LifeMoments design system.
+ * Unknown age → show moments that don't need a band (or treat employed/partner as eligible).
+ */
+function momentEligible(id: LifeMoment, age: number | null): boolean {
+  switch (id) {
+    case "firstjob":
+      return age === null || age < 30;
+    case "together":
+      return true; // unmarried-context unknown → show
+    case "child":
+      return age === null || (age >= 18 && age <= 45);
+    case "less":
+      return true; // employed unknown → always eligible
+    case "home":
+      return age === null || (age >= 25 && age <= 60);
+    case "selfemployed":
+      return age === null || age < 60;
+    case "separating":
+      return true; // partner context unknown → show
+    case "bonus":
+      return true;
+    case "grandchild":
+      return age !== null && age >= 45;
+    case "catchup":
+      return age !== null && age >= 50;
+    case "retire":
+      return age !== null && age >= 58;
+    case "caring":
+      return age !== null && age >= 40;
+    default:
+      return true;
+  }
+}
+
+/** Fill order when a preferred set has fewer than four eligible moments. */
+const SUGGEST_FILL: LifeMoment[] = [
+  "child",
+  "less",
+  "home",
+  "together",
+  "firstjob",
+  "selfemployed",
+  "separating",
+  "bonus",
+  "grandchild",
+  "catchup",
+  "retire",
+  "caring",
+];
+
+/** Age-band preference for the four suggested tiles (Lena ~34 vs Ruth ~61). */
+function suggestPrefer(age: number | null): LifeMoment[] {
+  if (age !== null && age >= 58) {
+    return ["retire", "catchup", "bonus", "caring"];
+  }
+  if (age !== null && age >= 50) {
+    return ["catchup", "caring", "bonus", "grandchild"];
+  }
+  if (age !== null && age >= 40) {
+    return ["caring", "home", "less", "bonus"];
+  }
+  if (age !== null && age < 30) {
+    return ["firstjob", "together", "home", "bonus"];
+  }
+  // ~30–39 or unknown → Lena-like default
+  return ["child", "less", "home", "together"];
+}
+
+/**
+ * Split eligible moments into up to four suggested tiles and the rest for “Something else”.
+ */
+export function momentsForAge(age: number | null): {
+  suggested: LifeMoment[];
+  more: LifeMoment[];
+} {
+  const eligible = SUGGEST_FILL.filter((id) => momentEligible(id, age));
+  const suggested: LifeMoment[] = [];
+  for (const id of suggestPrefer(age)) {
+    if (suggested.length >= 4) break;
+    if (eligible.includes(id) && !suggested.includes(id)) suggested.push(id);
+  }
+  for (const id of eligible) {
+    if (suggested.length >= 4) break;
+    if (!suggested.includes(id)) suggested.push(id);
+  }
+  const more = eligible.filter((id) => !suggested.includes(id));
+  return { suggested, more };
+}
 
 export function hasCertificate(): boolean {
   if (typeof window === "undefined") return false;
@@ -186,6 +285,9 @@ export function planHeadline(name: string, moments: LifeMoment[]): string {
   if (moments.includes("selfemployed")) return `${who} look at working for yourself.`;
   if (moments.includes("separating")) return `${who} look at the new numbers together.`;
   if (moments.includes("bonus")) return `${who} look at that money together.`;
+  if (moments.includes("grandchild")) return `${who} look at saving for a grandchild.`;
+  if (moments.includes("catchup")) return `${who} look at catching up before retirement.`;
+  if (moments.includes("retire")) return `${who} look at making the money last.`;
   if (moments.includes("caring")) return `${who} look at caring and your pension.`;
   return `${who} get your plan started.`;
 }
