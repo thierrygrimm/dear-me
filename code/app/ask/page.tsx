@@ -62,7 +62,24 @@ export default function AskPage() {
       {ready ? (
         <Chat
           initialQuestion={seed}
-          onOpenAnswer={() => router.push("/compare")}
+          onOpenAnswer={(question) => {
+            const q = (question || "").toLowerCase();
+            if (
+              q.includes("couldn't work") ||
+              q.includes("could not work") ||
+              q.includes("disab") ||
+              q.includes("cover")
+            ) {
+              router.push("/answer?topic=disability");
+              return;
+            }
+            if (q.includes("60") || q.includes("80") || q.includes("baby")) {
+              router.push("/answer?topic=pensum");
+              return;
+            }
+            router.push("/compare");
+          }}
+          onBook={() => router.push("/me/book")}
           onAttach={() => router.push("/certificate")}
         />
       ) : null}
