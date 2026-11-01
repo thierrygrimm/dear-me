@@ -1,5 +1,6 @@
 "use client";
 
+import { IntakeSpeak } from "@/components/auth/IntakeSpeak";
 import { CalculatingPanel } from "@/components/brand/Loading";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -304,37 +305,14 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
           </div>
         </div>
       ) : (
-        <div className="dm-stack" style={{ gap: 14 }}>
-          <p className="dm-small dm-muted" style={{ margin: 0 }}>
-            Say it your way, for example &quot;four days a week&quot; or &quot;80
-            percent&quot;.
-          </p>
-          <div
-            style={{
-              display: "grid",
-              placeItems: "center",
-              gap: 10,
-              padding: "8px 0",
-            }}
-          >
-            <button
-              type="button"
-              className="dm-speakbtn"
-              aria-label="Start speaking"
-              onClick={() => {
-                // Demo: treat speak as picking 80 %
-                setValue(80);
-                setMode("type");
-              }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <rect x="9" y="3" width="6" height="11" rx="3" />
-                <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-              </svg>
-            </button>
-            <span className="dm-label">Tap and talk</span>
-          </div>
-        </div>
+        <IntakeSpeak
+          key={q}
+          onResolved={(pensum) => setValue(pensum)}
+          onChangeIt={(pensum) => {
+            setValue(pensum);
+            setMode("type");
+          }}
+        />
       )}
 
       <div className="dm-row" style={{ marginTop: "auto", flexWrap: "nowrap" }}>
