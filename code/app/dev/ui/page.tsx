@@ -8,6 +8,7 @@ import { Chat } from "@/components/chat/Chat";
 import { ChatGuide } from "@/components/chat/ChatGuide";
 import { ChatPlan } from "@/components/chat/ChatPlan";
 import { ChatSteps } from "@/components/chat/ChatSteps";
+import { LifeMomentAsk } from "@/components/chat/LifeMomentAsk";
 import {
   AnswerWidget,
   MemoryChip,
@@ -37,7 +38,9 @@ import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { PensumSlider } from "@/components/ui/PensumSlider";
 import { Segmented } from "@/components/ui/Segmented";
+import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { copy } from "@/lib/copy";
+import type { PlanningScope } from "@/lib/session";
 import { useState } from "react";
 
 function Section({
@@ -67,6 +70,7 @@ export default function DevUiPage() {
   const toast = useToast();
   const [chipOn, setChipOn] = useState(true);
   const [seg, setSeg] = useState("me");
+  const [who, setWho] = useState<PlanningScope>("me");
   const [pensum, setPensum] = useState(80);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [opt, setOpt] = useState("a");
@@ -107,9 +111,10 @@ export default function DevUiPage() {
           options={[
             { value: "me", label: "Me" },
             { value: "us", label: "Us" },
-            { value: "family", label: "Family" },
           ]}
         />
+        <span className="dm-label">Who is planning</span>
+        <WhoPlanning value={who} onChange={setWho} />
         <PensumSlider value={pensum} onChange={setPensum} />
       </Section>
 
@@ -220,6 +225,21 @@ export default function DevUiPage() {
           }}
         >
           <Chat />
+        </div>
+        <div
+          style={{
+            height: 480,
+            borderRadius: 16,
+            overflow: "auto",
+            boxShadow: "inset 0 0 0 1px var(--line)",
+            padding: 12,
+          }}
+        >
+          <LifeMomentAsk
+            moment="firstjob"
+            name="Noah"
+            onDone={() => undefined}
+          />
         </div>
         <ChatGuide
           title="Parental leave plan"
