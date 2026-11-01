@@ -103,9 +103,8 @@ const HOME_OPPS: Record<
 };
 
 function helloFor(hour: number) {
-  if (hour >= 18) return "Good evening,";
-  if (hour >= 12) return "Good afternoon,";
-  return "Good morning,";
+  // First line of the localized greeting ("Good morning," / "Guten Morgen," / …).
+  return copy.home.greeting("", hour).split("\n")[0];
 }
 
 /** Research / topic card — suppress seed while C1 LifeMomentAsk is pending. */

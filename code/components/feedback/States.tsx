@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { Squirrel } from "@/components/brand/Squirrel";
 import { copy } from "@/lib/copy";
@@ -14,27 +16,28 @@ type Props = {
   className?: string;
 };
 
-const defaults: Record<
-  StateKind,
-  { title: string; body: string; primary: string; secondary?: string }
-> = {
-  empty: {
-    title: copy.states.emptyTitle,
-    body: copy.states.emptyBody,
-    primary: copy.states.goHome,
-  },
-  error: {
-    title: copy.states.errorTitle,
-    body: copy.states.errorBody,
-    primary: copy.states.retry,
-    secondary: copy.states.goHome,
-  },
-  offline: {
+function defaultsFor(kind: StateKind) {
+  if (kind === "empty") {
+    return {
+      title: copy.states.emptyTitle,
+      body: copy.states.emptyBody,
+      primary: copy.states.goHome,
+    };
+  }
+  if (kind === "error") {
+    return {
+      title: copy.states.errorTitle,
+      body: copy.states.errorBody,
+      primary: copy.states.retry,
+      secondary: copy.states.goHome,
+    };
+  }
+  return {
     title: copy.states.offlineTitle,
     body: copy.states.offlineBody,
     primary: copy.states.retry,
-  },
-};
+  };
+}
 
 export function States({
   kind,
@@ -44,7 +47,7 @@ export function States({
   onSecondary,
   className,
 }: Props) {
-  const d = defaults[kind];
+  const d = defaultsFor(kind);
   return (
     <div className={cn("dm-state", className)}>
       <Squirrel state={kind === "empty" ? "idle" : "peek"} size={64} />
@@ -56,7 +59,7 @@ export function States({
             {d.primary}
           </Button>
         ) : null}
-        {onSecondary && d.secondary ? (
+        {onSecondary && "secondary" in d && d.secondary ? (
           <Button variant="tonal" block onClick={onSecondary}>
             {d.secondary}
           </Button>

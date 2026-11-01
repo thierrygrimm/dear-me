@@ -3,6 +3,8 @@
 import { useVoiceMeter } from "@/hooks/useVoiceMeter";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { htmlLangFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/settingsPrefs";
 import { Mic, Plus, Send, Square, X } from "lucide-react";
 import {
   useCallback,
@@ -269,7 +271,7 @@ export function AskBar({
       const recognition = new SpeechRecognitionCtor();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "en-CH";
+      recognition.lang = `${htmlLangFor(readLanguage())}-CH`;
       recognition.onresult = (event) => {
         let text = "";
         for (let i = event.resultIndex; i < event.results.length; i += 1) {
