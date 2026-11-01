@@ -33,13 +33,12 @@ export default function AskPage() {
     <div
       className="dm-app-shell"
       style={{
-        minHeight: "100dvh",
         padding: "12px 16px 14px",
         gap: 12,
         boxSizing: "border-box",
       }}
     >
-      <header className="dm-appbar">
+      <header className="dm-appbar" style={{ flexShrink: 0 }}>
         <button
           type="button"
           aria-label={copy.chat.back}
