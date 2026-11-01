@@ -1,10 +1,8 @@
 /**
  * Per-lesson one-tap quizzes for the original four learn modules.
- * New lessons (three-pillars / AHV) own their own quiz config elsewhere.
- *
- * Wire in LessonPlayer:
- *   import { getLessonQuiz } from "@/lib/lessonQuizzes";
- *   const quiz = getLessonQuiz(lessonId);
+ * New lessons (three-pillars / AHV) own their quiz steps in LESSON_CONTENT.
+ * Certificate and pillar-3a quiz steps live in lessons.ts; this module keeps
+ * the shared prompt copy for reference and /dev previews.
  */
 
 export type LessonQuizOption = {
@@ -51,7 +49,8 @@ const QUIZZES: Record<string, LessonQuiz> = {
       { label: "All of them", ok: false },
     ],
     right: "Right. Five numbers tell the story; the rest is detail.",
-    wrong: "Almost. Focus on five: insured salary, projected pension, disability, survivors, and saved so far.",
+    wrong:
+      "Almost. Focus on five: insured salary, projected pension, disability, survivors, and saved so far.",
   },
   "pillar-3a": {
     prompt: "Quick check: what does the tax room on 3a mean this year?",
@@ -60,8 +59,10 @@ const QUIZZES: Record<string, LessonQuiz> = {
       { label: "How much you can still pay in for a tax cut", ok: true },
       { label: "Your AHV contribution", ok: false },
     ],
-    right: "Right. What's left in the room still lowers this year's taxable income.",
-    wrong: "Close. Tax room is how much you can still put into 3a this year for a tax cut.",
+    right:
+      "Right. What's left in the room still lowers this year's taxable income.",
+    wrong:
+      "Close. Tax room is how much you can still put into 3a this year for a tax cut.",
   },
 };
 
