@@ -63,6 +63,9 @@ dist/
 
 # Test / coverage
 coverage/
+# Keep the B2 simulate route (path contains /coverage/)
+!code/app/api/simulate/coverage/
+!code/app/api/simulate/coverage/**
 .nyc_output/
 playwright-report/
 test-results/
