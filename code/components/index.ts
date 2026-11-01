@@ -1,6 +1,7 @@
 export { Button } from "@/components/ui/Button";
 export { Chip } from "@/components/ui/Chip";
 export { Segmented } from "@/components/ui/Segmented";
+export { WhoPlanning } from "@/components/ui/WhoPlanning";
 export { PensumSlider } from "@/components/ui/PensumSlider";
 export { NumberEdit } from "@/components/ui/NumberEdit";
 export { SourceTag } from "@/components/data/SourceTag";
@@ -43,6 +44,7 @@ export {
 export { ChatPlan } from "@/components/chat/ChatPlan";
 export { ChatSteps } from "@/components/chat/ChatSteps";
 export { ChatGuide } from "@/components/chat/ChatGuide";
+export { LifeMomentAsk } from "@/components/chat/LifeMomentAsk";
 export { NextStep } from "@/components/home/NextStep";
 export { MemoryGreeting, MemoryFacts } from "@/components/home/Memory";
 export { Opportunities } from "@/components/home/Opportunities";
