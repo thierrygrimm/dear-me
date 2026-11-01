@@ -4,43 +4,68 @@ import { Disclaimer } from "@/components/answer/Disclaimer";
 import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
 import { Button } from "@/components/ui/Button";
+import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { copy } from "@/lib/copy";
-import { readIntake } from "@/lib/session";
+import {
+  markPlanningScope,
+  planningScopeHeading,
+  readIntake,
+  readPlanningScope,
+  type PlanningScope,
+} from "@/lib/session";
 import { ChevronLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
 /**
  * Guided answer screen after Home / chat "Open".
- * Matches Flows chat2 + Verdict: short sentence, one number in the note,
- * a money comparison, then optional Pax offer — not a dashboard of controls.
+ * WhoPlanning (Segmented C) switches Me / Us / Us + baby; copy follows.
  */
 export function AnswerScreen() {
   const router = useRouter();
   const params = useSearchParams();
   const topic = params.get("topic") ?? "disability";
   const [intake] = useState(() => readIntake());
+  const [scope, setScope] = useState<PlanningScope>(() => readPlanningScope());
   const after = intake?.pensumAfter ?? 60;
 
+  function changeScope(next: PlanningScope) {
+    setScope(next);
+    markPlanningScope(next);
+  }
+
   const content = useMemo(() => {
+    const who =
+      scope === "family"
+        ? "the three of you"
+        : scope === "us"
+          ? "the two of you"
+          : "you";
+
     if (topic === "pensum" || topic === "baby") {
       return {
         question: copy.answer.pensumQuestion,
         answer: "Yes, that works.",
-        note: (
-          <>
-            It costs you about <b>CHF 620 a month at 65, for life</b>.
-          </>
-        ),
+        note:
+          scope === "me" ? (
+            <>
+              It costs you about <b>CHF 620 a month at 65, for life</b>.
+            </>
+          ) : (
+            <>
+              Together you stay above your goal. The drop is about{" "}
+              <b>CHF 620 a month at 65, for life</b>.
+            </>
+          ),
         money: {
           leftLabel: "Income now / month",
-          leftValue: "4'230",
-          leftDelta: "−2'470",
-          rightLabel: "Pension at 65 / month",
-          rightValue: "1'060",
-          rightDelta: "−620 for life",
+          leftValue: scope === "me" ? "4'230" : "9'100",
+          leftDelta: scope === "me" ? "−2'470" : "−2'470 (Lena)",
+          rightLabel: planningScopeHeading(scope),
+          rightValue: scope === "me" ? "1'060" : "3'640",
+          rightDelta: scope === "me" ? "−620 for life" : "joint · −620 Lena",
         },
-        insight: `At ${after} % your pension drops by CHF 620 a month, for life. Disability also thins — that is the bigger new gap.`,
+        insight: `At ${after} % ${who === "you" ? "your" : "Lena's"} pension drops by CHF 620 a month, for life. Disability also thins — that is the bigger new gap for ${who}.`,
         offer: false as const,
         compare: true,
       };
@@ -49,26 +74,35 @@ export function AnswerScreen() {
     return {
       question: "What if I couldn't work?",
       answer: "Almost.",
-      note: (
-        <>
-          You&apos;d have about <b>half your income</b>. The soft spot is
-          disability cover.
-        </>
-      ),
+      note:
+        scope === "me" ? (
+          <>
+            You&apos;d have about <b>half your income</b>. The soft spot is
+            disability cover.
+          </>
+        ) : (
+          <>
+            Together you&apos;d still cover most of life. Alone, Lena would have
+            about <b>half her income</b>.
+          </>
+        ),
       money: {
-        leftLabel: "Income today / month",
-        leftValue: "6'700",
+        leftLabel:
+          scope === "me" ? "Income today / month" : "Household today / month",
+        leftValue: scope === "me" ? "6'700" : "11'900",
         leftDelta: undefined as string | undefined,
-        rightLabel: "If you couldn't work",
-        rightValue: "3'100",
-        rightDelta: "−3'600 / month",
+        rightLabel: "If Lena couldn't work",
+        rightValue: scope === "me" ? "3'100" : "8'300",
+        rightDelta: scope === "me" ? "−3'600 / month" : "−3'600 Lena",
       },
       insight:
-        "Your fund and AHV would pay about CHF 3'100 a month. The gap is mostly because you plan to work part-time after the baby.",
+        scope === "me"
+          ? "Your fund and AHV would pay about CHF 3'100 a month. The gap is mostly because you plan to work part-time after the baby."
+          : `For ${who}, Marco's income still carries a lot. The open spot is Lena's disability cover.`,
       offer: true as const,
       compare: false,
     };
-  }, [topic, after]);
+  }, [topic, after, scope]);
 
   return (
     <div
@@ -91,7 +125,7 @@ export function AnswerScreen() {
         >
           <ChevronLeft strokeWidth={1.75} />
         </button>
-        <span />
+        <WhoPlanning variant="pill" value={scope} onChange={changeScope} />
         <span style={{ width: 36 }} />
       </header>
 
@@ -142,10 +176,7 @@ export function AnswerScreen() {
             See all of it
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={() => router.push("/compare")}
-          >
+          <button type="button" onClick={() => router.push("/compare")}>
             See what changes at {after} %
           </button>
         )}
