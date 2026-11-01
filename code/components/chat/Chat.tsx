@@ -8,6 +8,7 @@ import {
   MemoryChip,
 } from "@/components/chat/ChatWidgets";
 import { ChatSteps, type StepLog } from "@/components/chat/ChatSteps";
+import { LifeMomentAsk } from "@/components/chat/LifeMomentAsk";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import {
   resolveDemoAnswer,
@@ -17,6 +18,14 @@ import {
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import { emphasizeMoney } from "@/lib/emphasizeMoney";
+import { primaryMoment, scriptFor } from "@/lib/lifeMoments";
+import {
+  markMomentAsked,
+  readAskedMoments,
+  readMoments,
+  readName,
+  type LifeMoment,
+} from "@/lib/session";
 import {
   useCallback,
   useEffect,
@@ -68,6 +77,11 @@ function isNavReply(text: string): "compare" | "book" | null {
   return null;
 }
 
+function startersFor(moment: LifeMoment | null): string[] {
+  if (!moment) return STARTER_REPLIES;
+  return scriptFor(moment).startersAfter;
+}
+
 function ThinkingRow({ label }: { label: string }) {
   return (
     <div className="dm-thinking dm-fadein" aria-live="polite">
@@ -88,6 +102,7 @@ function clearTimers(timers: number[]) {
 
 /**
  * Full chat screen behaviour from the design system:
+ * LifeMoments C1 ask-before-telling when a moment is pending, else
  * day tag → me bubble → thinking / ChatSteps → streamed answer →
  * one widget → short disclaimer → quick replies → AskBar.
  */
@@ -108,10 +123,11 @@ export function Chat({
   const busyRef = useRef(false);
 
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [quickReplies, setQuickReplies] = useState<string[] | null>(
-    STARTER_REPLIES,
-  );
+  const [quickReplies, setQuickReplies] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingMoment, setPendingMoment] = useState<LifeMoment | null>(null);
+  const [personName, setPersonName] = useState("there");
+  const [ready, setReady] = useState(false);
 
   const setBusyBoth = useCallback((value: boolean) => {
     busyRef.current = value;
@@ -126,7 +142,7 @@ export function Chat({
 
   useEffect(() => {
     scrollToEnd();
-  }, [turns, quickReplies, scrollToEnd]);
+  }, [turns, quickReplies, pendingMoment, scrollToEnd]);
 
   useEffect(
     () => () => {
@@ -246,13 +262,11 @@ export function Chat({
       };
 
       if (!useSteps) {
-        // Short path: hopping nuts until the first word.
         const thinkMs = reducedMotion ? 0 : 900;
         push(startStreaming, thinkMs);
         return;
       }
 
-      // Longer path: animate ChatSteps, then collapse and stream.
       let elapsed = 0;
       answer.steps.forEach((step, index) => {
         const startAt = elapsed;
@@ -306,15 +320,47 @@ export function Chat({
   useEffect(() => {
     if (bootRef.current) return;
     bootRef.current = true;
+
+    const name = readName();
+    setPersonName(name);
+
+    const moments = readMoments();
+    const asked = readAskedMoments();
+    const primary = primaryMoment(moments);
+    const needsAsk = Boolean(primary && !asked.includes(primary));
+
     const seed = initialQuestion?.trim();
     if (seed) {
+      // Explicit ask from Home / AskBar wins; still remember moment for later.
+      setPendingMoment(null);
       setQuickReplies(null);
-      // Defer so first paint shows the shell.
+      setReady(true);
       const id = window.setTimeout(() => runAnswer(seed), 80);
       return () => window.clearTimeout(id);
     }
+
+    if (needsAsk && primary) {
+      setPendingMoment(primary);
+      setQuickReplies(null);
+      setReady(true);
+      return undefined;
+    }
+
+    setPendingMoment(null);
+    setQuickReplies(startersFor(primary));
+    setReady(true);
     return undefined;
   }, [initialQuestion, runAnswer]);
+
+  function finishMomentAsk(starters: string[], followUp?: string) {
+    setPendingMoment(null);
+    if (followUp) {
+      setQuickReplies(null);
+      window.setTimeout(() => runAnswer(followUp), 80);
+      return;
+    }
+    setQuickReplies(starters);
+  }
 
   // Legacy layout-only mode for older call sites.
   if (legacyMessages) {
@@ -344,6 +390,13 @@ export function Chat({
     );
   }
 
+  const showEmptyHint =
+    ready &&
+    !pendingMoment &&
+    turns.length === 0 &&
+    !busy &&
+    Boolean(quickReplies?.length);
+
   return (
     <div
       className={cn("dm-chat", className)}
@@ -362,7 +415,17 @@ export function Chat({
       >
         <span className="dm-daytag">Today</span>
 
-        {turns.length === 0 && !busy ? (
+        {pendingMoment ? (
+          <LifeMomentAsk
+            moment={pendingMoment}
+            name={personName}
+            onAttach={onAttach}
+            onBookAdvisor={onBook}
+            onDone={finishMomentAsk}
+          />
+        ) : null}
+
+        {showEmptyHint ? (
           <div className="dm-bubble dm-bubble--us">
             Ask in your own words. I&apos;ll answer first, then we can play with
             the numbers.
@@ -384,7 +447,7 @@ export function Chat({
           />
         ))}
 
-        {quickReplies && quickReplies.length > 0 && !busy ? (
+        {!pendingMoment && quickReplies && quickReplies.length > 0 && !busy ? (
           <div className="dm-sugg dm-fadein">
             {quickReplies.map((r) => (
               <button
@@ -415,7 +478,13 @@ export function Chat({
         sticky
         disabled={busy}
         onAttach={onAttach}
-        onSubmit={(value) => runAnswer(value)}
+        onSubmit={(value) => {
+          if (pendingMoment) {
+            markMomentAsked(pendingMoment);
+            setPendingMoment(null);
+          }
+          runAnswer(value);
+        }}
       />
     </div>
   );
