@@ -11,12 +11,11 @@
   BaselHack 2026 · Pax challenge · Philippe Reichen &amp; Thierry Grimm
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind-4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind">
-</p>
+<div align='left'>
+
+[![](https://img.shields.io/badge/Next.js-000000.svg?style=for-the-badge&logo=nextdotjs&logoColor=white 'Next.js')](https://nextjs.org/) [![](https://img.shields.io/badge/React-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black 'React')](https://react.dev/) [![](https://img.shields.io/badge/TypeScript-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white 'TypeScript')](https://www.typescriptlang.org/) [![](https://img.shields.io/badge/Tailwind-38BDF8.svg?style=for-the-badge&logo=tailwindcss&logoColor=white 'Tailwind')](https://tailwindcss.com/)
+
+</div>
 
 <details>
   <summary>Table of contents</summary>
