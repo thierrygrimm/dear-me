@@ -37,10 +37,24 @@ type Props = {
   className?: string;
 };
 
+/** Cap facts at two; fill whyShown from the gap if the script omitted it. */
+function prepareOffer(
+  offer: MomentOffer,
+  reveal: MomentReveal,
+): MomentOffer {
+  return {
+    ...offer,
+    facts: offer.facts.slice(0, 2),
+    whyShown:
+      offer.whyShown ??
+      `Shown because ${reveal.big.label}: ${reveal.big.value} ${reveal.big.meaning}.`,
+  };
+}
+
 /**
  * LifeMoments C1–C3: ask before telling.
  * Greeting + bold tap question(s) → one sentence + one big number →
- * optional Pax idea sheet only when asked.
+ * optional Pax idea sheet only when asked (one idea; second on request).
  */
 export function LifeMomentAsk({
   moment,
@@ -57,7 +71,15 @@ export function LifeMomentAsk({
   const [lines, setLines] = useState<Line[]>([]);
   const [reveal, setReveal] = useState<MomentReveal | null>(null);
   const [offerOpen, setOfferOpen] = useState(false);
-  const [offer, setOffer] = useState<MomentOffer | null>(null);
+  const [primaryOffer, setPrimaryOffer] = useState<MomentOffer | null>(null);
+  const [secondaryOffer, setSecondaryOffer] = useState<MomentOffer | null>(
+    null,
+  );
+  /** Which Pax idea the sheet is showing — never both. */
+  const [sheetOffer, setSheetOffer] = useState<MomentOffer | null>(null);
+  const [showedSecondary, setShowedSecondary] = useState(false);
+  const [whyOpen, setWhyOpen] = useState(false);
+  const [choseNext, setChoseNext] = useState(false);
   const [remembered, setRemembered] = useState<string | null>(null);
   const [booted, setBooted] = useState(false);
 
@@ -67,6 +89,9 @@ export function LifeMomentAsk({
     Boolean(step) &&
     lines.some((l) => l.id === `q-${step!.id}`) &&
     !lines.some((l) => l.id === `a-${step!.id}`);
+
+  const canShowAnother =
+    Boolean(secondaryOffer) && !showedSecondary && sheetOffer === primaryOffer;
 
   useEffect(() => {
     if (booted) return;
@@ -86,8 +111,17 @@ export function LifeMomentAsk({
     markMomentAnswers(moment, nextAnswers);
     markMomentAsked(moment);
     const nextReveal = script.reveal(nextAnswers);
+    const primary = prepareOffer(nextReveal.offer, nextReveal);
+    const secondary = nextReveal.offerSecondary
+      ? prepareOffer(nextReveal.offerSecondary, nextReveal)
+      : null;
     setReveal(nextReveal);
-    setOffer(nextReveal.offer);
+    setPrimaryOffer(primary);
+    setSecondaryOffer(secondary);
+    setSheetOffer(primary);
+    setShowedSecondary(false);
+    setWhyOpen(false);
+    setChoseNext(false);
     setPhase("reveal");
 
     const labels = script.questions
@@ -131,14 +165,23 @@ export function LifeMomentAsk({
     }, 480);
   }
 
+  function openPrimarySheet() {
+    if (!primaryOffer) return;
+    setSheetOffer(primaryOffer);
+    setShowedSecondary(false);
+    setWhyOpen(false);
+    setOfferOpen(true);
+  }
+
   function onNextTap(label: string) {
     if (!reveal) return;
+    setChoseNext(true);
     setLines((prev) => [
       ...prev,
       { kind: "me", id: `next-${Date.now()}`, text: label },
     ]);
 
-    if (label === "What could help?" && offer) {
+    if (label === "What could help?" && primaryOffer) {
       window.setTimeout(() => {
         setLines((prev) => [
           ...prev,
@@ -148,7 +191,7 @@ export function LifeMomentAsk({
             text: "One idea fits this gap. Only if you want it.",
           },
         ]);
-        setOfferOpen(true);
+        openPrimarySheet();
       }, 420);
       return;
     }
@@ -163,6 +206,7 @@ export function LifeMomentAsk({
             text: reveal.note,
           },
         ]);
+        setChoseNext(false);
       }, 420);
       return;
     }
@@ -177,9 +221,27 @@ export function LifeMomentAsk({
 
   function continueToChat() {
     setOfferOpen(false);
+    setWhyOpen(false);
     setPhase("done");
     onDone(script.startersAfter);
   }
+
+  function onAdvisor() {
+    setOfferOpen(false);
+    setWhyOpen(false);
+    onBookAdvisor?.();
+    setPhase("done");
+    onDone(script.startersAfter);
+  }
+
+  function onShowAnother() {
+    if (!secondaryOffer || showedSecondary) return;
+    setWhyOpen(false);
+    setSheetOffer(secondaryOffer);
+    setShowedSecondary(true);
+  }
+
+  const offer = sheetOffer;
 
   return (
     <div className={cn("dm-lmq", className)}>
@@ -236,6 +298,7 @@ export function LifeMomentAsk({
 
       {phase === "reveal" && reveal && lines.some((l) => l.id === "reveal-say") ? (
         <>
+          {/* C2: one sentence + one big number. No product here. */}
           <div className="lmq-big dm-fadein">
             <small>{reveal.big.label}</small>
             <b>{reveal.big.value}</b>
@@ -243,34 +306,49 @@ export function LifeMomentAsk({
           </div>
           <p className="lmq-note dm-fadein">{reveal.note}</p>
           {remembered ? <MemoryChip text={remembered} /> : null}
-          <div className="dm-sugg dm-fadein">
-            {reveal.next.map((label) => (
-              <button key={label} type="button" onClick={() => onNextTap(label)}>
-                {label}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="lmq-skip dm-fadein"
-            onClick={continueToChat}
-          >
-            Ask something else
-          </button>
+          {!choseNext ? (
+            <div className="dm-sugg dm-fadein">
+              {reveal.next.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onNextTap(label)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {!choseNext ? (
+            <button
+              type="button"
+              className="lmq-skip dm-fadein"
+              onClick={continueToChat}
+            >
+              Ask something else
+            </button>
+          ) : null}
         </>
       ) : null}
 
       <BottomSheet
         open={offerOpen}
-        onClose={() => setOfferOpen(false)}
-        title={offer?.title}
+        onClose={() => {
+          setOfferOpen(false);
+          setWhyOpen(false);
+          // Scrim dismiss keeps them on C2 so they can ask again.
+          if (phase === "reveal") setChoseNext(false);
+        }}
       >
         {offer ? (
           <div className="lmq-offer">
             <div className="lmq-offer__brand">
-              <span className="lmq-offer__pax">Pax</span>
+              <span className="lmq-offer__pax" aria-label="Pax">
+                Pax
+              </span>
               <span className="dm-small dm-muted">Partner idea</span>
             </div>
+            <h4 className="lmq-offer__title">{offer.title}</h4>
             <p className="lmq-offer__body">{offer.body}</p>
             <ul className="lmq-offer__facts">
               {offer.facts.map((f) => (
@@ -280,20 +358,36 @@ export function LifeMomentAsk({
                 </li>
               ))}
             </ul>
-            <Button
-              variant="pax"
-              block
-              onClick={() => {
-                setOfferOpen(false);
-                onBookAdvisor?.();
-                continueToChat();
-              }}
-            >
+            {offer.whyShown ? (
+              <div className={cn("lmq-offer__why", whyOpen && "is-open")}>
+                <button
+                  type="button"
+                  className="lmq-offer__why-btn"
+                  aria-expanded={whyOpen}
+                  onClick={() => setWhyOpen((v) => !v)}
+                >
+                  Why am I seeing this?
+                </button>
+                {whyOpen ? (
+                  <p className="lmq-offer__why-body">{offer.whyShown}</p>
+                ) : null}
+              </div>
+            ) : null}
+            <Button variant="pax" block onClick={onAdvisor}>
               Talk to an advisor
             </Button>
             <Button variant="text" block onClick={continueToChat}>
               Not now
             </Button>
+            {canShowAnother ? (
+              <button
+                type="button"
+                className="lmq-offer__another"
+                onClick={onShowAnother}
+              >
+                Show another idea
+              </button>
+            ) : null}
           </div>
         ) : null}
       </BottomSheet>
