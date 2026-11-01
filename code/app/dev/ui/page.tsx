@@ -115,6 +115,7 @@ export default function DevUiPage() {
         />
         <span className="dm-label">Who is planning</span>
         <WhoPlanning value={who} onChange={setWho} />
+        <WhoPlanning variant="pill" value={who} onChange={setWho} />
         <PensumSlider value={pensum} onChange={setPensum} />
       </Section>
 
