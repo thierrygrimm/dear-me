@@ -12,7 +12,7 @@ import {
   type FormEvent,
 } from "react";
 
-type AskMode = "idle" | "listening" | "transcribing";
+type AskMode = "idle" | "listening" | "writing";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -51,15 +51,9 @@ function formatTimer(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function Waveform({
-  levels,
-  frozen,
-}: {
-  levels: number[];
-  frozen?: boolean;
-}) {
+function Waveform({ levels }: { levels: number[] }) {
   return (
-    <div className={cn("dm-wave", frozen && "is-frozen")} aria-hidden>
+    <div className="dm-wave" aria-hidden>
       {levels.map((level, i) => (
         <i
           key={i}
@@ -67,6 +61,16 @@ function Waveform({
         />
       ))}
     </div>
+  );
+}
+
+function Dots3({ label = copy.askWriting }: { label?: string }) {
+  return (
+    <span className="dm-dots3" aria-label={label}>
+      <i />
+      <i />
+      <i />
+    </span>
   );
 }
 
@@ -95,12 +99,14 @@ export function AskBar({
   const [mode, setMode] = useState<AskMode>("idle");
   const [focused, setFocused] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const [frozenLevels, setFrozenLevels] = useState<number[] | null>(null);
+  const [writingWords, setWritingWords] = useState<string[]>([]);
+  const [writingCount, setWritingCount] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const transcriptRef = useRef("");
   const finishingRef = useRef(false);
+  const writeTimerRef = useRef<number | null>(null);
 
   const {
     levels,
@@ -110,7 +116,14 @@ export function AskBar({
     stop: stopMeter,
   } = useVoiceMeter(40);
   const canSend = value.trim().length > 0;
-  const isVoice = mode === "listening" || mode === "transcribing";
+  const isBusy = mode !== "idle";
+
+  const clearWriteTimer = useCallback(() => {
+    if (writeTimerRef.current != null) {
+      window.clearInterval(writeTimerRef.current);
+      writeTimerRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     if (mode !== "listening") return;
@@ -118,35 +131,13 @@ export function AskBar({
     return () => window.clearInterval(id);
   }, [mode]);
 
-  const finishListening = useCallback(
-    async (opts?: { cancel?: boolean }) => {
-      if (finishingRef.current) return;
-      finishingRef.current = true;
-
-      recognitionRef.current?.stop();
-      recognitionRef.current = null;
-
-      if (opts?.cancel) {
-        stopMeter();
-        setFrozenLevels(null);
-        setMode("idle");
-        transcriptRef.current = "";
-        finishingRef.current = false;
-        return;
-      }
-
-      setFrozenLevels(levels);
-      setMode("transcribing");
-      stopMeter();
-
-      const spoken = transcriptRef.current.trim();
-      await new Promise((r) => window.setTimeout(r, spoken ? 600 : 900));
-
-      const text = spoken || mockTranscript;
+  const landInField = useCallback(
+    (text: string) => {
+      clearWriteTimer();
+      setWritingWords([]);
+      setWritingCount(0);
       setValue(text);
       setMode("idle");
-      setFrozenLevels(null);
-      transcriptRef.current = "";
       finishingRef.current = false;
       requestAnimationFrame(() => {
         inputRef.current?.focus();
@@ -154,14 +145,79 @@ export function AskBar({
         inputRef.current?.setSelectionRange(len, len);
       });
     },
-    [levels, mockTranscript, setValue, stopMeter],
+    [clearWriteTimer, setValue],
+  );
+
+  const startWriting = useCallback(
+    (text: string) => {
+      const words = text.trim().split(/\s+/).filter(Boolean);
+      setWritingWords(words);
+      setWritingCount(0);
+      setMode("writing");
+      clearWriteTimer();
+
+      if (words.length === 0) {
+        landInField(text);
+        return;
+      }
+
+      // Design system: first word appears immediately, then +140ms each
+      setWritingCount(1);
+      if (words.length === 1) {
+        window.setTimeout(() => landInField(words.join(" ")), 350);
+        return;
+      }
+
+      let k = 1;
+      writeTimerRef.current = window.setInterval(() => {
+        k += 1;
+        setWritingCount(k);
+        if (k >= words.length) {
+          clearWriteTimer();
+          window.setTimeout(() => landInField(words.join(" ")), 350);
+        }
+      }, 140);
+    },
+    [clearWriteTimer, landInField],
+  );
+
+  const finishListening = useCallback(
+    (opts?: { cancel?: boolean }) => {
+      if (finishingRef.current) return;
+      finishingRef.current = true;
+
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      stopMeter();
+
+      if (opts?.cancel) {
+        clearWriteTimer();
+        setWritingWords([]);
+        setWritingCount(0);
+        setMode("idle");
+        transcriptRef.current = "";
+        finishingRef.current = false;
+        return;
+      }
+
+      // Transcribing = AskBar state 5: normal bar, no recorder / waveform.
+      // Cancel · words writing in · three dots. Instant cut, no fade.
+      const spoken = transcriptRef.current.trim();
+      const text = spoken || mockTranscript;
+      transcriptRef.current = "";
+      startWriting(text);
+    },
+    [clearWriteTimer, mockTranscript, startWriting, stopMeter],
   );
 
   const startListening = useCallback(async () => {
     if (disabled || finishingRef.current) return;
+    clearWriteTimer();
     transcriptRef.current = "";
-    setFrozenLevels(null);
+    setWritingWords([]);
+    setWritingCount(0);
     setSeconds(0);
+    finishingRef.current = false;
     setMode("listening");
     await startMeter();
 
@@ -201,9 +257,8 @@ export function AskBar({
     } catch {
       recognitionRef.current = null;
     }
-  }, [disabled, startMeter]);
+  }, [clearWriteTimer, disabled, startMeter]);
 
-  // Auto-stop after ~2s of quiet levels when using the real mic.
   useEffect(() => {
     if (mode !== "listening" || !meterActive || simulated) return;
     let quietFor = 0;
@@ -211,21 +266,21 @@ export function AskBar({
       const peak = Math.max(...levels.slice(-8));
       if (peak < 0.2) quietFor += 200;
       else quietFor = 0;
-      if (quietFor >= 2000) void finishListening();
+      if (quietFor >= 2000) finishListening();
     }, 200);
     return () => window.clearInterval(id);
   }, [finishListening, levels, meterActive, mode, simulated]);
 
-  // Simulated path: stop after 8s so demos don't run forever.
   useEffect(() => {
     if (mode !== "listening" || !simulated) return;
-    const id = window.setTimeout(() => void finishListening(), 8000);
+    const id = window.setTimeout(() => finishListening(), 8000);
     return () => window.clearTimeout(id);
   }, [finishListening, mode, simulated]);
 
   useEffect(
     () => () => {
       recognitionRef.current?.abort();
+      clearWriteTimer();
       stopMeter();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount only
@@ -234,13 +289,13 @@ export function AskBar({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!canSend || disabled || isVoice) return;
+    if (!canSend || disabled || isBusy) return;
     onSubmit?.(value.trim());
     setValue("");
   }
 
-  if (isVoice) {
-    const waveLevels = frozenLevels ?? levels;
+  /* 4 · Listening — recorder bar only */
+  if (mode === "listening") {
     return (
       <div
         className={cn(
@@ -256,44 +311,75 @@ export function AskBar({
           type="button"
           className="dm-iconbtn"
           aria-label={copy.askCancel}
-          onClick={() => void finishListening({ cancel: true })}
-          disabled={disabled || mode === "transcribing"}
+          onClick={() => finishListening({ cancel: true })}
+          disabled={disabled}
         >
           <X strokeWidth={1.75} />
         </button>
 
         <div className="dm-voice">
-          {mode === "listening" ? <span className="dm-rec" /> : null}
-          <Waveform levels={waveLevels} frozen={mode === "transcribing"} />
-          {mode === "transcribing" ? (
-            <span className="dm-shimmer">{copy.askWriting}</span>
-          ) : null}
+          <span className="dm-rec" />
+          <Waveform levels={levels} />
         </div>
 
         <div>
           <span className="dm-timer">{formatTimer(seconds)}</span>
-          {mode === "listening" ? (
-            <button
-              type="button"
-              className="dm-iconbtn dm-iconbtn--live"
-              aria-label={copy.askStop}
-              onClick={() => void finishListening()}
-            >
-              <Square
-                strokeWidth={0}
-                fill="currentColor"
-                size={14}
-                aria-hidden
-              />
-            </button>
-          ) : (
-            <span style={{ width: 44, display: "inline-block" }} aria-hidden />
-          )}
+          <button
+            type="button"
+            className="dm-iconbtn dm-iconbtn--live"
+            aria-label={copy.askStop}
+            onClick={() => finishListening()}
+          >
+            <Square
+              strokeWidth={0}
+              fill="currentColor"
+              size={14}
+              aria-hidden
+            />
+          </button>
         </div>
       </div>
     );
   }
 
+  /* 5 · Transcribing — normal bar, words write in, dots. No waveform. */
+  if (mode === "writing") {
+    return (
+      <div
+        className={cn(
+          "dm-ask is-focus",
+          sticky && "dm-floatask",
+          disabled && "is-disabled",
+          className,
+        )}
+        role="status"
+        aria-live="polite"
+        aria-label={copy.askWriting}
+      >
+        <button
+          type="button"
+          className="dm-iconbtn"
+          aria-label={copy.askCancel}
+          onClick={() => finishListening({ cancel: true })}
+          disabled={disabled}
+        >
+          <X strokeWidth={1.75} />
+        </button>
+        <span className="dm-transcript is-writing">
+          {writingWords.slice(0, writingCount).map((w, i) => (
+            <span key={`${w}-${i}`} className="w">
+              {i > 0 ? " " : ""}
+              {w}
+            </span>
+          ))}
+          <span className="dm-fakecaret" style={{ marginLeft: 2 }} />
+        </span>
+        <Dots3 />
+      </div>
+    );
+  }
+
+  /* 1–3 · Resting / focused / typing · 6 · Transcribed */
   return (
     <form
       className={cn(
