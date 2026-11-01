@@ -12,24 +12,17 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-const HOST_SELECTOR =
-  ".dm-app-shell, .dm-signup-shell, .dm-cert-shell, .dm-cert-pane, .dm-phone, .dm-app-full";
-
 const SWIPE_CLOSE = 96;
 const SWIPE_COLLAPSE = 48;
+const DIALOG_MQ = "(min-width: 900px)";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   title?: string;
   description?: string;
-  /** Start (or force) full-height explain mode. Grab still toggles. */
+  /** Start (or force) full-height explain mode. Grab still toggles on phone. */
   full?: boolean;
-  /**
-   * Prefer the app shell host (default). Set `body` to always pin the sheet
-   * to the viewport/phone frame bottom (`.dm-bs--fixed`).
-   */
-  portal?: "host" | "body";
   children: ReactNode;
   className?: string;
 };
@@ -42,13 +35,18 @@ function focusables(root: HTMLElement) {
   ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
 }
 
+function isDialogViewport() {
+  return (
+    typeof window !== "undefined" && window.matchMedia(DIALOG_MQ).matches
+  );
+}
+
 export function BottomSheet({
   open,
   onClose,
   title,
   description,
   full: fullProp = false,
-  portal = "host",
   children,
   className,
 }: Props) {
@@ -56,28 +54,19 @@ export function BottomSheet({
   const titleId = `${reactId}-title`;
   const descId = `${reactId}-desc`;
 
-  const anchorRef = useRef<HTMLSpanElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const startY = useRef(0);
   const dragYRef = useRef(0);
   const dragging = useRef(false);
 
-  const [host, setHost] = useState<Element | null>(null);
   const [mounted, setMounted] = useState(false);
   const [full, setFull] = useState(fullProp);
   const [dragY, setDragY] = useState(0);
 
   useLayoutEffect(() => {
     setMounted(true);
-    if (portal === "body") {
-      setHost(null);
-      return;
-    }
-    const el = anchorRef.current;
-    if (!el) return;
-    setHost(el.closest(HOST_SELECTOR));
-  }, [open, portal]);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -140,13 +129,13 @@ export function BottomSheet({
   }, [open, onClose]);
 
   useEffect(() => {
-    if (!open || !host) return;
-    const prev = (host as HTMLElement).style.overflow;
-    (host as HTMLElement).style.overflow = "hidden";
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      (host as HTMLElement).style.overflow = prev;
+      document.body.style.overflow = prev;
     };
-  }, [open, host]);
+  }, [open]);
 
   const endDrag = () => {
     dragging.current = false;
@@ -163,7 +152,7 @@ export function BottomSheet({
   };
 
   const onTouchStart = (e: TouchEvent) => {
-    if (!open) return;
+    if (!open || isDialogViewport()) return;
     const sheet = sheetRef.current;
     const t = e.target as HTMLElement | null;
     const fromGrab = !!t?.closest(".grab");
@@ -189,8 +178,9 @@ export function BottomSheet({
     endDrag();
   };
 
+  /* Inline translateY fights centred-dialog CSS at ≥900px — only apply on phone. */
   const sheetStyle =
-    dragY > 0
+    dragY > 0 && !isDialogViewport()
       ? {
           transform: `translateY(${dragY}px)`,
           transition: "none" as const,
@@ -199,12 +189,7 @@ export function BottomSheet({
 
   const sheet = (
     <div
-      className={cn(
-        "dm-bs",
-        host ? "dm-bs--hosted" : "dm-bs--fixed",
-        open && "open",
-        className,
-      )}
+      className={cn("dm-bs", "dm-bs--fixed", open && "open", className)}
       aria-hidden={!open}
     >
       <button
@@ -242,14 +227,7 @@ export function BottomSheet({
     </div>
   );
 
-  return (
-    <>
-      <span ref={anchorRef} hidden aria-hidden />
-      {mounted
-        ? createPortal(sheet, host ?? document.body)
-        : null}
-    </>
-  );
+  return mounted ? createPortal(sheet, document.body) : null;
 }
 
 type OptionProps = {
