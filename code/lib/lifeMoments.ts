@@ -480,15 +480,15 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
   retire: {
     id: "retire",
     greeting: (name) =>
-      `${hi(name)} The money's nearly here. One question before we talk about making it last:`,
+      `${hi(name)} Retiring soon. Let's start with your choice:`,
     questions: [
       {
         id: "payout_choice",
-        question: "What are you taking from the pension fund?",
+        question: "How will you take your pension fund money?",
         options: [
-          { id: "lump", label: "Mostly a lump sum" },
-          { id: "pension", label: "Mostly a pension" },
-          { id: "mix", label: "A mix" },
+          { id: "lump", label: "As a lump sum" },
+          { id: "pension", label: "As a pension" },
+          { id: "mix", label: "Half and half" },
           { id: "unsure", label: "Not decided" },
         ],
         note: "Or tap + and bring in your retirement offer.",
@@ -500,7 +500,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
       return withOffers("retire", answers, {
         sentence: lump
           ? "Dear me, the money's here. Now let's make it last. One number:"
-          : "Even with a pension, a lump sum needs a plan. One number:",
+          : "Even with a pension, any capital still needs a plan. One number:",
         big: {
           label: "This capital could pay",
           value: "CHF 2'100",
@@ -556,10 +556,12 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
   },
 };
 
-/** Prefer child/less demo path, else first selected moment. */
+/**
+ * Primary story for Chat C1: first moment in the selected list.
+ * Order is intent — applyPersona sets [firstjob] for Noah, [child, less]
+ * for Lena, etc. Do not hard-prefer child over a later-selected story.
+ */
 export function primaryMoment(moments: LifeMoment[]): LifeMoment | null {
-  if (moments.includes("child")) return "child";
-  if (moments.includes("less")) return "less";
   return moments[0] ?? null;
 }
 
