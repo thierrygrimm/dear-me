@@ -10,6 +10,7 @@ import {
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
 import { AppShell } from "@/components/layout/AppShell";
+import { FlowShell } from "@/components/layout/FlowShell";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { needsNumericIntake } from "@/lib/lifeMoments";
 import { getPersona, readPersonaId } from "@/lib/personas";
@@ -237,31 +238,63 @@ export default function SignUpPage() {
     );
   }
 
-  return (
-    <div className="dm-signup-shell" ref={pulseRef}>
-      {step === "welcome" ? (
-        <WelcomeScreen
-          onGetStarted={() => setStep("choose")}
-          onLogin={() => setStep("choose")}
-        />
-      ) : null}
+  function exitFlow() {
+    markSignedIn("guest");
+    markOnboarded();
+    router.replace("/");
+  }
 
-      {step === "connect" ? (
-        <ConnectPaxScreen
-          onBack={() => setStep("choose")}
-          onContinue={() => setStep("signing")}
-          onEmail={() => begin("email")}
-        />
-      ) : null}
+  if (step === "welcome") {
+    return (
+      <AppShell variant="signapp" hideNav flush>
+        <div ref={pulseRef} style={{ display: "contents" }}>
+          <WelcomeScreen
+            onGetStarted={() => setStep("choose")}
+            onLogin={() => setStep("choose")}
+          />
+        </div>
+      </AppShell>
+    );
+  }
 
-      {step === "plan" ? (
-        <YourPlanScreen
-          name={name}
-          moments={moments}
-          onBack={() => setStep("moments")}
-          onStart={startPlan}
-        />
-      ) : null}
-    </div>
-  );
+  if (step === "connect") {
+    return (
+      <div ref={pulseRef}>
+        <FlowShell
+          step="Connect myPax"
+          progress={66}
+          pane="card"
+          onExit={exitFlow}
+        >
+          <ConnectPaxScreen
+            onBack={() => setStep("choose")}
+            onContinue={() => setStep("signing")}
+            onEmail={() => begin("email")}
+          />
+        </FlowShell>
+      </div>
+    );
+  }
+
+  if (step === "plan") {
+    return (
+      <div ref={pulseRef}>
+        <FlowShell
+          step="Set up your plan · 2 of 3"
+          progress={66}
+          pane="col"
+          onExit={exitFlow}
+        >
+          <YourPlanScreen
+            name={name}
+            moments={moments}
+            onBack={() => setStep("moments")}
+            onStart={startPlan}
+          />
+        </FlowShell>
+      </div>
+    );
+  }
+
+  return null;
 }
