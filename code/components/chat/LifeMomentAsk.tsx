@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { MemoryChip } from "@/components/chat/ChatWidgets";
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 import {
   scriptFor,
   type MomentOffer,
@@ -348,7 +349,9 @@ export function LifeMomentAsk({
               <span className="lmq-offer__pax" aria-label="Pax">
                 Pax
               </span>
-              <span className="dm-small dm-muted">Partner idea</span>
+              <span className="dm-small dm-muted">
+                {copy.offer.recommendationsFromPax}
+              </span>
             </div>
             <h4 id={offerTitleId} className="lmq-offer__title">
               {offer.title}

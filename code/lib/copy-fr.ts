@@ -181,6 +181,7 @@ export const copyFr: Copy = {
   offer: {
     why: "Pourquoi ceci ?",
     book: "En parler avec Pax",
+    recommendationsFromPax: "Recommandations de Pax",
   },
   settings: {
     groupUse: "Ce que nous utilisons",
