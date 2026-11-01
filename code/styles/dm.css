@@ -1115,6 +1115,26 @@ button.dm-pair{all:unset;cursor:pointer;display:flex;align-items:center;color:in
  .dm-psheet.open .pan{transform:none;opacity:1}
  .dm-psheet .grab{display:none}
 }
+
+/* Settings A · Language picker (DS) */
+.dm-flagv{display:inline-flex;align-items:center;gap:8px}
+.dm-flagv .fl{display:inline-flex;width:18px;height:18px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.dm-flagv .fl svg,.dm-lang .fl svg{width:100%;height:100%;display:block}
+.dm-langgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dm-opt.dm-lang{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;background:var(--surface-card);box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow 160ms,background 160ms}
+.dm-lang .fl{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px var(--line);margin-bottom:10px}
+.dm-lang b{font:600 16px/20px var(--font-text)}
+.dm-lang small{font:400 12px/16px var(--font-text);color:var(--ink-muted)}
+.dm-lang em{font-style:normal;margin-top:8px;font:500 13px/18px var(--font-display);color:var(--ink-muted)}
+.dm-lang i{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line-strong)}
+.dm-opt.dm-lang[aria-checked=true]{background:var(--surface);box-shadow:inset 0 0 0 2px var(--espressosatz)}
+.dm-opt.dm-lang[aria-checked=true] i{background:var(--neonweste);box-shadow:inset 0 0 0 1.5px var(--espressosatz),inset 0 0 0 5px var(--neonweste),inset 0 0 0 20px var(--espressosatz)}
+.dm-opt.dm-lang[aria-checked=true] em{color:var(--ink)}
+.dm-lang:focus-visible{outline:2px solid var(--brombeerkompott);outline-offset:2px}
+
+/* Me / Privacy: let .dm-lscroll fill the tab and scroll like the DS phone */
+.dm-app-main:has(> .dm-lscroll){gap:0;overflow:hidden;padding-top:16px}
+.dm-app-main > .dm-lscroll{flex:1;min-height:0;flex-shrink:1;align-self:stretch}
 .dm-gauge{margin-bottom:22px}
 .dm-gauge .c{bottom:6px}
 .dm-gauge .c span{position:absolute;top:100%;left:-20px;right:-20px;margin-top:8px}
