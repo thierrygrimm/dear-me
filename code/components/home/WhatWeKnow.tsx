@@ -3,9 +3,10 @@
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { useToast } from "@/components/feedback/Toast";
 import { Button } from "@/components/ui/Button";
+import { NumberEdit } from "@/components/ui/NumberEdit";
 import { cn } from "@/lib/cn";
 import { formatSwiss } from "@/lib/format";
-import { ChevronRight, Delete } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export type KnowFact = {
@@ -322,73 +323,17 @@ export function WhatWeKnow({ facts: initial = DEFAULT_FACTS, className }: Props)
         title={editing?.label}
       >
         {editing ? (
-          <>
-            <p
-              style={{
-                margin: 0,
-                font: "800 40px/1 var(--font-display)",
-                letterSpacing: "-0.03em",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {draft || "0"}
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 2,
-                  height: 36,
-                  marginLeft: 2,
-                  background: "var(--ink)",
-                  verticalAlign: "-4px",
-                  animation: "dmCaret 1s step-end infinite",
-                }}
-              />
-              {editing.unit ? (
-                <small
-                  style={{
-                    marginLeft: 8,
-                    font: "500 16px/1 var(--font-text)",
-                    color: "var(--ink-muted)",
-                  }}
-                >
-                  {editing.unit}
-                </small>
-              ) : null}
-            </p>
-            <p className="dm-small dm-muted" style={{ margin: 0 }}>
-              Was {editing.value}
-              {editing.unit ? ` ${editing.unit}` : ""}
-            </p>
-            <div className="dm-keys">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => {
-                    if (k === "." && draft.includes(".")) return;
-                    setDraft((d) => (d === "0" && k !== "." ? k : `${d}${k}`).slice(0, 8));
-                  }}
-                >
-                  {k}
-                </button>
-              ))}
-              <button
-                type="button"
-                aria-label="Delete"
-                onClick={() => setDraft((d) => d.slice(0, -1) || "0")}
-              >
-                <Delete strokeWidth={1.75} />
-              </button>
-            </div>
-            <Button
-              variant="primary"
-              block
-              disabled={draft === editing.value || !draft}
-              onClick={saveEdit}
-            >
-              Save
-            </Button>
-          </>
+          <NumberEdit
+            value={draft}
+            onChange={setDraft}
+            unit={editing.unit}
+            wasLabel={`${editing.value}${editing.unit ? ` ${editing.unit}` : ""}`}
+            allowDecimal={editing.unit !== "%"}
+            maxLength={editing.unit === "%" ? 3 : 10}
+            onCancel={() => setEditing(null)}
+            onSave={saveEdit}
+            saveDisabled={draft === editing.value || !draft}
+          />
         ) : null}
       </BottomSheet>
     </section>
