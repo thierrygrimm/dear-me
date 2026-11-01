@@ -1,49 +1,156 @@
-import type { LessonMeta } from "@/lib/lessons";
-
 type Props = {
-  art: LessonMeta["art"];
+  /** Wider than LessonMeta["art"] until lessons.ts lands new keys. */
+  art: string;
 };
 
-export function LessonArt({ art }: Props) {
-  if (art === "pillars") {
-    return (
-      <div
+function EqualPillars() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        gap: 8,
+        paddingBottom: 22,
+      }}
+    >
+      <i
         style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          gap: 8,
-          paddingBottom: 22,
+          width: 24,
+          height: "62%",
+          background: "#0A0507",
+          borderRadius: 6,
+        }}
+      />
+      <i
+        style={{
+          width: 24,
+          height: "62%",
+          background: "#ECFF23",
+          borderRadius: 6,
+          boxShadow: "inset 0 0 0 2px #0A0507",
+        }}
+      />
+      <i
+        style={{
+          width: 24,
+          height: "62%",
+          background: "#FF80AC",
+          borderRadius: 6,
+          boxShadow: "inset 0 0 0 2px #0A0507",
+        }}
+      />
+    </div>
+  );
+}
+
+function UnequalPillars() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        gap: 8,
+        paddingBottom: 22,
+      }}
+    >
+      <i
+        style={{
+          width: 22,
+          height: "70%",
+          background: "#FAF7F0",
+          borderRadius: 6,
+        }}
+      />
+      <i
+        style={{
+          width: 22,
+          height: "48%",
+          background: "#ECFF23",
+          borderRadius: 6,
+        }}
+      />
+      <i
+        style={{
+          width: 22,
+          height: "24%",
+          background: "#FF80AC",
+          borderRadius: 6,
+        }}
+      />
+    </div>
+  );
+}
+
+function AhvMark() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        font: "700 34px/1 var(--font-display)",
+        color: "#0A0507",
+      }}
+    >
+      AHV
+    </div>
+  );
+}
+
+function ThirteenBadge() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
+      <span
+        style={{
+          display: "grid",
+          placeItems: "center",
+          width: 64,
+          height: 72,
+          borderRadius: 12,
+          background: "#ECFF23",
+          font: "700 30px/1 var(--font-display)",
+          color: "#0A0507",
         }}
       >
-        <i
-          style={{
-            width: 22,
-            height: "70%",
-            background: "#FAF7F0",
-            borderRadius: 6,
-          }}
-        />
-        <i
-          style={{
-            width: 22,
-            height: "48%",
-            background: "#ECFF23",
-            borderRadius: 6,
-          }}
-        />
-        <i
-          style={{
-            width: 22,
-            height: "24%",
-            background: "#FF80AC",
-            borderRadius: 6,
-          }}
-        />
-      </div>
-    );
+        13
+      </span>
+    </div>
+  );
+}
+
+export function LessonArt({ art }: Props) {
+  if (
+    art === "pillars-equal" ||
+    art === "three-pillars" ||
+    art === "pillars-new"
+  ) {
+    return <EqualPillars />;
+  }
+
+  if (art === "ahv") {
+    return <AhvMark />;
+  }
+
+  if (art === "thirteen" || art === "ahv2") {
+    return <ThirteenBadge />;
+  }
+
+  if (art === "pillars") {
+    return <UnequalPillars />;
   }
 
   if (art === "part-time") {
@@ -57,7 +164,7 @@ export function LessonArt({ art }: Props) {
           height: 26,
           borderRadius: 8,
           background:
-            "repeating-linear-gradient(135deg,rgba(10,5,7,.35) 0 5px,rgba(10,5,7,.15) 5px 10px)",
+            "repeating-linear-gradient(135deg, rgba(10,5,7,.35) 0 5px, rgba(10,5,7,.15) 5px 10px)",
           overflow: "hidden",
         }}
       >
@@ -98,6 +205,7 @@ export function LessonArt({ art }: Props) {
     );
   }
 
+  // nut (and any unknown art)
   return (
     <div
       style={{
