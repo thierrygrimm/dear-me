@@ -27,6 +27,25 @@ const DEFAULT: DemoAnswer = {
 };
 
 const ANSWERS: Record<string, DemoAnswer> = {
+  "What if I couldn't work?": {
+    text: "Almost. If you couldn't work, your fund and AHV would pay about CHF 3'100 a month — roughly half of what you take home today.",
+    thinkingLabel: "Checking your cover",
+    steps: [
+      { id: "1", label: "Read your question", duration: "0.4 s" },
+      { id: "2", label: "Read your pension certificate", duration: "1.0 s" },
+      { id: "3", label: "Checked AHV disability scale", duration: "0.9 s" },
+      { id: "4", label: "Compared with your salary", duration: "0.7 s" },
+    ],
+    totalSeconds: 3.0,
+    widget: {
+      label: "If you couldn't work",
+      cue: "per month",
+      verdict: "Almost.",
+      detail: "About half your income",
+      bars: [{ height: 56 }, { height: 22, gap: true }, { height: 12 }],
+    },
+    quickReplies: ["See all of it", "Talk to Sara from Pax", "Can I go to 60 % after the baby?"],
+  },
   "Can I go to 60 % after the baby?": {
     text: "Yes, that works. About CHF 600 less a month at 65, and together you stay above your goal.",
     thinkingLabel: "Checking your numbers",
@@ -121,6 +140,14 @@ export function resolveDemoAnswer(question: string): DemoAnswer {
   }
   if (lower.includes("expect") || lower.includes("march") || lower.includes("baby due")) {
     return ANSWERS["We're expecting in March."]!;
+  }
+  if (
+    lower.includes("couldn't work") ||
+    lower.includes("could not work") ||
+    lower.includes("disability") ||
+    lower.includes("covered")
+  ) {
+    return ANSWERS["What if I couldn't work?"]!;
   }
   return DEFAULT;
 }
