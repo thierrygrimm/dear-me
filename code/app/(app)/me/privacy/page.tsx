@@ -65,6 +65,7 @@ export default function PrivacyPage() {
   const [chats, setChats] = useState(true);
   const [analytics, setAnalytics] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   return (
     <PageColumn kind="plan">
@@ -164,14 +165,41 @@ export default function PrivacyPage() {
       <button
         type="button"
         className="dm-li"
-        onClick={() => toast.show({ message: "PDF ready in a moment." })}
+        disabled={downloading}
+        onClick={() => {
+          setDownloading(true);
+          toast.show({ message: "Preparing your PDF…" });
+          window.setTimeout(() => {
+            try {
+              const blob = new Blob(
+                [
+                  "dear me · your data export\n\nDemo PDF. In the real app this is your facts and documents.",
+                ],
+                { type: "application/pdf" },
+              );
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "dear-me-data.pdf";
+              a.click();
+              URL.revokeObjectURL(url);
+            } catch {
+              /* ignore */
+            }
+            setDownloading(false);
+            toast.show({ message: "PDF downloaded." });
+          }, 900);
+        }}
       >
         <span className="ic">
           <Icon>
             <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
           </Icon>
         </span>
-        <span className="tx">Download</span>
+        <span className="tx">
+          Download
+          {downloading ? <small>Preparing…</small> : null}
+        </span>
         <span className="rt">
           PDF
           <Chevron />
