@@ -1,7 +1,12 @@
 "use client";
 
 import { DocumentVault } from "@/components/data/DocumentVault";
+import { PageColumn } from "@/components/layout/PageColumn";
 
 export default function DocumentsPage() {
-  return <DocumentVault />;
+  return (
+    <PageColumn kind="docs">
+      <DocumentVault />
+    </PageColumn>
+  );
 }

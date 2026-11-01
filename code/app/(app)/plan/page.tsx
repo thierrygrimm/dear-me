@@ -2,6 +2,7 @@
 
 import { ChatPlan } from "@/components/chat/ChatPlan";
 import { States } from "@/components/feedback/States";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { Segmented } from "@/components/ui/Segmented";
 import { copy } from "@/lib/copy";
 import { useRouter } from "next/navigation";
@@ -81,8 +82,11 @@ export default function PlanPage() {
   );
 
   return (
-    <>
-      <h1 className="dm-hello">{copy.plan.title}</h1>
+    <PageColumn
+      kind="plan"
+      title={copy.plan.title}
+      subtitle={copy.plan.listHint}
+    >
       <Segmented
         value={mode}
         onChange={(v) => setMode(v as Mode)}
@@ -102,6 +106,6 @@ export default function PlanPage() {
           steps={wired}
         />
       )}
-    </>
+    </PageColumn>
   );
 }

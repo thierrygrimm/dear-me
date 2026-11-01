@@ -1,16 +1,17 @@
 "use client";
 
 import { AdvisorBooking } from "@/components/auth/AdvisorBooking";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { useRouter } from "next/navigation";
 
 export default function BookPage() {
   const router = useRouter();
   return (
-    <div className="dm-signup-shell">
+    <PageColumn kind="book">
       <AdvisorBooking
-        onBack={() => router.back()}
+        onBack={() => router.push("/me")}
         onBooked={() => router.push("/plan")}
       />
-    </div>
+    </PageColumn>
   );
 }

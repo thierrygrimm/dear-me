@@ -3,6 +3,7 @@
 import { Disclaimer } from "@/components/answer/Disclaimer";
 import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { Button } from "@/components/ui/Button";
 import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { copy } from "@/lib/copy";
@@ -105,15 +106,7 @@ export function AnswerScreen() {
   }, [topic, after, scope]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-        flex: 1,
-        minHeight: 0,
-      }}
-    >
+    <PageColumn kind="plan">
       <header className="dm-appbar" style={{ margin: "0 -4px" }}>
         <button
           type="button"
@@ -199,6 +192,6 @@ export function AnswerScreen() {
       <Button variant="text" onClick={() => router.push("/")}>
         Back to Home
       </Button>
-    </div>
+    </PageColumn>
   );
 }

@@ -2,6 +2,7 @@
 
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { useToast } from "@/components/feedback/Toast";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode, type SVGProps } from "react";
 
@@ -66,8 +67,8 @@ export default function PrivacyPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
-    <div className="dm-lscroll" style={{ display: "flex", flexDirection: "column" }}>
-      <div className="dm-appbar" style={{ margin: "0 -4px 8px" }}>
+    <PageColumn kind="plan">
+      <header className="dm-appbar" style={{ margin: "0 -4px" }}>
         <button
           type="button"
           aria-label="Back"
@@ -81,7 +82,7 @@ export default function PrivacyPage() {
           Privacy and data
         </b>
         <span style={{ width: 36 }} />
-      </div>
+      </header>
 
       <p style={{ margin: 0, font: "700 22px/27px var(--font-display)" }}>
         Your data stays yours.
@@ -231,6 +232,6 @@ export default function PrivacyPage() {
           Keep my data
         </button>
       </BottomSheet>
-    </div>
+    </PageColumn>
   );
 }

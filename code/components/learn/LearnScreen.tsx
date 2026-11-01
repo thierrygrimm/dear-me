@@ -2,6 +2,7 @@
 
 import { LessonArt } from "@/components/learn/LessonArt";
 import { LessonPlayer } from "@/components/learn/LessonPlayer";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { copy } from "@/lib/copy";
 import {
   LESSONS,
@@ -37,11 +38,10 @@ export function LearnScreen() {
   }
 
   return (
-    <>
-      <h1 className="dm-q" style={{ fontSize: 24, lineHeight: "28px" }}>
+    <PageColumn kind="learn">
+      <p className="dm-q" style={{ fontSize: 24, lineHeight: "28px" }}>
         {copy.learn.title}
-      </h1>
-      <span className="dm-small dm-muted">{copy.learn.subtitle}</span>
+      </p>
 
       <div className="dm-libgrid">
         {LESSONS.map((l) => {
@@ -86,6 +86,6 @@ export function LearnScreen() {
           }}
         />
       ) : null}
-    </>
+    </PageColumn>
   );
 }

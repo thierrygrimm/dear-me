@@ -1,6 +1,7 @@
 "use client";
 
 import { ScenarioCompare } from "@/components/answer/ScenarioCompare";
+import { PageColumn } from "@/components/layout/PageColumn";
 import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import {
   markPlanningScope,
@@ -23,7 +24,7 @@ export default function ComparePage() {
   }
 
   return (
-    <>
+    <PageColumn kind="cmp">
       <div className="dm-row" style={{ alignItems: "center", gap: 8 }}>
         <button
           type="button"
@@ -58,6 +59,6 @@ export default function ComparePage() {
         onTalk={() => router.push("/me/book")}
         onDone={() => router.push("/")}
       />
-    </>
+    </PageColumn>
   );
 }
