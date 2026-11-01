@@ -2,6 +2,8 @@
 
 import { SourcedNumber } from "@/components/data/SourcedNumber";
 import { Button } from "@/components/ui/Button";
+import { useCoverageSimulation } from "@/hooks/useCoverageSimulation";
+import { useWorkloadSimulation } from "@/hooks/useWorkloadSimulation";
 import { cn } from "@/lib/cn";
 import { formatCHF, formatSwiss } from "@/lib/format";
 import { getPersona, readPersonaId, type PersonaId } from "@/lib/personas";
@@ -75,14 +77,51 @@ export function ScenarioCompare({
   const [personaId, setPersonaId] = useState<PersonaId>("lena");
   const [pensum, setPensum] = useState(initialPensum);
   const [retireMix, setRetireMix] = useState<"cash" | "mix" | "pension">("mix");
+  const { stepFor, data: workload } = useWorkloadSimulation([100, 80, 60]);
+  const { partner2Illness } = useCoverageSimulation();
 
   useEffect(() => {
     setPersonaId(readPersonaId());
   }, []);
 
   const mode = modeProp ?? modeFor(personaId);
-  const money = useMemo(() => moneyAt(pensum), [pensum]);
-  const next = useMemo(() => scoresAt(pensum), [pensum]);
+  const step = stepFor(pensum);
+  const baselineMo = workload
+    ? Math.round(workload.baselinePensionYr / 12)
+    : 1680;
+  const money = useMemo(() => {
+    if (step) {
+      const income = Math.round(step.grossIncome / 12);
+      const fullIncome = Math.round(
+        (workload?.steps.find((s) => s.workloadPc === 100)?.grossIncome ??
+          step.grossIncome / (pensum / 100)) / 12,
+      );
+      const pension = Math.round(step.pillar2PensionYr / 12);
+      return {
+        income,
+        incomeDelta: income - fullIncome,
+        pension,
+        pensionDelta: -Math.round(step.monthlyDiff),
+        pensionTrace: step.traces.pillar2Pension,
+        diffTrace: step.traces.monthlyDiff,
+      };
+    }
+    const fallback = moneyAt(pensum);
+    return { ...fallback, pensionTrace: null as string | null, diffTrace: null as string | null };
+  }, [step, pensum, workload]);
+  const next = useMemo(() => {
+    if (step) {
+      const drop = step.pensionDropPc;
+      return [
+        Math.round(82 - drop * 0.45),
+        Math.round(46 - drop * 0.55),
+        Math.round(70 - drop * 0.2),
+        Math.round(55 - drop * 0.15),
+        Math.round(78 - drop * 0.1),
+      ];
+    }
+    return scoresAt(pensum);
+  }, [step, pensum]);
   const first = getPersona(personaId).hi.replace(/\.$/, "");
 
   if (mode === "retire") {
@@ -171,8 +210,14 @@ export function ScenarioCompare({
   }
 
   if (mode === "disability") {
-    const incomeToday = personaId === "sandra" ? 7200 : 5200;
-    const ifSick = personaId === "sandra" ? 2100 : 3300;
+    const illness = partner2Illness();
+    const incomeToday = illness
+      ? Math.round(illness.incomeNeedMo / 0.8)
+      : personaId === "sandra"
+        ? 7200
+        : 5200;
+    const ifSick = illness?.incomeTotalMo ?? (personaId === "sandra" ? 2100 : 3300);
+    const gap = illness?.incomeGapMo ?? incomeToday - ifSick;
     return (
       <div className={cn("dm-stack", className)} style={{ gap: 14 }}>
         <div className="dm-money2">
@@ -196,6 +241,7 @@ export function ScenarioCompare({
             <SourcedNumber
               amount={ifSick}
               exact
+              traceId={illness?.traceId}
               sheetTitle="If you couldn't work"
               sheetDescription="AHV/IV plus any fund disability. Demo fixture."
               sources={[
@@ -212,9 +258,7 @@ export function ScenarioCompare({
                 },
               ]}
             />
-            <em className="neg">
-              −{formatSwiss(incomeToday - ifSick)} / month
-            </em>
+            <em className="neg">−{formatSwiss(gap)} / month</em>
           </div>
         </div>
         <div className="dm-db">
@@ -251,10 +295,7 @@ export function ScenarioCompare({
         </div>
         <p className="dm-insight">
           For {first}, the soft spot is disability: about{" "}
-          <b>
-            {formatCHF(incomeToday - ifSick)} a month
-          </b>{" "}
-          would be missing.
+          <b>{formatCHF(gap)} a month</b> would be missing.
         </p>
         {onTalk ? (
           <Button variant="primary" block onClick={onTalk}>
@@ -330,7 +371,7 @@ export function ScenarioCompare({
             sources={[
               {
                 label: "Salary",
-                detail: `${pensum} % of CHF 6'700`,
+                detail: `${pensum} % of full-time pay`,
                 amount: money.income,
               },
             ]}
@@ -346,6 +387,7 @@ export function ScenarioCompare({
           <SourcedNumber
             amount={money.pension}
             exact
+            traceId={money.pensionTrace}
             sheetTitle="Pension fund at 65"
             sheetDescription="Coordination deduction makes part-time cost more than the salary cut."
             sources={[
@@ -356,7 +398,7 @@ export function ScenarioCompare({
               },
               {
                 label: "Drop vs 100 %",
-                detail: "For life",
+                detail: `Baseline ${formatSwiss(baselineMo)} / mo`,
                 amount: Math.abs(money.pensionDelta),
               },
             ]}
