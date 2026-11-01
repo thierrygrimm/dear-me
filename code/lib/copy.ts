@@ -61,7 +61,8 @@ export const copy = {
     skip: "Skip for now",
   },
   learn: {
-    title: "Learn in 2 minutes",
+    title: "Learn in a few minutes",
+    subtitle: "Start with how Swiss pensions work, then your own numbers.",
     empty: "Two-minute lessons will land here.",
   },
   me: {
