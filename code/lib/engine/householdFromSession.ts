@@ -1,7 +1,7 @@
 "use client";
 
 import { readCertificate, readIntake } from "@/lib/session";
-import { demoHousehold } from "./demoClient";
+import { fixtureHousehold } from "./fixtures";
 import type { Household } from "./types";
 
 /**
@@ -9,7 +9,8 @@ import type { Household } from "./types";
  * Other personas keep the fixture clone until we add their packs.
  */
 export function householdForDemo(personaId = "lena"): Household {
-  const h = demoHousehold(personaId);
+  const id = personaId === "lena" ? "lea" : personaId;
+  const h = fixtureHousehold(id);
   if (personaId !== "lena" && personaId !== "lea") return h;
 
   const intake = readIntake();
