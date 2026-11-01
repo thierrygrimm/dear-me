@@ -77,7 +77,6 @@ export function AnswerScreen() {
       <SourcedNumber
         amount={monthlyGap}
         cue="tap for sources"
-        showSources
         sources={[
           {
             label: "Pension fund drop",
