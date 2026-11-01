@@ -9,6 +9,7 @@ import {
   YourPlanScreen,
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
+import { AppShell } from "@/components/layout/AppShell";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { needsNumericIntake } from "@/lib/lifeMoments";
 import {
@@ -175,6 +176,39 @@ export default function SignUpPage() {
 
   const name = provider === "pax" ? readName() : "there";
 
+  if (step === "choose") {
+    return (
+      <AppShell variant="signapp" hideNav flush>
+        <div ref={pulseRef} style={{ display: "contents" }}>
+          <ChooseHowScreen
+            onBack={() => setStep("welcome")}
+            onPax={() => begin("pax")}
+            onApple={() => begin("apple")}
+            onGoogle={() => begin("google")}
+            onEmail={() => begin("email")}
+            onLookAround={() => begin("guest")}
+          />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (step === "moments") {
+    return (
+      <AppShell variant="onb" hideNav flush>
+        <div ref={pulseRef} style={{ display: "contents" }}>
+          <YourMomentsScreen
+            name={name}
+            value={moments}
+            onChange={setMoments}
+            onBack={() => setStep("choose")}
+            onContinue={() => setStep("plan")}
+          />
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <div className="dm-signup-shell" ref={pulseRef}>
       {step === "welcome" ? (
@@ -184,32 +218,11 @@ export default function SignUpPage() {
         />
       ) : null}
 
-      {step === "choose" ? (
-        <ChooseHowScreen
-          onBack={() => setStep("welcome")}
-          onPax={() => begin("pax")}
-          onApple={() => begin("apple")}
-          onGoogle={() => begin("google")}
-          onEmail={() => begin("email")}
-          onLookAround={() => begin("guest")}
-        />
-      ) : null}
-
       {step === "connect" ? (
         <ConnectPaxScreen
           onBack={() => setStep("choose")}
           onContinue={() => setStep("signing")}
           onEmail={() => begin("email")}
-        />
-      ) : null}
-
-      {step === "moments" ? (
-        <YourMomentsScreen
-          name={name}
-          value={moments}
-          onChange={setMoments}
-          onBack={() => setStep("choose")}
-          onContinue={() => setStep("plan")}
         />
       ) : null}
 
