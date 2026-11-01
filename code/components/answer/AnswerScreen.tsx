@@ -1,135 +1,174 @@
 "use client";
 
-import { AskBar } from "@/components/answer/AskBar";
 import { Disclaimer } from "@/components/answer/Disclaimer";
 import { OfferCard } from "@/components/answer/OfferCard";
 import { Verdict } from "@/components/answer/Verdict";
-import { PillarChart } from "@/components/data/PillarChart";
-import { SourcedNumber } from "@/components/data/SourcedNumber";
-import { Segmented } from "@/components/ui/Segmented";
-import { PensumSlider } from "@/components/ui/PensumSlider";
+import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
-import { formatCHF } from "@/lib/format";
 import { readIntake } from "@/lib/session";
+import { ChevronLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
+/**
+ * Guided answer screen after Home / chat "Open".
+ * Matches Flows chat2 + Verdict: short sentence, one number in the note,
+ * a money comparison, then optional Pax offer — not a dashboard of controls.
+ */
 export function AnswerScreen() {
   const router = useRouter();
-  const [who, setWho] = useState("me");
-  const [pensum, setPensum] = useState(() => readIntake()?.pensumAfter ?? 60);
+  const params = useSearchParams();
+  const topic = params.get("topic") ?? "disability";
+  const [intake] = useState(() => readIntake());
+  const after = intake?.pensumAfter ?? 60;
 
-  const monthlyGap = useMemo(() => {
-    // Demo curve: 100% → 0 gap, 60% → ~620
-    return Math.round(((100 - pensum) / 40) * 620);
-  }, [pensum]);
+  const content = useMemo(() => {
+    if (topic === "pensum" || topic === "baby") {
+      return {
+        question: copy.answer.pensumQuestion,
+        answer: "Yes, that works.",
+        note: (
+          <>
+            It costs you about <b>CHF 620 a month at 65, for life</b>.
+          </>
+        ),
+        money: {
+          leftLabel: "Income now / month",
+          leftValue: "4'230",
+          leftDelta: "−2'470",
+          rightLabel: "Pension at 65 / month",
+          rightValue: "1'060",
+          rightDelta: "−620 for life",
+        },
+        insight: `At ${after} % your pension drops by CHF 620 a month, for life. Disability also thins — that is the bigger new gap.`,
+        offer: false as const,
+        compare: true,
+      };
+    }
 
-  const pillars = useMemo(
-    () => [
-      { id: "ahv", label: "AHV", amount: 2100, max: 3200, tone: "ahv" as const },
-      {
-        id: "pk",
-        label: "Pension fund",
-        amount: Math.round(1400 * (pensum / 100)),
-        max: 1600,
-        tone: "pk" as const,
-        gap: pensum < 100,
+    return {
+      question: "What if I couldn't work?",
+      answer: "Almost.",
+      note: (
+        <>
+          You&apos;d have about <b>half your income</b>. The soft spot is
+          disability cover.
+        </>
+      ),
+      money: {
+        leftLabel: "Income today / month",
+        leftValue: "6'700",
+        leftDelta: undefined as string | undefined,
+        rightLabel: "If you couldn't work",
+        rightValue: "3'100",
+        rightDelta: "−3'600 / month",
       },
-      {
-        id: "3a",
-        label: "Pillar 3a",
-        amount: 420,
-        max: 700,
-        tone: "3a" as const,
-        gap: true,
-      },
-    ],
-    [pensum],
-  );
+      insight:
+        "Your fund and AHV would pay about CHF 3'100 a month. The gap is mostly because you plan to work part-time after the baby.",
+      offer: true as const,
+      compare: false,
+    };
+  }, [topic, after]);
 
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        flex: 1,
+        minHeight: 0,
+      }}
+    >
+      <header className="dm-appbar" style={{ margin: "0 -4px" }}>
+        <button
+          type="button"
+          aria-label={copy.chat.back}
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push("/");
+          }}
+        >
+          <ChevronLeft strokeWidth={1.75} />
+        </button>
+        <span />
+        <span style={{ width: 36 }} />
+      </header>
+
       <Verdict
-        question={copy.answer.pensumQuestion}
-        answer={
-          <span className="dm-num">
-            {formatCHF(monthlyGap)}
-            <small
-              style={{
-                display: "block",
-                font: "400 14px/18px var(--font-text)",
-                letterSpacing: 0,
-                marginTop: 6,
-              }}
-            >
-              a month, for life
-            </small>
-          </span>
-        }
-        note={
-          <>
-            At {pensum} %, about{" "}
-            <b className="dm-mark-line">{formatCHF(monthlyGap)}</b> less later
-            on.
-          </>
-        }
-      />
-      <SourcedNumber
-        amount={monthlyGap}
-        cue="tap for sources"
-        sources={[
-          {
-            label: "Pension fund drop",
-            detail: "Calculated from pensum",
-            amount: monthlyGap,
-          },
-        ]}
+        question={content.question}
+        answer={<span className="dm-mark-line">{content.answer}</span>}
+        note={content.note}
+        signal
       />
 
-      <PillarChart pillars={pillars} />
+      <div className="dm-wcard" style={{ boxShadow: "none", padding: 0 }}>
+        <h4 style={{ marginBottom: 4 }}>
+          {topic === "pensum" || topic === "baby"
+            ? `${after} % compared to today`
+            : "Today vs if you couldn't work"}
+        </h4>
+        <div className="dm-money2">
+          <div>
+            <small>{content.money.leftLabel}</small>
+            <b className="mn">{content.money.leftValue}</b>
+            {content.money.leftDelta ? (
+              <em className="neg">{content.money.leftDelta}</em>
+            ) : null}
+          </div>
+          <div>
+            <small>{content.money.rightLabel}</small>
+            <b className="mp">{content.money.rightValue}</b>
+            {content.money.rightDelta ? (
+              <em className="neg">{content.money.rightDelta}</em>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
-      <Segmented
-        aria-label="Who this is for"
-        value={who}
-        onChange={setWho}
-        options={[
-          { value: "me", label: "Me" },
-          { value: "us", label: "Us" },
-          { value: "family", label: "Family" },
-        ]}
-      />
-
-      <PensumSlider value={pensum} onChange={setPensum} />
-
-      <button
-        type="button"
-        className="dm-btn dm-btn--secondary dm-btn--block"
-        onClick={() => router.push("/compare")}
+      <p
+        className="dm-insight"
+        style={{
+          margin: 0,
+          font: "400 15px/22px var(--font-text)",
+          color: "var(--ink)",
+        }}
       >
-        See all of it
-      </button>
+        {content.insight}
+      </p>
+
+      <div className="dm-sugg" style={{ justifyContent: "stretch" }}>
+        {content.compare ? (
+          <button type="button" onClick={() => router.push("/compare")}>
+            See all of it
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => router.push("/compare")}
+          >
+            See what changes at {after} %
+          </button>
+        )}
+        <button type="button" onClick={() => router.push("/me/book")}>
+          Talk to Sara from Pax
+        </button>
+      </div>
+
+      {content.offer ? (
+        <OfferCard
+          pax
+          title="A small cover for the soft spot"
+          body="If income drops because you couldn't work, a Pax disability idea can close most of the gap. You choose what Pax sees."
+          onBook={() => router.push("/me/book")}
+        />
+      ) : null}
 
       <Disclaimer variant="plain">{copy.answer.disclaimer}</Disclaimer>
 
-      {monthlyGap > 0 ? (
-        <OfferCard
-          pax
-          title="A Pax idea that softens the soft spot"
-          body="If something is still missing after you play with the lever, we can show one clear option — you choose what Pax sees."
-          onBook={() => router.push("/me/book")}
-        />
-      ) : (
-        <p className="dm-label">{copy.nothingElse}</p>
-      )}
-
-      <AskBar
-        sticky
-        onAttach={() => router.push("/certificate")}
-        onSubmit={(value) => {
-          sessionStorage.setItem("dm-ask-q", value);
-          router.push("/ask");
-        }}
-      />
-    </>
+      <Button variant="text" onClick={() => router.push("/")}>
+        Back to Home
+      </Button>
+    </div>
   );
 }
