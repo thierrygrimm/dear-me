@@ -7,7 +7,6 @@ import {
   type LessonId,
   markLessonDone,
 } from "@/lib/lessons";
-import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
 
@@ -127,7 +126,9 @@ export function LessonPlayer({
             ))}
           </div>
           <button type="button" aria-label="Close" onClick={onClose}>
-            <X strokeWidth={2} />
+            <svg viewBox="0 0 16 16" aria-hidden>
+              <path d="M4 4l8 8M12 4l-8 8" />
+            </svg>
           </button>
         </div>
 
