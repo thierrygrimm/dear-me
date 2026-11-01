@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/brand/Logo";
-import { Squirrel } from "@/components/brand/Squirrel";
+import { Squirrel, type SquirrelState } from "@/components/brand/Squirrel";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
 import {
@@ -12,7 +13,46 @@ import {
   suggestedMoments,
   type LifeMoment,
 } from "@/lib/session";
-import { useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
+
+const AUTH_SAY_DEFAULT = "Pick one on the right. You can change it later.";
+const AUTH_SAY_HI = "Hi. I keep an eye on your nuts.";
+
+type AuthHoverKey = "pax" | "apple" | "google" | "email" | "look";
+
+const AUTH_HOVER: Record<
+  AuthHoverKey,
+  { state: SquirrelState; say: string }
+> = {
+  pax: {
+    state: "listening",
+    say: "Fastest if you're with Pax. Your certificate comes along.",
+  },
+  apple: {
+    state: "done",
+    say: "One tap. No new password to remember.",
+  },
+  google: {
+    state: "done",
+    say: "One tap. No new password to remember.",
+  },
+  email: {
+    state: "thinking",
+    say: "Email works too. We send you one link.",
+  },
+  look: {
+    state: "peek",
+    say: "Have a look first. No account needed.",
+  },
+};
 
 function BackButton({ onClick }: { onClick?: () => void }) {
   return (
@@ -206,7 +246,7 @@ export function WelcomeScreen({
   );
 }
 
-/** 2 · Choose how */
+/** 2 · Choose how — split from 900px: lime art + SSO column */
 export function ChooseHowScreen({
   onBack,
   onPax,
@@ -224,49 +264,220 @@ export function ChooseHowScreen({
   onLookAround?: () => void;
   className?: string;
 }) {
+  const reduced = usePrefersReducedMotion();
+  const artRef = useRef<HTMLDivElement>(null);
+  const sayTimer = useRef<number | null>(null);
+
+  const [sqState, setSqState] = useState<SquirrelState>("idle");
+  const [say, setSay] = useState(AUTH_SAY_DEFAULT);
+  const [jumping, setJumping] = useState(false);
+  const [lean, setLean] = useState<CSSProperties>({});
+  const [sunShift, setSunShift] = useState<CSSProperties>({});
+
+  const clearSayTimer = useCallback(() => {
+    if (sayTimer.current != null) {
+      window.clearTimeout(sayTimer.current);
+      sayTimer.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearSayTimer(), [clearSayTimer]);
+
+  const resetHover = useCallback(() => {
+    setSqState("idle");
+    setSay(AUTH_SAY_DEFAULT);
+  }, []);
+
+  const onOptionEnter = useCallback(
+    (key: AuthHoverKey) => {
+      clearSayTimer();
+      const next = AUTH_HOVER[key];
+      setSqState(next.state);
+      setSay(next.say);
+    },
+    [clearSayTimer],
+  );
+
+  const onArtPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (reduced) return;
+      const art = artRef.current;
+      if (!art) return;
+      const r = art.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      setLean({ transform: `rotate(${(x * 10).toFixed(1)}deg)` });
+      setSunShift({
+        transform: `translate(${(x * -14).toFixed(1)}px, ${(y * -10).toFixed(1)}px)`,
+      });
+    },
+    [reduced],
+  );
+
+  const onArtPointerLeave = useCallback(() => {
+    setLean({});
+    setSunShift({});
+  }, []);
+
+  const onSqClick = useCallback(() => {
+    clearSayTimer();
+    setSay(AUTH_SAY_HI);
+    if (!reduced) {
+      setJumping(false);
+      // Double rAF so the jump class can retrigger the hop animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setJumping(true));
+      });
+    }
+    sayTimer.current = window.setTimeout(() => {
+      setSay(AUTH_SAY_DEFAULT);
+      setJumping(false);
+    }, 2200);
+  }, [clearSayTimer, reduced]);
+
+  const hoverHandlers = (key: AuthHoverKey) => ({
+    onMouseEnter: () => onOptionEnter(key),
+    onFocus: () => onOptionEnter(key),
+    onMouseLeave: resetHover,
+    onBlur: resetHover,
+  });
+
   return (
-    <div className={cn("dm-signup", className)}>
-      <div className="dm-appbar">
-        <BackButton onClick={onBack} />
-        <span className="dm-small dm-muted">{copy.signup.createAccount}</span>
-        <span style={{ width: 36 }} />
-      </div>
-      <p className="dm-q">{copy.signup.chooseHow}</p>
-      <span className="dm-small dm-muted">{copy.signup.chooseHowSub}</span>
-      <div className="dm-stack" style={{ gap: 10 }}>
-        <button type="button" className="dm-sso dm-sso--pax" onClick={onPax}>
-          <b>Pax</b>
-          {copy.signup.continuePax}
-        </button>
-        <div className="dm-or">{copy.signup.or}</div>
-        <button type="button" className="dm-sso dm-sso--dark" onClick={onApple}>
-          <AppleIcon />
-          {copy.signup.continueApple}
-        </button>
-        <button type="button" className="dm-sso" onClick={onGoogle}>
-          <GoogleIcon />
-          {copy.signup.continueGoogle}
-        </button>
-        <button type="button" className="dm-sso" onClick={onEmail}>
-          <MailIcon />
-          {copy.signup.continueEmail}
-        </button>
-      </div>
-      <Button
-        variant="text"
-        className="dm-small"
-        style={{ alignSelf: "center" }}
-        onClick={onLookAround}
+    <>
+      <div
+        ref={artRef}
+        className={cn("auth-art", className)}
+        onPointerMove={onArtPointerMove}
+        onPointerLeave={onArtPointerLeave}
       >
-        {copy.signup.lookAround}
-      </Button>
-      <p
-        className="dm-small dm-muted"
-        style={{ margin: "auto 0 0", fontSize: 11, lineHeight: "15px" }}
-      >
-        {copy.signup.terms}
-      </p>
-    </div>
+        <Logo className="auth-lk" />
+        <div className="auth-stage">
+          <svg
+            className="auth-scene"
+            viewBox="0 0 600 300"
+            preserveAspectRatio="xMidYMax slice"
+            aria-hidden
+          >
+            <circle
+              className="sun"
+              cx="440"
+              cy="92"
+              r="40"
+              fill="var(--briefpapier)"
+              style={sunShift}
+            />
+            <path
+              d="M0 215 Q150 160 300 205 T600 190 V300 H0Z"
+              fill="var(--kaugummi)"
+            />
+            <path
+              d="M0 250 Q170 215 330 242 T600 236 V300 H0Z"
+              fill="var(--pflaumenkuchen)"
+            />
+            <g
+              className="nut"
+              transform="translate(132 140) scale(.9) rotate(-12 20 30)"
+            >
+              <path
+                d="M20 9 V2"
+                stroke="var(--espressosatz)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <path
+                d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+                fill="var(--briefpapier)"
+              />
+              <path
+                d="M3 21 Q3 9 20 9 Q37 9 37 21 Z"
+                fill="var(--espressosatz)"
+              />
+            </g>
+          </svg>
+          <button
+            type="button"
+            className={cn("auth-sq", jumping && "jump")}
+            aria-label="Say hello to the squirrel"
+            style={lean}
+            onClick={onSqClick}
+          >
+            <Squirrel state={sqState} className="auth-sq__mark" />
+          </button>
+        </div>
+        <div className="auth-copy">
+          <h2>Plan life&apos;s big moments.</h2>
+          <p className="say" aria-live="polite">
+            {say}
+          </p>
+        </div>
+      </div>
+
+      <div className="pg auth">
+        <div className="dm-appbar" style={{ margin: "-4px -8px 0" }}>
+          <BackButton onClick={onBack} />
+          <span className="dm-small dm-muted">{copy.signup.createAccount}</span>
+          <span style={{ width: 36 }} />
+        </div>
+        <p className="dm-q" style={{ fontSize: 24, lineHeight: "28px" }}>
+          {copy.signup.chooseHow}
+        </p>
+        <span className="dm-small dm-muted">{copy.signup.chooseHowSub}</span>
+        <div className="dm-stack" style={{ gap: 10 }}>
+          <button
+            type="button"
+            className="dm-sso dm-sso--pax"
+            onClick={onPax}
+            {...hoverHandlers("pax")}
+          >
+            <b>Pax</b>
+            {copy.signup.continuePax}
+          </button>
+          <div className="dm-or">{copy.signup.or}</div>
+          <button
+            type="button"
+            className="dm-sso dm-sso--dark"
+            onClick={onApple}
+            {...hoverHandlers("apple")}
+          >
+            <AppleIcon />
+            {copy.signup.continueApple}
+          </button>
+          <button
+            type="button"
+            className="dm-sso"
+            onClick={onGoogle}
+            {...hoverHandlers("google")}
+          >
+            <GoogleIcon />
+            {copy.signup.continueGoogle}
+          </button>
+          <button
+            type="button"
+            className="dm-sso"
+            onClick={onEmail}
+            {...hoverHandlers("email")}
+          >
+            <MailIcon />
+            {copy.signup.continueEmail}
+          </button>
+        </div>
+        <Button
+          variant="text"
+          className="dm-small"
+          style={{ alignSelf: "center" }}
+          onClick={onLookAround}
+          {...hoverHandlers("look")}
+        >
+          {copy.signup.lookAround}
+        </Button>
+        <p
+          className="dm-small dm-muted"
+          style={{ margin: "auto 0 0", fontSize: 11, lineHeight: "15px" }}
+        >
+          {copy.signup.terms}
+        </p>
+      </div>
+    </>
   );
 }
 
@@ -346,7 +557,7 @@ function toggleMoment(list: LifeMoment[], id: LifeMoment): LifeMoment[] {
   return list.includes(id) ? list.filter((m) => m !== id) : [...list, id];
 }
 
-/** Your moments — multi-select suggestions after sign-in */
+/** Your moments — multi-select; from 900px: onb top bar + 4-col grid */
 export function YourMomentsScreen({
   name = "Lena",
   onBack,
@@ -365,73 +576,82 @@ export function YourMomentsScreen({
   const [moreOpen, setMoreOpen] = useState(false);
 
   return (
-    <div className={cn("dm-signup", className)}>
-      <StepProg step={1} onBack={onBack} />
-      <p className="dm-q" style={{ fontSize: 24, lineHeight: "28px", margin: 0 }}>
-        {copy.signup.momentsTitle(name)}
-      </p>
-      <span className="dm-small dm-muted" style={{ marginTop: -8 }}>
-        {copy.signup.momentsSub}
-      </span>
-      <div className="dm-lmgrid">
-        {suggestedMoments.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            className="dm-lm"
-            aria-pressed={value.includes(m.id)}
-            onClick={() => onChange?.(toggleMoment(value, m.id))}
-          >
-            {momentIcons[m.id]}
-            {m.label}
-          </button>
-        ))}
+    <>
+      <div className={cn("onb-top", className)}>
+        <Logo className="dm-signup__logo" />
+        <span className="dm-small dm-muted">Set up your plan</span>
       </div>
-      <button
-        type="button"
-        className="dm-more2"
-        onClick={() => setMoreOpen(true)}
-      >
-        {copy.signup.somethingElse}
-        <svg viewBox="0 0 16 16" aria-hidden>
-          <path d="M6 3l5 5-5 5" />
-        </svg>
-      </button>
-      <Button
-        variant="primary"
-        block
-        className="dm-signup__cta"
-        style={{ flex: "none" }}
-        disabled={value.length === 0}
-        onClick={onContinue}
-      >
-        {copy.signup.continue}
-      </Button>
-
-      <BottomSheet
-        open={moreOpen}
-        onClose={() => setMoreOpen(false)}
-        title={copy.signup.somethingElse}
-      >
-        <div className="dm-lmlist">
-          {moreMoments.map((m) => (
+      <div className="onb-col">
+        <StepProg step={1} onBack={onBack} />
+        <p
+          className="dm-q"
+          style={{ fontSize: 24, lineHeight: "28px", margin: 0 }}
+        >
+          {copy.signup.momentsTitle(name)}
+        </p>
+        <span className="dm-small dm-muted" style={{ marginTop: -8 }}>
+          {copy.signup.momentsSub}
+        </span>
+        <div className="dm-lmgrid">
+          {suggestedMoments.map((m) => (
             <button
               key={m.id}
               type="button"
+              className="dm-lm"
               aria-pressed={value.includes(m.id)}
               onClick={() => onChange?.(toggleMoment(value, m.id))}
             >
               {momentIcons[m.id]}
-              <span>{m.label}</span>
-              <i />
+              {m.label}
             </button>
           ))}
         </div>
-        <Button variant="primary" block onClick={() => setMoreOpen(false)}>
-          {copy.signup.done}
+        <button
+          type="button"
+          className="dm-more2"
+          onClick={() => setMoreOpen(true)}
+        >
+          {copy.signup.somethingElse}
+          <svg viewBox="0 0 16 16" aria-hidden>
+            <path d="M6 3l5 5-5 5" />
+          </svg>
+        </button>
+        <Button
+          variant="primary"
+          block
+          className="dm-signup__cta"
+          style={{ flex: "none", marginTop: "auto" }}
+          disabled={value.length === 0}
+          onClick={onContinue}
+        >
+          {copy.signup.continue}
         </Button>
-      </BottomSheet>
-    </div>
+
+        <BottomSheet
+          open={moreOpen}
+          onClose={() => setMoreOpen(false)}
+          title={copy.signup.somethingElse}
+        >
+          <div className="dm-lmlist">
+            {moreMoments.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={value.includes(m.id)}
+                onClick={() => onChange?.(toggleMoment(value, m.id))}
+              >
+                {momentIcons[m.id]}
+                <span>{m.label}</span>
+                <i />
+              </button>
+            ))}
+          </div>
+          <Button variant="primary" block onClick={() => setMoreOpen(false)}>
+            {copy.signup.done}
+          </Button>
+        </BottomSheet>
+      </div>
+    </>
   );
 }
 
@@ -586,13 +806,14 @@ export function SignUp({
   className?: string;
 }) {
   return (
-    <ChooseHowScreen
-      className={className}
-      onPax={onPax}
-      onApple={onApple}
-      onGoogle={onGoogle}
-      onEmail={onEmail}
-      onLookAround={onLookAround}
-    />
+    <div className={cn("dm-app signapp", className)}>
+      <ChooseHowScreen
+        onPax={onPax}
+        onApple={onApple}
+        onGoogle={onGoogle}
+        onEmail={onEmail}
+        onLookAround={onLookAround}
+      />
+    </div>
   );
 }
