@@ -20,6 +20,8 @@ type Props = {
   open: boolean;
   onClose: () => void;
   title?: string;
+  /** External heading id when the visible title lives in children. */
+  labelledBy?: string;
   description?: string;
   /** Start (or force) full-height explain mode. Grab still toggles on phone. */
   full?: boolean;
@@ -45,6 +47,7 @@ export function BottomSheet({
   open,
   onClose,
   title,
+  labelledBy,
   description,
   full: fullProp = false,
   children,
@@ -53,6 +56,7 @@ export function BottomSheet({
   const reactId = useId();
   const titleId = `${reactId}-title`;
   const descId = `${reactId}-desc`;
+  const labelId = labelledBy ?? (title ? titleId : undefined);
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -204,7 +208,7 @@ export function BottomSheet({
         className={cn("sheet", full && "full")}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? titleId : undefined}
+        aria-labelledby={labelId}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
         style={sheetStyle}
