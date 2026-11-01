@@ -220,103 +220,42 @@ function MailIcon() {
   );
 }
 
-/** 1 · Welcome */
-export function WelcomeScreen({
-  onGetStarted,
-  onLogin,
-  className,
-}: {
-  onGetStarted?: () => void;
-  onLogin?: () => void;
-  className?: string;
-}) {
-  return (
-    <div className={cn("dm-signup dm-signup--flush-top", className)}>
-      <div className="dm-welcome" aria-hidden>
-        <span className="sun" />
-        <span className="hill" />
-        <span className="home" />
-        <span className="sq-lg">
-          <Squirrel state="idle" size={120} />
-        </span>
-        <span className="sq-sm">
-          <Squirrel state="done" size={48} />
-        </span>
-      </div>
-      <div className="dm-signup__body">
-        <Logo className="dm-signup__logo" />
-        <p className="dm-q">{copy.signup.promise}</p>
-        <Button
-          variant="primary"
-          size="lg"
-          block
-          className="dm-signup__cta"
-          onClick={onGetStarted}
-        >
-          {copy.signup.getStarted}
-        </Button>
-        <p className="dm-small" style={{ textAlign: "center", margin: 0 }}>
-          {copy.signup.haveAccount}{" "}
-          <button type="button" className="dm-signup__link" onClick={onLogin}>
-            {copy.signup.logIn}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
-}
+const AUTH_WELCOME_SAY =
+  "A letter to later starts here. Tap the squirrel, or get started on the right.";
 
-/** 2 · Choose how — split from 900px: lime art + SSO column */
-export function ChooseHowScreen({
-  onBack,
-  onPax,
-  onApple,
-  onGoogle,
-  onEmail,
-  onLookAround,
+/** Lime art column — DS signapp left pane (hidden under 900px). */
+function AuthArtPanel({
+  say,
+  sqState,
   className,
+  headline = "Plan life's big moments.",
+  onSayHi,
 }: {
-  onBack?: () => void;
-  onPax?: () => void;
-  onApple?: () => void;
-  onGoogle?: () => void;
-  onEmail?: () => void;
-  onLookAround?: () => void;
+  say: string;
+  sqState: SquirrelState;
   className?: string;
+  headline?: string;
+  onSayHi?: () => void;
 }) {
   const reduced = usePrefersReducedMotion();
   const artRef = useRef<HTMLDivElement>(null);
-  const sayTimer = useRef<number | null>(null);
-
-  const [sqState, setSqState] = useState<SquirrelState>("idle");
-  const [say, setSay] = useState(AUTH_SAY_DEFAULT);
   const [jumping, setJumping] = useState(false);
   const [lean, setLean] = useState<CSSProperties>({});
   const [sunShift, setSunShift] = useState<CSSProperties>({});
+  const [saySwap, setSaySwap] = useState(false);
+  const [shownSay, setShownSay] = useState(say);
+  const sayKey = useRef(say);
 
-  const clearSayTimer = useCallback(() => {
-    if (sayTimer.current != null) {
-      window.clearTimeout(sayTimer.current);
-      sayTimer.current = null;
-    }
-  }, []);
-
-  useEffect(() => () => clearSayTimer(), [clearSayTimer]);
-
-  const resetHover = useCallback(() => {
-    setSqState("idle");
-    setSay(AUTH_SAY_DEFAULT);
-  }, []);
-
-  const onOptionEnter = useCallback(
-    (key: AuthHoverKey) => {
-      clearSayTimer();
-      const next = AUTH_HOVER[key];
-      setSqState(next.state);
-      setSay(next.say);
-    },
-    [clearSayTimer],
-  );
+  useEffect(() => {
+    if (say === sayKey.current) return;
+    sayKey.current = say;
+    setSaySwap(true);
+    const t = window.setTimeout(() => {
+      setShownSay(say);
+      setSaySwap(false);
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [say]);
 
   const onArtPointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -340,97 +279,236 @@ export function ChooseHowScreen({
   }, []);
 
   const onSqClick = useCallback(() => {
-    clearSayTimer();
-    setSay(AUTH_SAY_HI);
+    onSayHi?.();
     if (!reduced) {
       setJumping(false);
-      // Double rAF so the jump class can retrigger the hop animation
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setJumping(true));
       });
+      window.setTimeout(() => setJumping(false), 700);
     }
+  }, [onSayHi, reduced]);
+
+  return (
+    <div
+      ref={artRef}
+      className={cn("auth-art", className)}
+      onPointerMove={onArtPointerMove}
+      onPointerLeave={onArtPointerLeave}
+    >
+      <Logo className="auth-lk" />
+      <div className="auth-stage">
+        <svg
+          className="auth-scene"
+          viewBox="0 0 600 300"
+          preserveAspectRatio="xMidYMax slice"
+          aria-hidden
+        >
+          <circle
+            className="sun"
+            cx="440"
+            cy="92"
+            r="40"
+            fill="var(--briefpapier)"
+            style={sunShift}
+          />
+          <path
+            d="M0 215 Q150 160 300 205 T600 190 V300 H0Z"
+            fill="var(--kaugummi)"
+          />
+          <path
+            d="M0 250 Q170 215 330 242 T600 236 V300 H0Z"
+            fill="var(--pflaumenkuchen)"
+          />
+          <g
+            className="nut"
+            transform="translate(132 140) scale(.9) rotate(-12 20 30)"
+          >
+            <path
+              d="M20 9 V2"
+              stroke="var(--espressosatz)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
+              fill="var(--briefpapier)"
+            />
+            <path
+              d="M3 21 Q3 9 20 9 Q37 9 37 21 Z"
+              fill="var(--espressosatz)"
+            />
+          </g>
+        </svg>
+        <button
+          type="button"
+          className={cn("auth-sq", jumping && "jump")}
+          aria-label="Say hello to the squirrel"
+          style={lean}
+          onClick={onSqClick}
+        >
+          <Squirrel state={sqState} className="auth-sq__mark" />
+        </button>
+      </div>
+      <div className="auth-copy">
+        <h2>{headline}</h2>
+        <p
+          className={cn("say", saySwap && "is-swap")}
+          aria-live="polite"
+        >
+          {shownSay}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** 1 · Welcome — phone illustration; from 900px: lime art + promise column */
+export function WelcomeScreen({
+  onGetStarted,
+  onLogin,
+  className,
+}: {
+  onGetStarted?: () => void;
+  onLogin?: () => void;
+  className?: string;
+}) {
+  const sayTimer = useRef<number | null>(null);
+  const [sqState, setSqState] = useState<SquirrelState>("idle");
+  const [say, setSay] = useState(AUTH_WELCOME_SAY);
+
+  useEffect(
+    () => () => {
+      if (sayTimer.current != null) window.clearTimeout(sayTimer.current);
+    },
+    [],
+  );
+
+  const onSayHi = useCallback(() => {
+    if (sayTimer.current != null) window.clearTimeout(sayTimer.current);
+    setSqState("done");
+    setSay(AUTH_SAY_HI);
     sayTimer.current = window.setTimeout(() => {
-      setSay(AUTH_SAY_DEFAULT);
-      setJumping(false);
+      setSqState("idle");
+      setSay(AUTH_WELCOME_SAY);
     }, 2200);
-  }, [clearSayTimer, reduced]);
+  }, []);
+
+  return (
+    <>
+      <AuthArtPanel
+        className={className}
+        say={say}
+        sqState={sqState}
+        onSayHi={onSayHi}
+      />
+      <div className="pg auth wel">
+        <div className="dm-welcome" aria-hidden>
+          <span className="sun" />
+          <span className="hill" />
+          <span className="home" />
+          <span className="sq-lg">
+            <Squirrel state="idle" size={120} />
+          </span>
+          <span className="sq-sm">
+            <Squirrel state="done" size={48} />
+          </span>
+        </div>
+        <Logo className="dm-signup__logo" />
+        <p className="dm-q">{copy.signup.promise}</p>
+        <Button
+          variant="primary"
+          size="lg"
+          block
+          className="dm-signup__cta"
+          onClick={onGetStarted}
+        >
+          {copy.signup.getStarted}
+        </Button>
+        <p className="dm-small" style={{ textAlign: "center", margin: 0 }}>
+          {copy.signup.haveAccount}{" "}
+          <button type="button" className="dm-signup__link" onClick={onLogin}>
+            {copy.signup.logIn}
+          </button>
+        </p>
+      </div>
+    </>
+  );
+}
+
+/** 2 · Choose how — split from 900px: lime art + SSO column */
+export function ChooseHowScreen({
+  onBack,
+  onPax,
+  onApple,
+  onGoogle,
+  onEmail,
+  onLookAround,
+  className,
+}: {
+  onBack?: () => void;
+  onPax?: () => void;
+  onApple?: () => void;
+  onGoogle?: () => void;
+  onEmail?: () => void;
+  onLookAround?: () => void;
+  className?: string;
+}) {
+  const sayTimer = useRef<number | null>(null);
+  const [sqState, setSqState] = useState<SquirrelState>("idle");
+  const [say, setSay] = useState(AUTH_SAY_DEFAULT);
+
+  useEffect(
+    () => () => {
+      if (sayTimer.current != null) window.clearTimeout(sayTimer.current);
+    },
+    [],
+  );
+
+  const resetHover = useCallback(() => {
+    if (sayTimer.current != null) {
+      window.clearTimeout(sayTimer.current);
+      sayTimer.current = null;
+    }
+    setSqState("idle");
+    setSay(AUTH_SAY_DEFAULT);
+  }, []);
+
+  const onOptionEnter = useCallback((key: AuthHoverKey) => {
+    if (sayTimer.current != null) {
+      window.clearTimeout(sayTimer.current);
+      sayTimer.current = null;
+    }
+    const next = AUTH_HOVER[key];
+    setSqState(next.state);
+    setSay(next.say);
+  }, []);
+
+  const onSayHi = useCallback(() => {
+    if (sayTimer.current != null) window.clearTimeout(sayTimer.current);
+    setSqState("done");
+    setSay(AUTH_SAY_HI);
+    sayTimer.current = window.setTimeout(() => {
+      setSqState("idle");
+      setSay(AUTH_SAY_DEFAULT);
+    }, 2200);
+  }, []);
 
   const hoverHandlers = (key: AuthHoverKey) => ({
-    onMouseEnter: () => onOptionEnter(key),
+    onPointerEnter: () => onOptionEnter(key),
     onFocus: () => onOptionEnter(key),
-    onMouseLeave: resetHover,
+    onPointerLeave: resetHover,
     onBlur: resetHover,
   });
 
   return (
     <>
-      <div
-        ref={artRef}
-        className={cn("auth-art", className)}
-        onPointerMove={onArtPointerMove}
-        onPointerLeave={onArtPointerLeave}
-      >
-        <Logo className="auth-lk" />
-        <div className="auth-stage">
-          <svg
-            className="auth-scene"
-            viewBox="0 0 600 300"
-            preserveAspectRatio="xMidYMax slice"
-            aria-hidden
-          >
-            <circle
-              className="sun"
-              cx="440"
-              cy="92"
-              r="40"
-              fill="var(--briefpapier)"
-              style={sunShift}
-            />
-            <path
-              d="M0 215 Q150 160 300 205 T600 190 V300 H0Z"
-              fill="var(--kaugummi)"
-            />
-            <path
-              d="M0 250 Q170 215 330 242 T600 236 V300 H0Z"
-              fill="var(--pflaumenkuchen)"
-            />
-            <g
-              className="nut"
-              transform="translate(132 140) scale(.9) rotate(-12 20 30)"
-            >
-              <path
-                d="M20 9 V2"
-                stroke="var(--espressosatz)"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-              <path
-                d="M6 21 H34 V30 Q34 45 20 52 Q6 45 6 30 Z"
-                fill="var(--briefpapier)"
-              />
-              <path
-                d="M3 21 Q3 9 20 9 Q37 9 37 21 Z"
-                fill="var(--espressosatz)"
-              />
-            </g>
-          </svg>
-          <button
-            type="button"
-            className={cn("auth-sq", jumping && "jump")}
-            aria-label="Say hello to the squirrel"
-            style={lean}
-            onClick={onSqClick}
-          >
-            <Squirrel state={sqState} className="auth-sq__mark" />
-          </button>
-        </div>
-        <div className="auth-copy">
-          <h2>Plan life&apos;s big moments.</h2>
-          <p className="say" aria-live="polite">
-            {say}
-          </p>
-        </div>
-      </div>
+      <AuthArtPanel
+        className={className}
+        say={say}
+        sqState={sqState}
+        onSayHi={onSayHi}
+      />
 
       <div className="pg auth">
         <div className="dm-appbar" style={{ margin: "-4px -8px 0" }}>
