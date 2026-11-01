@@ -48,7 +48,7 @@ export { LifeMomentAsk } from "@/components/chat/LifeMomentAsk";
 export { NextStep } from "@/components/home/NextStep";
 export { MemoryGreeting, MemoryFacts } from "@/components/home/Memory";
 export { Opportunities } from "@/components/home/Opportunities";
-export { SettingsList } from "@/components/home/Settings";
+export { SettingsList, SettingsYou } from "@/components/home/Settings";
 export { LifeSheet } from "@/components/home/LifeSheet";
 export { HomeScreen } from "@/components/home/HomeScreen";
 export { HomeHero } from "@/components/home/HomeHero";
