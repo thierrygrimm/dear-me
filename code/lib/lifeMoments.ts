@@ -497,3 +497,17 @@ export function scriptFor(moment: LifeMoment): MomentScript {
 export function needsNumericIntake(moments: LifeMoment[]): boolean {
   return moments.includes("child") || moments.includes("less");
 }
+
+/**
+ * Open /ask. If a life-moment C1 is still pending, do not seed a research
+ * question — the chat must ask first.
+ */
+export function seedForAsk(
+  moments: LifeMoment[],
+  asked: LifeMoment[],
+  researchQuestion?: string,
+): string | null {
+  const primary = primaryMoment(moments);
+  if (primary && !asked.includes(primary)) return null;
+  return researchQuestion?.trim() || null;
+}
