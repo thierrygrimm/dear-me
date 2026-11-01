@@ -5,6 +5,7 @@ import {
   type CertificateStep,
 } from "@/components/certificate/CertificateFlow";
 import { FlowShell } from "@/components/layout/FlowShell";
+import { getPersona, readPersonaId } from "@/lib/personas";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -40,7 +41,17 @@ export default function CertificatePage() {
         <CertificateFlow
           onStepChange={setStep}
           onClose={() => router.push("/")}
-          onDone={() => router.push("/answer?topic=pensum")}
+          onDone={() => {
+            const id = readPersonaId();
+            const primary = getPersona(id).moments[0];
+            const topic =
+              primary === "child" || primary === "less"
+                ? "pensum"
+                : primary === "retire"
+                  ? "retire"
+                  : "disability";
+            router.push(`/answer?topic=${topic}`);
+          }}
         />
       </div>
     </FlowShell>

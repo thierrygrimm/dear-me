@@ -435,7 +435,10 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
           onSubmit={(value) => goAskFree(router, value)}
         />
         <div className="chips">
-          {HOME_STARTERS.map((q) => (
+          {(persona.earlierChats.length
+            ? persona.earlierChats
+            : [...HOME_STARTERS]
+          ).map((q) => (
             <button
               key={q}
               type="button"
