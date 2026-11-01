@@ -2148,7 +2148,8 @@ html{background:var(--surface)}
   .dm-app-main--flush{padding:0}
   .dm-app-main--flush:has(> .dm-morn){padding-bottom:0;overflow:hidden}
   .home-nocert{padding:40px 40px 56px;padding-bottom:56px;max-width:760px;margin-inline:auto;width:100%}
-  .dm-app-shell.set{grid-template-columns:76px 380px minmax(0,1fr)}
+  /* Me list+detail live inside main — keep shell at sidebar + main only */
+  .dm-app-shell.set{grid-template-columns:76px minmax(0,1fr)}
   .dm-app-shell.pgapp,
   .dm-app.pgapp{grid-template-columns:76px minmax(0,1fr)}
   .dm-app-shell.chat,
@@ -2180,7 +2181,7 @@ html{background:var(--surface)}
 @media (min-width:1200px){
   .dm-app-shell,
   .dm-app{grid-template-columns:248px minmax(0,1fr)}
-  .dm-app-shell.set{grid-template-columns:248px 380px minmax(0,1fr)}
+  .dm-app-shell.set{grid-template-columns:248px minmax(0,1fr)}
   .dm-app-shell.pgapp,
   .dm-app.pgapp{grid-template-columns:248px minmax(0,1fr)}
 }
@@ -2270,10 +2271,14 @@ html{background:var(--surface)}
  .dm-app .onb-col .dm-lm{min-height:150px;text-align:left}
  .dm-app .onb-col .dm-more2{width:auto;align-self:center}
  .dm-app .onb-col>.dm-btn--block{width:320px;margin-top:12px!important}
- /* Settings: list and page */
- .dm-app.set{grid-template-columns:76px 380px minmax(0,1fr)}
- .dm-app .pane-list{display:flex;flex-direction:column;gap:18px;grid-column:2;grid-row:1;padding:28px 24px;box-shadow:1px 0 0 var(--line);overflow:auto}
- .dm-app .pane-detail{display:flex;flex-direction:column;gap:18px;grid-column:3;grid-row:1;padding:28px 48px;overflow:auto;max-width:760px;box-sizing:border-box}
+ /* Settings: Me list + detail live inside main (AppShell), not as shell columns */
+ .dm-app.set{grid-template-columns:76px minmax(0,1fr)}
+ .dm-app.set > .dm-app-main{
+   display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);padding:0;overflow:hidden;
+ }
+ .dm-app.set .me-panes{display:contents}
+ .dm-app .pane-list{display:flex;flex-direction:column;gap:18px;grid-column:1;grid-row:1;padding:28px 24px;box-shadow:1px 0 0 var(--line);overflow:auto;min-height:0;min-width:0}
+ .dm-app .pane-detail{display:flex;flex-direction:column;gap:18px;grid-column:2;grid-row:1;padding:28px 48px;overflow:auto;max-width:none;box-sizing:border-box;min-height:0;min-width:0}
  .dm-app .pane-detail .dm-appbar [aria-label=Back]{visibility:hidden}
  /* Sheets → dialogs / toasts centre (also covered in bridge for body portals) */
  .dm-app .dm-bs .sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(520px,90%);max-height:80%;border-radius:24px;transform:translate(-50%,-46%);opacity:0;transition:transform 300ms var(--dm-ease),opacity 200ms}
@@ -2284,7 +2289,7 @@ html{background:var(--surface)}
 /* wide: full sidebar */
 @media (min-width:1200px){
  .dm-app{grid-template-columns:248px minmax(0,1fr)}
- .dm-app.set{grid-template-columns:248px 380px minmax(0,1fr)}
+ .dm-app.set{grid-template-columns:248px minmax(0,1fr)}
  .dm-side .lk span,.dm-side .ask>span:last-child,.dm-side nav span,.dm-side .who>span{display:inline}
  .dm-side .rec{display:flex}
  .dm-side .ask{justify-content:flex-start;padding:6px 16px 6px 6px}.dm-side nav a{justify-content:flex-start;padding:10px 12px}.dm-side .lk{justify-content:flex-start;padding-inline:8px}.dm-side .who{justify-content:flex-start;padding-inline:8px}
@@ -2669,30 +2674,54 @@ html{background:var(--surface)}
     grid-row:4;width:calc(100% - 48px);max-width:720px;justify-self:center;margin:0 0 24px;
   }
 
-  /* Me dual pane: list + detail as grid children of main when both present */
-  .dm-app-shell.set{grid-template-columns:76px minmax(0,1fr)}
-  .dm-app-shell.set > .dm-app-main{
-    display:grid;grid-template-columns:380px minmax(0,1fr);padding:0;overflow:hidden;
+  /* Me dual pane: list + detail are columns of main (not shell cols 2/3).
+     Older .dm-app.set rules still set pane-list/detail to grid-column 2/3 —
+     reset those so the You list is not crushed into a ~48px strip. */
+  .dm-app-shell.set,
+  .dm-app.set{grid-template-columns:76px minmax(0,1fr)}
+  .dm-app-shell.set > .dm-app-main,
+  .dm-app.set > .dm-app-main{
+    display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);padding:0;overflow:hidden;
   }
-  .dm-app-shell.set .me-panes{display:contents}
-  .dm-app-shell.set .pane-list{
+  .dm-app-shell.set .me-panes,
+  .dm-app.set .me-panes{display:contents}
+  .dm-app-shell.set .pane-list,
+  .dm-app.set .pane-list{
     display:flex;flex-direction:column;gap:18px;padding:28px 24px;
-    box-shadow:1px 0 0 var(--line);overflow:auto;min-height:0;
+    box-shadow:1px 0 0 var(--line);overflow:auto;min-height:0;min-width:0;
+    grid-column:1;grid-row:1;
   }
-  .dm-app-shell.set .pane-detail{
+  .dm-app-shell.set .pane-detail,
+  .dm-app.set .pane-detail{
     display:flex;flex-direction:column;gap:18px;padding:28px 48px;
-    overflow:auto;max-width:none;box-sizing:border-box;min-height:0;
+    overflow:auto;max-width:none;box-sizing:border-box;min-height:0;min-width:0;
+    grid-column:2;grid-row:1;
   }
-  .dm-app-shell.set .pane-detail > .pg{
+  .dm-app-shell.set .pane-detail > .pg,
+  .dm-app.set .pane-detail > .pg{
     padding:0;margin:0;max-width:100%;width:100%;
   }
-  .dm-app-shell.set .pane-detail > .pg.docs{max-width:880px}
-  .dm-app-shell.set .pane-detail > .pg.book{max-width:960px}
-  .dm-app-shell.set .pane-detail > .pg.wwk{max-width:800px}
-  .dm-app-shell.set .pane-detail > .pg.plan{max-width:760px}
+  .dm-app-shell.set .pane-detail > .pg.docs,
+  .dm-app.set .pane-detail > .pg.docs{max-width:880px}
+  .dm-app-shell.set .pane-detail > .pg.book,
+  .dm-app.set .pane-detail > .pg.book{max-width:960px}
+  .dm-app-shell.set .pane-detail > .pg.wwk,
+  .dm-app.set .pane-detail > .pg.wwk{max-width:800px}
+  .dm-app-shell.set .pane-detail > .pg.plan,
+  .dm-app.set .pane-detail > .pg.plan{max-width:760px}
   .dm-app-shell.set .pane-detail .dm-appbar [aria-label=Back],
-  .dm-app-shell.set .pane-detail [aria-label="Back"]{visibility:hidden}
-  .dm-app-shell.set .me-desk-empty{
+  .dm-app-shell.set .pane-detail [aria-label="Back"],
+  .dm-app.set .pane-detail .dm-appbar [aria-label=Back],
+  .dm-app.set .pane-detail [aria-label="Back"]{visibility:hidden}
+  /* Docs Add: pin to the detail column header, not the phone FAB slot */
+  .dm-app-shell.set .pane-detail .pg.docs .dm-fab,
+  .dm-app.set .pane-detail .pg.docs .dm-fab{
+    position:absolute;top:0;right:0;bottom:auto;left:auto;z-index:2;
+  }
+  .dm-app-shell.set .pane-detail .dm-filt,
+  .dm-app.set .pane-detail .dm-filt{margin-inline:0;padding-inline:0}
+  .dm-app-shell.set .me-desk-empty,
+  .dm-app.set .me-desk-empty{
     display:flex;align-items:center;justify-content:center;flex:1;min-height:240px;
     font:400 15px/22px var(--font-text);
   }
