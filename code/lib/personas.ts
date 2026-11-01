@@ -261,6 +261,58 @@ export function momentsForPersona(id: PersonaId): LifeMoment[] {
   return [...PERSONAS[id].moments];
 }
 
+/** Partner first name for shared-plan UI, or null when planning alone. */
+export function partnerNameFor(id?: PersonaId): string | null {
+  const p = getPersona(id);
+  if (p.id === "lena") return "Marco";
+  if (p.id === "ruth") return "Peter";
+  return null;
+}
+
+/** Default advisor shown on book / Home for this life. */
+export function advisorForPersona(id?: PersonaId): {
+  name: string;
+  role: string;
+  about: string;
+  noteDefault: string;
+} {
+  const p = getPersona(id);
+  if (p.id === "sandra") {
+    return {
+      name: "Jonas Meier",
+      role: "Pension advisor at Pax · Basel",
+      about: p.topic,
+      noteDefault:
+        "I went self-employed. What replaces the pension fund, and what should I set up first?",
+    };
+  }
+  if (p.id === "noah") {
+    return {
+      name: "Sara Keller",
+      role: "Pension advisor at Pax · Basel",
+      about: p.topic,
+      noteDefault:
+        "First job, first salary. Do I need a 3a at 24, and what if I couldn't work?",
+    };
+  }
+  if (p.id === "ruth") {
+    return {
+      name: "Sara Keller",
+      role: "Pension advisor at Pax · Basel",
+      about: p.topic,
+      noteDefault:
+        "How should we take the CHF 380'000 — lump sum, pension, or both?",
+    };
+  }
+  return {
+    name: "Sara Keller",
+    role: "Pension advisor at Pax · Basel",
+    about: "Can I go to 60 % after the baby?",
+    noteDefault:
+      "Can I go to 60 % from March without a gap in my pension?",
+  };
+}
+
 /**
  * Switch demo life: persona id + name, sync moments, clear C1 asked/answers
  * so Chat opens a fresh LifeMomentAsk for that story.
