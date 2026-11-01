@@ -13,21 +13,12 @@ import { Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const NEW_LESSON_IDS = new Set([
-  "three-pillars",
-  "ahv-part-1",
-  "ahv-part-2",
-]);
-
 function showNewBadge(
   lesson: (typeof LESSONS)[number],
   isDone: boolean,
 ): boolean {
   if (isDone) return false;
-  if ("isNew" in lesson && typeof (lesson as { isNew?: boolean }).isNew === "boolean") {
-    return Boolean((lesson as { isNew?: boolean }).isNew);
-  }
-  return NEW_LESSON_IDS.has(lesson.id);
+  return Boolean(lesson.isNew);
 }
 
 export function LearnScreen() {
