@@ -14,6 +14,7 @@ import {
   readCertificate,
   type IntakeValues,
 } from "@/lib/session";
+import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { Pencil } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
@@ -73,6 +74,10 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
   const salary = cert?.insuredSalary ? Math.round(cert.insuredSalary * 1.5) : 92000;
   const savings = cert?.savings ?? 84300;
 
+  const pulseHints =
+    phase === "check" ? ["Calculate"] : phase === "ask" ? ["Next"] : [];
+  const pulseRef = useDemoPulse(pulseHints, [phase, q]);
+
   useEffect(() => {
     if (phase !== "calc") return;
     const values: IntakeValues = {
@@ -121,8 +126,8 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
     );
   }
 
-  const shell = (body: React.ReactNode) => (
-    <div className={cn("dm-signup-shell", className)}>
+  const shell = (body: ReactNode) => (
+    <div className={cn("dm-signup-shell", className)} ref={pulseRef}>
       <div className="dm-signup">{body}</div>
     </div>
   );
