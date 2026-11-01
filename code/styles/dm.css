@@ -792,6 +792,12 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 .ig-stacks i{display:block;flex:none;width:38px;height:12px;border-radius:6px;opacity:0;transform:translateY(-120px)}
 .dm-step.on .ig-stacks i{animation:dm-fall 600ms cubic-bezier(.4,1.5,.6,1) forwards}
 @media (prefers-reduced-motion:reduce){.dm-step.on .ig-stacks i{opacity:1;transform:none}}
+/* lessons v2: larger stacked pills (three pillars) */
+.ig-stacks--lg{bottom:30px;gap:30px}
+.ig-stacks--lg>div{gap:4px;font:600 14px/18px var(--font-text);transition:opacity 300ms}
+.ig-stacks--lg>div>span{margin-top:10px}
+.ig-stacks--lg i{width:56px;height:16px;border-radius:8px}
+.ig-stacks--lg>div.dim{opacity:.22}
 /* infographic 2: salary vs insured */
 .ig-bars{position:absolute;left:24px;right:24px;top:70px;display:flex;flex-direction:column;gap:14px}
 .ig-bars .row{display:flex;flex-direction:column;gap:6px;font:600 12px/16px var(--font-text)}
@@ -810,6 +816,14 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 .ig-done{display:grid;place-items:center;height:100%}
 .ig-done .medal{position:relative;width:150px;height:150px;border-radius:50%;background:var(--espressosatz);display:grid;place-items:center;color:var(--neonweste)}
 .ig-done .medal::before{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px dashed var(--espressosatz);animation:dm-spin 14s linear infinite}
+/* C · Lesson done: lime full-bleed, content at phone width on laptop */
+.dm-lesson-done{background:var(--neonweste)}
+.dm-lesson-done__inner{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;gap:12px;padding:24px 20px 18px;box-sizing:border-box}
+.dm-lesson-done__inner > .ig-done{flex:1;min-height:0}
+.dm-lesson-done__inner > small{font:600 12px/16px var(--font-text)}
+.dm-lesson-done__inner > h4{margin:0;font:700 26px/30px var(--font-display);letter-spacing:-.02em}
+.dm-lesson-done__inner > p{margin:0;font:400 15px/22px var(--font-text)}
+.dm-lesson-done .dm-btn--text{align-self:center}
 
 /* ---------- Lesson infographics (pillars, AHV) ---------- */
 .lp{position:absolute;inset:0;width:100%;height:100%}
@@ -838,8 +852,17 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 .lq button:focus-visible{outline:2px solid var(--brombeerkompott);outline-offset:2px}
 .dm-libtile .art em.new{position:absolute;top:10px;left:10px;font-style:normal;padding:3px 9px;border-radius:999px;background:var(--neuschnee);color:var(--espressosatz);font:600 11px/14px var(--font-text)}
 @media (prefers-reduced-motion:reduce){.dm-step.on .lp-col,.dm-step.on .lp-row,.dm-step.on .lp-dot,.dm-step.on .lp-grow,.dm-step.on .lp-band,.dm-step.on .lp-cut,.dm-step.on .lp-pop,.dm-step.on .lp-pin,.dm-step.on .lp-arrow,.dm-step.on .lp-big b{animation:none}}
-.dm-lesson[data-gen] .dm-lesson__art{flex:none;height:280px}
-.dm-lesson[data-gen] .dm-step:has(.lq) .dm-lesson__art{height:220px}
+.dm-lesson[data-gen] .dm-lesson__art{flex:none;height:320px}
+.dm-lesson[data-gen] .dm-step:has(.lq) .dm-lesson__art{height:250px}
+.dm-lesson[data-gen] .dm-lesson__body{padding-top:24px;gap:8px}
+.dm-lesson[data-gen] .dm-lesson__body h4{font-size:28px;line-height:32px;text-wrap:balance}
+.dm-lesson[data-gen] .dm-lesson__body p:empty{display:none}
+.dm-lesson[data-gen] .dm-lesson__body p{color:var(--ink-muted);text-wrap:pretty;font-size:16px;line-height:23px}
+.dm-lesson[data-gen] .dm-step:has(.lq) .dm-lesson__body h4{font-size:24px;line-height:28px}
+.dm-lesson[data-gen] .lq{margin-top:10px}
+.dm-lesson[data-gen] .lp-big{justify-content:center;align-items:center;text-align:center;padding:30px 20px 0}
+.dm-lesson[data-gen] .lp-big b{font-size:84px}
+.dm-lesson[data-gen] .lp-big span{font-size:16px}
 @container vp (min-width:900px){
  /* lesson player — FlowShell .pg.lesson or full-screen .dm-lesson-host */
  .dm-app.flowapp .pg.lesson{max-width:1000px;padding:40px 40px 48px}
@@ -2121,8 +2144,16 @@ html{background:var(--surface)}
 .dm-vp{container:vp/inline-size;height:100%}
 /* Preview phones only — do not collapse the real app shell's 100dvh height */
 .dm-vp .dm-app{width:100%!important;min-height:0!important;height:100%;border-radius:0;box-shadow:none;position:relative}
-.dm-app .dm-side,.dm-app .onb-top,.dm-app .pane-detail{display:none}
-.dm-app .onb-col,.dm-app .pane-list{display:contents}
+.dm-app .dm-side,.dm-app .pane-detail{display:none}
+.dm-app .pane-list{display:contents}
+/* Preview phones only — real app onb uses media queries below */
+.dm-vp .dm-app .onb-top{display:none}
+.dm-vp .dm-app .onb-col{display:contents}
+/* Phone app: hide desktop onb chrome; flatten column into the shell */
+@media (max-width:899px){
+  .dm-app.onb > .onb-top{display:none}
+  .dm-app.onb > .onb-col{display:contents}
+}
 .dm-app.chat>.dm-tabbar{display:none}
 /* Phone gutters for Ask (dm-phone padding equivalent; zeroed from 900px) */
 .dm-app.chat{padding:12px 16px 14px;gap:12px;box-sizing:border-box}
@@ -2290,6 +2321,36 @@ html{background:var(--surface)}
  .dm-app .pg .dm-btn--block{max-width:320px}
  .dm-app .pg.learn{max-width:1000px}
  .dm-app .pg.learn .dm-libgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+ /* Lesson player (app media queries; keep overlay full-bleed, constrain content) */
+ .dm-app.flowapp .pg.lesson{max-width:1000px;padding:40px 40px 48px}
+ .dm-app-full.dm-lesson-host{max-width:none;width:100%;padding:40px 40px 48px;box-sizing:border-box;overflow:auto}
+ .dm-app-full.dm-lesson-host > .dm-lesson{width:100%;max-width:1000px;margin:0 auto}
+ .dm-app .pg.lesson .dm-lesson,
+ .dm-lesson-host .dm-lesson{background:none;height:auto}
+ .dm-app .pg.lesson .dm-lesson__top,
+ .dm-lesson-host .dm-lesson__top{position:static;max-width:560px;margin:0 auto 36px;width:100%}
+ .dm-app .pg.lesson .dm-lesson__top button,
+ .dm-lesson-host .dm-lesson__top button{background:var(--surface-card)}
+ .dm-app .pg.lesson .dm-step.on,
+ .dm-lesson-host .dm-step.on{display:grid!important;grid-template-columns:440px minmax(0,1fr);gap:56px;align-items:center;height:auto!important}
+ .dm-app .pg.lesson .dm-lesson__art,
+ .dm-lesson-host .dm-lesson__art{height:440px!important;border-radius:28px;flex:none;min-height:0}
+ .dm-app .pg.lesson .dm-lesson__body,
+ .dm-lesson-host .dm-lesson__body{padding:0;gap:14px}
+ .dm-app .pg.lesson .dm-lesson__body h4,
+ .dm-lesson-host .dm-lesson__body h4{font-size:36px;line-height:42px}
+ .dm-app .pg.lesson .dm-lesson__body p,
+ .dm-lesson-host .dm-lesson__body p{font-size:17px;line-height:26px;max-width:460px}
+ .dm-app .pg.lesson .nx,
+ .dm-lesson-host .nx{margin-top:18px!important;max-width:320px}
+ .dm-app .pg.lesson .lq,
+ .dm-lesson-host .lq{max-width:420px}
+ .dm-app .pg.lesson .dm-lesson[data-gen] .dm-lesson__art,
+ .dm-lesson-host .dm-lesson[data-gen] .dm-lesson__art{height:440px!important}
+ /* Done: lime fills the window, content at phone width */
+ .dm-app-full.dm-lesson-done{max-width:none;width:100%;align-items:center}
+ .dm-lesson-done__inner{max-width:390px;margin:0 auto}
+ .dm-lesson-done .dm-btn--block{max-width:320px}
  .dm-app .pg.cmp,.dm-app .pg.docs{max-width:880px}
  .dm-app .pg.cmp .dm-seg3{max-width:420px}
  .dm-app .pg.book{max-width:960px;display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:48px;row-gap:16px;align-content:start}
@@ -2634,14 +2695,15 @@ html{background:var(--surface)}
 }
 
 
-/* Welcome / intermediate signup steps: fit short laptop heights */
+/* Legacy phone signup shell — only when NOT inside a desktop flow/split */
 @media (min-width:900px){
- .dm-signup-shell{
+ .dm-signup-shell:not(.signapp):not(:has(.auth-art)){
    height:100dvh;max-height:100dvh;overflow:auto;
    display:flex;flex-direction:column;align-items:center;
  }
- .dm-signup-shell > .dm-signup{
-   width:100%;max-width:480px;min-height:100%;
+ /* Do not force a 480px phone column on desktop start flows */
+ .dm-signup-shell:not(:has(.dm-app)):not(.signapp) > .dm-signup{
+   width:100%;max-width:560px;min-height:100%;
    padding-bottom:max(24px,env(safe-area-inset-bottom,0px));
  }
 }
@@ -2654,8 +2716,17 @@ html{background:var(--surface)}
 .dm-app.flowapp .pg.fl{
   flex:1;display:flex;flex-direction:column;min-height:0;width:100%
 }
-.dm-app.flowapp .pg.fl > .dm-signup{
-  flex:1;width:100%;min-height:0
+.dm-app.flowapp .pg.fl > .dm-signup,
+.dm-app.flowapp .pg.fl .dm-signup--flow{
+  flex:1;width:100%;min-height:0;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  box-sizing:border-box
+}
+@media (min-width:900px){
+  .dm-app.flowapp .pg.fl > .dm-signup,
+  .dm-app.flowapp .pg.fl .dm-signup--flow{
+    padding:0
+  }
 }
 @media (min-width:900px){
  .dm-app-shell.flowapp,
@@ -2727,15 +2798,24 @@ html{background:var(--surface)}
  .dm-app.flowapp .pg.fl-question .dm-mode{align-self:center}
  .dm-app.flowapp .pg.fl-question .dm-stepper{transform:scale(1.6);transform-origin:50% 50%;margin:24px 0}
  .dm-app.flowapp .pg.fl-question .dm-row{justify-content:center}
+ .dm-app.flowapp .pg.fl-question .dm-flow-footer,
  .dm-app.flowapp .pg.fl-question .dm-signup > .dm-row:last-child,
  .dm-app.flowapp .pg.fl-question > .dm-row:last-child{
    position:fixed;left:0;right:0;bottom:0;padding:16px 32px;margin:0;
    background:var(--surface);box-shadow:0 -1px 0 var(--line);
    display:flex;justify-content:space-between;gap:12px;z-index:3
  }
+ .dm-app.flowapp .pg.fl-question .dm-flow-footer .dm-btn,
  .dm-app.flowapp .pg.fl-question .dm-signup > .dm-row:last-child .dm-btn,
  .dm-app.flowapp .pg.fl-question > .dm-row:last-child .dm-btn{
    flex:none!important;width:auto!important;min-width:140px
+ }
+ .dm-app.flowapp .pg.fl .dm-signup--flow{
+   max-width:none;width:100%;min-height:0;height:auto;margin:0;padding:0;
+   background:transparent;gap:18px
+ }
+ .dm-app.flowapp .pg.fl-question .dm-signup--flow{
+   align-items:center;text-align:center;flex:1;padding-bottom:24px
  }
  /* full bleed: loaders, celebration */
  .dm-app.flowapp.fl-bleed{background:none}
