@@ -10,6 +10,8 @@ const NAME_KEY = "dm-name";
 const INTAKE_KEY = "dm-intake";
 const SHARE_PAX_KEY = "dm-share-pax";
 const SCOPE_KEY = "dm-planning-scope";
+const LEAD_KEY = "dm-lead-id";
+const CHAT_HISTORY_KEY = "dm-chat-history";
 
 /** First name from the active demo persona (e.g. "Ruth" from "Ruth, 61"). */
 function nameFromActivePersona(): string {
@@ -350,6 +352,36 @@ export function readSharePax(): boolean {
 export function markSharePax(on: boolean): void {
   if (on) sessionStorage.setItem(SHARE_PAX_KEY, "1");
   else sessionStorage.removeItem(SHARE_PAX_KEY);
+}
+
+export function readLeadId(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(LEAD_KEY);
+}
+
+export function markLeadId(id: string): void {
+  sessionStorage.setItem(LEAD_KEY, id);
+}
+
+export function readChatHistory(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = sessionStorage.getItem(CHAT_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((x): x is string => typeof x === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function pushChatHistory(question: string): void {
+  const q = question.trim();
+  if (!q) return;
+  const next = [q, ...readChatHistory().filter((x) => x !== q)].slice(0, 12);
+  sessionStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(next));
 }
 
 export function readPlanningScope(): PlanningScope {

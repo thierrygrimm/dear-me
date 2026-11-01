@@ -6,12 +6,14 @@ import { Squirrel } from "@/components/brand/Squirrel";
 import { useToast } from "@/components/feedback/Toast";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { createLeadClient, householdForDemo } from "@/lib/engine";
 import {
   advisorForPersona,
   readPersonaId,
 } from "@/lib/personas";
+import { markLeadId } from "@/lib/session";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const days = [
   { label: "Mon", n: 2, disabled: true },
@@ -78,6 +80,7 @@ export function AdvisorBooking({
   const [noteDefault, setNoteDefault] = useState(
     noteDefaultProp ?? seed.noteDefault,
   );
+  const questionRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const a = advisorForPersona(readPersonaId());
@@ -86,6 +89,32 @@ export function AdvisorBooking({
     if (!aboutProp) setAbout(a.about);
     if (!noteDefaultProp) setNoteDefault(a.noteDefault);
   }, [advisorNameProp, advisorRoleProp, aboutProp, noteDefaultProp]);
+
+  async function confirmBooking() {
+    const question =
+      questionRef.current?.value?.trim() || noteDefault || about;
+    try {
+      const personaId = readPersonaId();
+      const preference =
+        channel === "Phone"
+          ? "call"
+          : channel === "In person"
+            ? "office"
+            : "video";
+      const lead = await createLeadClient({
+        household: householdForDemo(personaId),
+        personaId,
+        entryPoint: "book",
+        contactPreference: preference,
+        questions: [question],
+        askedForPerson: true,
+      });
+      markLeadId(lead.id);
+    } catch {
+      /* demo still continues without a server lead */
+    }
+    setStep(4);
+  }
 
   const when = `Tue ${day} Nov · ${slot ?? "10:30"}`;
   const where =
@@ -260,11 +289,12 @@ export function AdvisorBooking({
             <label>Your question</label>
             <textarea
               key={noteDefault}
+              ref={questionRef}
               rows={2}
               defaultValue={noteDefault}
             />
           </div>
-          <ShareConsent onConfirm={() => setStep(4)} />
+          <ShareConsent onConfirm={() => void confirmBooking()} />
           <p className="dm-small dm-muted" style={{ margin: 0 }}>
             So {first} doesn&apos;t start from zero. Documents and chats stay
             private.
@@ -273,7 +303,7 @@ export function AdvisorBooking({
             variant="signal"
             block
             className="dm-signup__cta"
-            onClick={() => setStep(4)}
+            onClick={() => void confirmBooking()}
           >
             Book {when}
           </Button>
