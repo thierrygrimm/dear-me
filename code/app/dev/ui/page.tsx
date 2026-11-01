@@ -13,6 +13,7 @@ import {
   AnswerWidget,
   MemoryChip,
 } from "@/components/chat/ChatWidgets";
+import { YourMomentsScreen } from "@/components/auth/SignUp";
 import {
   BrandLoader,
   CalculatingPanel,
@@ -40,7 +41,7 @@ import { PensumSlider } from "@/components/ui/PensumSlider";
 import { Segmented } from "@/components/ui/Segmented";
 import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { copy } from "@/lib/copy";
-import type { PlanningScope } from "@/lib/session";
+import type { LifeMoment, PlanningScope } from "@/lib/session";
 import { useState } from "react";
 
 function Section({
@@ -75,6 +76,8 @@ export default function DevUiPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [opt, setOpt] = useState("a");
   const [planDone, setPlanDone] = useState(false);
+  const [momentPersona, setMomentPersona] = useState<"lena" | "ruth">("lena");
+  const [devMoments, setDevMoments] = useState<LifeMoment[]>([]);
 
   return (
     <div className="dm-app-shell" style={{ maxWidth: 520, padding: 20 }}>
@@ -93,6 +96,44 @@ export default function DevUiPage() {
           <Button variant="family-soft">Soft</Button>
           <Button variant="joy">Joy</Button>
           <Button variant="text">Text</Button>
+        </div>
+      </Section>
+
+      <Section title="Life moments picker">
+        <div className="dm-row">
+          <Chip
+            pressed={momentPersona === "lena"}
+            onClick={() => {
+              setMomentPersona("lena");
+              setDevMoments([]);
+            }}
+          >
+            Lena · 34
+          </Chip>
+          <Chip
+            pressed={momentPersona === "ruth"}
+            onClick={() => {
+              setMomentPersona("ruth");
+              setDevMoments([]);
+            }}
+          >
+            Ruth · 61
+          </Chip>
+        </div>
+        <div
+          style={{
+            height: 640,
+            borderRadius: 16,
+            overflow: "hidden",
+            boxShadow: "inset 0 0 0 1px var(--line)",
+          }}
+        >
+          <YourMomentsScreen
+            name={momentPersona === "lena" ? "Lena" : "Ruth"}
+            age={momentPersona === "lena" ? 34 : 61}
+            value={devMoments}
+            onChange={setDevMoments}
+          />
         </div>
       </Section>
 
@@ -227,6 +268,10 @@ export default function DevUiPage() {
         >
           <Chat />
         </div>
+        <p className="dm-small dm-muted" style={{ margin: 0 }}>
+          LifeMoments C1–C3 · first job (secondary idea available) and retire
+          (Auszahlungsplan only). Tap through to “What could help?”.
+        </p>
         <div
           style={{
             height: 480,
@@ -239,6 +284,21 @@ export default function DevUiPage() {
           <LifeMomentAsk
             moment="firstjob"
             name="Noah"
+            onDone={() => undefined}
+          />
+        </div>
+        <div
+          style={{
+            height: 480,
+            borderRadius: 16,
+            overflow: "auto",
+            boxShadow: "inset 0 0 0 1px var(--line)",
+            padding: 12,
+          }}
+        >
+          <LifeMomentAsk
+            moment="retire"
+            name="Rita"
             onDone={() => undefined}
           />
         </div>
