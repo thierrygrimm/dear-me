@@ -1,4 +1,5 @@
 import type { LifeMoment } from "@/lib/session";
+import { offerForMoment } from "@/lib/paxProducts";
 
 export type MomentOption = {
   id: string;
@@ -17,6 +18,8 @@ export type MomentOffer = {
   title: string;
   body: string;
   facts: { label: string; value: string }[];
+  /** Why this Pax idea was shown for this gap (C3). */
+  whyShown?: string;
 };
 
 export type MomentReveal = {
@@ -25,6 +28,8 @@ export type MomentReveal = {
   note: string;
   next: string[];
   offer: MomentOffer;
+  /** Second Pax idea — only on later “show more”, never first C3 screen. */
+  offerSecondary?: MomentOffer;
 };
 
 export type MomentScript = {
@@ -41,10 +46,23 @@ function hi(name: string): string {
   return name && name !== "there" ? `Hi ${name}.` : "Hi.";
 }
 
+function withOffers(
+  moment: LifeMoment,
+  answers: Record<string, string>,
+  base: Omit<MomentReveal, "offer" | "offerSecondary">,
+): MomentReveal {
+  const { primary, secondary } = offerForMoment(moment, answers);
+  return {
+    ...base,
+    offer: primary,
+    offerSecondary: secondary,
+  };
+}
+
 /**
  * LifeMoments C1–C3 scripts from the design system.
  * Ask before telling: one (or a few) tap questions, then one number, then a
- * product only when asked.
+ * product only when asked. C3 offers come from paxProducts / scenarios.md.
  */
 export const momentScripts: Record<LifeMoment, MomentScript> = {
   firstjob: {
@@ -65,7 +83,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
     ],
     reveal: (answers) => {
       const has = answers.employer_pk === "yes";
-      return {
+      return withOffers("firstjob", answers, {
         sentence: has
           ? "Then you're off to a good start. One spot is thin:"
           : "That's common at the start. One spot is thin either way:",
@@ -78,15 +96,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
           ? "Estimated from your salary. Your certificate makes it exact."
           : "Without a fund, AHV alone leaves a wider gap. A certificate or payslip makes it exact.",
         next: ["What could help?", "How did you get this?"],
-        offer: {
-          title: "Income protection for young people",
-          body: "Pays a monthly income if illness or an accident stops you working. Made for ages 15 to 28.",
-          facts: [
-            { label: "Pays up to", value: "CHF 36'000 a year" },
-            { label: "Price", value: "With an advisor" },
-          ],
-        },
-      };
+      });
     },
     startersAfter: [
       "What if I change jobs?",
@@ -113,7 +123,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
     ],
     reveal: (answers) => {
       const no = answers.pays_pk !== "yes";
-      return {
+      return withOffers("selfemployed", answers, {
         sentence: no
           ? "Then the gap if you couldn't work is the main one:"
           : "Good. Even with a fund, one spot is often thin:",
@@ -124,15 +134,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         },
         note: "Estimated for self-employed cover. Your numbers make it exact.",
         next: ["What could help?", "How did you get this?"],
-        offer: {
-          title: "Income protection while you build",
-          body: "A monthly income if illness or an accident stops you working — built for people without a classic employer fund.",
-          facts: [
-            { label: "Focus", value: "Income gap" },
-            { label: "Next", value: "With an advisor" },
-          ],
-        },
-      };
+      });
     },
     startersAfter: [
       "How much 3a can I pay?",
@@ -157,24 +159,17 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         note: "Or tap + and bring in the mortgage papers.",
       },
     ],
-    reveal: () => ({
-      sentence: "The flat is yours. One thing still protects it:",
-      big: {
-        label: "If one of you dies",
-        value: "CHF 420'000",
-        meaning: "still owed on the mortgage in this example",
-      },
-      note: "Estimated from a typical first home. Your contract makes it exact.",
-      next: ["What could help?", "How did you get this?"],
-      offer: {
-        title: "Cover that follows the mortgage",
-        body: "A decreasing sum that tracks what you still owe, so the home stays with the other person.",
-        facts: [
-          { label: "Idea", value: "FKF · decreasing capital" },
-          { label: "Price", value: "With an advisor" },
-        ],
-      },
-    }),
+    reveal: (answers) =>
+      withOffers("home", answers, {
+        sentence: "The flat is yours. One thing still protects it:",
+        big: {
+          label: "If one of you dies",
+          value: "CHF 420'000",
+          meaning: "still owed on the mortgage in this example",
+        },
+        note: "Estimated from a typical first home. Your contract makes it exact.",
+        next: ["What could help?", "How did you get this?"],
+      }),
     startersAfter: [
       "What about amortisation?",
       "Can we use pillar 2 for the home?",
@@ -240,7 +235,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
     reveal: (answers) => {
       const meCuts =
         answers.who_reduce === "me" || answers.who_reduce === "both";
-      return {
+      return withOffers("child", answers, {
         sentence: meCuts
           ? "If you go to 60 % after the baby, one number stands out:"
           : "Before you decide who stays home, one number stands out:",
@@ -251,15 +246,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         },
         note: "From your salary and pension fund. We can play with the slider next.",
         next: ["What could help?", "Can I go to 60 % after the baby?"],
-        offer: {
-          title: "A pension for the family",
-          body: "Monthly income for the people who depend on you, if the worst happens — plus room for a children's policy later.",
-          facts: [
-            { label: "Idea", value: "FR · family pension" },
-            { label: "Also", value: "Kinderversicherung" },
-          ],
-        },
-      };
+      });
     },
     startersAfter: [
       "Can I go to 60 % after the baby?",
@@ -287,7 +274,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
     ],
     reveal: (answers) => {
       const pct = answers.target_pensum === "80" ? "300" : "600";
-      return {
+      return withOffers("less", answers, {
         sentence: "60 % pensum. Let's not make it 60 % pension. One number:",
         big: {
           label: "At 65",
@@ -296,15 +283,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         },
         note: "Estimated from your certificate. The slider makes it yours.",
         next: ["What could help?", "What if 80 %?"],
-        offer: {
-          title: "Keep saving while you work less",
-          body: "A 3a that can rise automatically, so a lower pensum does not freeze your retirement savings.",
-          facts: [
-            { label: "Idea", value: "TerzaFondsStar" },
-            { label: "Also", value: "Income cover (SIR)" },
-          ],
-        },
-      };
+      });
     },
     startersAfter: [
       "What if 80 %?",
@@ -328,24 +307,17 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         ],
       },
     ],
-    reveal: () => ({
-      sentence: "You're not married. The law has noticed. One gap:",
-      big: {
-        label: "If one of you dies",
-        value: "CHF 0",
-        meaning: "from the other's pension fund, by default",
-      },
-      note: "Partners outside marriage need to be named. A beneficiary form fixes that.",
-      next: ["What could help?", "How do we name each other?"],
-      offer: {
-        title: "Cover for both of you",
-        body: "A policy that pays the other person if one of you dies — made for couples who aren't married.",
-        facts: [
-          { label: "Idea", value: "FK2 · two lives" },
-          { label: "Also", value: "Name each other on pillar 2" },
-        ],
-      },
-    }),
+    reveal: (answers) =>
+      withOffers("together", answers, {
+        sentence: "You're not married. The law has noticed. One gap:",
+        big: {
+          label: "If one of you dies",
+          value: "CHF 0",
+          meaning: "from the other's pension fund, by default",
+        },
+        note: "Partners outside marriage need to be named. A beneficiary form fixes that.",
+        next: ["What could help?", "How do we name each other?"],
+      }),
     startersAfter: [
       "How do we name each other?",
       "What about taxes together?",
@@ -369,24 +341,17 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         note: "Or tap + and bring in the divorce papers or a statement.",
       },
     ],
-    reveal: () => ({
-      sentence: "After a split, retirement often needs a restart. One number:",
-      big: {
-        label: "Typical gap to close",
-        value: "CHF 280",
-        meaning: "a month at 65, if 3a pauses for a few years",
-      },
-      note: "A rough guide. Your decree and certificates make it exact.",
-      next: ["What could help?", "How did you get this?"],
-      offer: {
-        title: "Restart your 3a",
-        body: "A clean 3a for the next chapter, with beneficiaries you choose — and room for new family cover if you need it.",
-        facts: [
-          { label: "Idea", value: "FondsStar or LifeStar" },
-          { label: "Also", value: "Update beneficiaries" },
-        ],
-      },
-    }),
+    reveal: (answers) =>
+      withOffers("separating", answers, {
+        sentence: "After a split, retirement often needs a restart. One number:",
+        big: {
+          label: "Typical gap to close",
+          value: "CHF 280",
+          meaning: "a month at 65, if 3a pauses for a few years",
+        },
+        note: "A rough guide. Your decree and certificates make it exact.",
+        next: ["What could help?", "How did you get this?"],
+      }),
     startersAfter: [
       "How do beneficiaries work now?",
       "Should I restart 3a?",
@@ -410,28 +375,145 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         ],
       },
     ],
-    reveal: () => ({
-      sentence: "We didn't spend it all. One way it can work harder:",
-      big: {
-        label: "In 3a this year",
-        value: "CHF 1'900",
-        meaning: "tax you can still save in this example",
-      },
-      note: "Depends on your canton and what you've already paid in.",
-      next: ["What could help?", "How did you get this?"],
-      offer: {
-        title: "Invest the windfall with a plan",
-        body: "A one-off into funds or a guarantee share — so the money has a job before it drifts into spending.",
-        facts: [
-          { label: "Idea", value: "FondsStarInvest / LifeStarInvest" },
-          { label: "Also", value: "Privileged top-up if you qualify" },
-        ],
-      },
-    }),
+    reveal: (answers) =>
+      withOffers("bonus", answers, {
+        sentence: "We didn't spend it all. One way it can work harder:",
+        big: {
+          label: "In 3a this year",
+          value: "CHF 1'900",
+          meaning: "tax you can still save in this example",
+        },
+        note: "Depends on your canton and what you've already paid in.",
+        next: ["What could help?", "How did you get this?"],
+      }),
     startersAfter: [
       "How much 3a is left this year?",
       "Guarantee or funds?",
       "What if I need the money later?",
+    ],
+  },
+
+  grandchild: {
+    id: "grandchild",
+    greeting: (name) =>
+      `${hi(name)} Saving for a little one. One question first:`,
+    questions: [
+      {
+        id: "child_age",
+        question: "How old is the grandchild?",
+        options: [
+          { id: "baby", label: "Under 3" },
+          { id: "school", label: "3 to 10" },
+          { id: "teen", label: "11 to 18" },
+          { id: "soon", label: "Not born yet" },
+        ],
+      },
+      {
+        id: "goal",
+        question: "What should the money help with?",
+        options: [
+          { id: "start", label: "A start in life" },
+          { id: "school", label: "School or training" },
+          { id: "open", label: "Just something put aside" },
+        ],
+        note: "Or tap + and bring in a statement if you already save for them.",
+      },
+    ],
+    reveal: (answers) =>
+      withOffers("grandchild", answers, {
+        sentence: "Dear little one, I thought about you today. One number:",
+        big: {
+          label: "By age 20, in this sketch",
+          value: "CHF 48'000",
+          meaning: "if you put aside about CHF 200 a month",
+        },
+        note: "A fictional path. Your age as payer and theirs make it exact.",
+        next: ["What could help?", "How did you get this?"],
+      }),
+    startersAfter: [
+      "Can I be the payer after 60?",
+      "What if they need it earlier?",
+      "Compare FirstStep packages",
+    ],
+  },
+
+  catchup: {
+    id: "catchup",
+    greeting: (name) =>
+      `${hi(name)} Late is better than never. One question, so I don't guess the horizon:`,
+    questions: [
+      {
+        id: "years_left",
+        question: "Roughly how many years until you stop working?",
+        options: [
+          { id: "under10", label: "Under 10" },
+          { id: "10to15", label: "10 to 15" },
+          { id: "over15", label: "More than 15" },
+          { id: "unsure", label: "Not sure" },
+        ],
+        note: "Or tap + and bring in your pension certificate.",
+      },
+    ],
+    reveal: (answers) => {
+      const short =
+        answers.years_left === "under10" || answers.years_left === "10to15";
+      return withOffers("catchup", answers, {
+        sentence: short
+          ? "With under 15 years left, certainty matters more. One gap:"
+          : "There's still room to catch up. One gap:",
+        big: {
+          label: "At 65",
+          value: "CHF 740",
+          meaning: "a month short of a comfortable target in this example",
+        },
+        note: "Estimated from a typical 50+ certificate. Yours makes it exact.",
+        next: ["What could help?", "How did you get this?"],
+      });
+    },
+    startersAfter: [
+      "Guarantee or funds at my age?",
+      "How much 3a is left this year?",
+      "What about a buy-in?",
+    ],
+  },
+
+  retire: {
+    id: "retire",
+    greeting: (name) =>
+      `${hi(name)} The money's nearly here. One question before we talk about making it last:`,
+    questions: [
+      {
+        id: "payout_choice",
+        question: "What are you taking from the pension fund?",
+        options: [
+          { id: "lump", label: "Mostly a lump sum" },
+          { id: "pension", label: "Mostly a pension" },
+          { id: "mix", label: "A mix" },
+          { id: "unsure", label: "Not decided" },
+        ],
+        note: "Or tap + and bring in your retirement offer.",
+      },
+    ],
+    reveal: (answers) => {
+      const lump =
+        answers.payout_choice === "lump" || answers.payout_choice === "mix";
+      return withOffers("retire", answers, {
+        sentence: lump
+          ? "Dear me, the money's here. Now let's make it last. One number:"
+          : "Even with a pension, a lump sum needs a plan. One number:",
+        big: {
+          label: "This capital could pay",
+          value: "CHF 2'100",
+          meaning: "a month for about 20 years in this sketch",
+        },
+        note: "Fictional payout from CHF 350'000. Your offer letter makes it exact.",
+        next: ["What could help?", "How did you get this?"],
+      });
+    },
+    startersAfter: [
+      "Lump sum or pension?",
+      "What if I live to 95?",
+      "Can I change my mind later?",
     ],
   },
 
@@ -453,7 +535,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
     ],
     reveal: (answers) => {
       const cutting = answers.cut_work !== "no";
-      return {
+      return withOffers("caring", answers, {
         sentence: cutting
           ? "Caring often means less pensum. One number to watch:"
           : "Even without a cut, care years matter. One number:",
@@ -464,15 +546,7 @@ export const momentScripts: Record<LifeMoment, MomentScript> = {
         },
         note: "A sketch from typical care cuts. Your certificate makes it exact.",
         next: ["What could help?", "How did you get this?"],
-        offer: {
-          title: "Keep a little saving going",
-          body: "A small 3a so care years don't freeze retirement — and income cover if your workload drops.",
-          facts: [
-            { label: "Idea", value: "3a + SIR" },
-            { label: "Price", value: "With an advisor" },
-          ],
-        },
-      };
+      });
     },
     startersAfter: [
       "What about AHV care credits?",
