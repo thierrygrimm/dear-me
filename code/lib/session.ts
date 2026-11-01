@@ -7,6 +7,9 @@ const ONBOARDED_KEY = "dm-onboarded";
 const NAME_KEY = "dm-name";
 const INTAKE_KEY = "dm-intake";
 const SHARE_PAX_KEY = "dm-share-pax";
+const SCOPE_KEY = "dm-planning-scope";
+
+export type PlanningScope = "me" | "us" | "family";
 export type AuthProvider = "pax" | "apple" | "google" | "email" | "guest";
 
 export type LifeMoment =
@@ -217,6 +220,24 @@ export function readSharePax(): boolean {
 export function markSharePax(on: boolean): void {
   if (on) sessionStorage.setItem(SHARE_PAX_KEY, "1");
   else sessionStorage.removeItem(SHARE_PAX_KEY);
+}
+
+export function readPlanningScope(): PlanningScope {
+  if (typeof window === "undefined") return "me";
+  const v = sessionStorage.getItem(SCOPE_KEY);
+  if (v === "me" || v === "us" || v === "family") return v;
+  return "me";
+}
+
+export function markPlanningScope(scope: PlanningScope): void {
+  sessionStorage.setItem(SCOPE_KEY, scope);
+}
+
+/** Heading that follows the who-is-planning control (Segmented README). */
+export function planningScopeHeading(scope: PlanningScope): string {
+  if (scope === "us") return "Your joint pension at 65";
+  if (scope === "family") return "Your family's plan, three of you";
+  return "Your pension at 65";
 }
 
 const MOMENT_ASKED_KEY = "dm-moment-asked";
