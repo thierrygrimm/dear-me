@@ -1,20 +1,31 @@
 "use client";
 
 import { Chat } from "@/components/chat/Chat";
-import { Logo } from "@/components/brand/Logo";
+import {
+  SafetyNetCard,
+  SafetyNetPill,
+} from "@/components/chat/SafetyNetCard";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
+import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 import { isSignedIn } from "@/lib/session";
-import { ChevronLeft, MoreHorizontal } from "lucide-react";
+import { Clock, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const EARLIER = [
+  "Can I go to 60 %?",
+  "Who should reduce?",
+  "Is Marco covered?",
+];
 
 export default function AskPage() {
   const router = useRouter();
   const [seed, setSeed] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [netMin, setNetMin] = useState(false);
 
   useEffect(() => {
     if (!isSignedIn()) {
@@ -29,39 +40,40 @@ export default function AskPage() {
     setReady(true);
   }, [router]);
 
+  function closeChat() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }
+
   return (
-    <div
-      className="dm-app-shell"
-      style={{
-        padding: "12px 16px 14px",
-        gap: 12,
-        boxSizing: "border-box",
-      }}
-    >
-      <header className="dm-appbar" style={{ flexShrink: 0 }}>
-        <button
-          type="button"
-          aria-label={copy.chat.back}
-          onClick={() => {
-            if (window.history.length > 1) router.back();
-            else router.push("/");
-          }}
-        >
-          <ChevronLeft strokeWidth={1.75} />
+    <AppShell variant="chat" hideNav={false}>
+      <header className="dm-appbar" style={{ margin: "-4px -8px 0" }}>
+        <button type="button" aria-label={copy.chat.close} onClick={closeChat}>
+          <X strokeWidth={1.75} />
         </button>
-        <Logo />
+        <SafetyNetPill show={netMin} onClick={() => setNetMin(false)} />
         <button
           type="button"
-          aria-label={copy.chat.menu}
-          onClick={() => setMenuOpen(true)}
+          aria-label={copy.chat.history}
+          onClick={() => setHistoryOpen(true)}
         >
-          <MoreHorizontal strokeWidth={1.75} />
+          <Clock strokeWidth={1.75} />
         </button>
       </header>
 
+      <SafetyNetCard
+        minimized={netMin}
+        onActivate={() => setNetMin(false)}
+      />
+
       {ready ? (
         <Chat
+          shell
           initialQuestion={seed}
+          onThreadScroll={(top) => setNetMin((was) => (top > 48 ? true : top < 8 ? false : was))}
           onOpenAnswer={(question) => {
             const q = (question || "").toLowerCase();
             if (
@@ -85,15 +97,30 @@ export default function AskPage() {
       ) : null}
 
       <BottomSheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        title="Chat"
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        title={copy.chat.history}
       >
+        {EARLIER.map((q) => (
+          <Button
+            key={q}
+            variant="secondary"
+            block
+            onClick={() => {
+              setHistoryOpen(false);
+              setSeed(q);
+              setReady(false);
+              window.setTimeout(() => setReady(true), 0);
+            }}
+          >
+            {q}
+          </Button>
+        ))}
         <Button
-          variant="secondary"
+          variant="text"
           block
           onClick={() => {
-            setMenuOpen(false);
+            setHistoryOpen(false);
             setSeed(null);
             setReady(false);
             window.setTimeout(() => setReady(true), 0);
@@ -101,17 +128,10 @@ export default function AskPage() {
         >
           Clear chat
         </Button>
-        <Button
-          variant="text"
-          block
-          onClick={() => {
-            setMenuOpen(false);
-            router.push("/");
-          }}
-        >
-          Close
+        <Button variant="text" block onClick={closeChat}>
+          {copy.chat.close}
         </Button>
       </BottomSheet>
-    </div>
+    </AppShell>
   );
 }
