@@ -184,9 +184,8 @@ export const PERSONAS: Record<PersonaId, Persona> = {
     topicDetail:
       "How you take your CHF 380'000 decides how long it lasts.",
     net: "Strong, check the payout",
-    lesson: "Lump sum, pension or both",
+    lesson: "AHV for couples and at 65",
     lessonTime: "4 minutes",
-    /** Prefer AHV part 2 (couples / at 65) when that lesson ships. */
     lessonId: "ahv-part-2",
     appointment: {
       avatar: "SK",
