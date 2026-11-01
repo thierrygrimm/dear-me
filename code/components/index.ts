@@ -41,6 +41,10 @@ export {
   AnswerWidget,
   MemoryChip,
 } from "@/components/chat/Chat";
+export {
+  SafetyNetCard,
+  SafetyNetPill,
+} from "@/components/chat/SafetyNetCard";
 export { ChatPlan } from "@/components/chat/ChatPlan";
 export { ChatSteps } from "@/components/chat/ChatSteps";
 export { ChatGuide } from "@/components/chat/ChatGuide";

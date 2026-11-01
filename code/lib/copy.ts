@@ -62,7 +62,6 @@ export const copy = {
   },
   learn: {
     title: "Learn in 2 minutes",
-    subtitle: "Short lessons with your own numbers.",
     empty: "Two-minute lessons will land here.",
   },
   me: {
