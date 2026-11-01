@@ -381,6 +381,12 @@ export function markMomentAsked(moment: LifeMoment): void {
   sessionStorage.setItem(MOMENT_ASKED_KEY, JSON.stringify(next));
 }
 
+/** Reset C1 asked state — used when "Try another life" switches persona. */
+export function clearMomentAsked(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(MOMENT_ASKED_KEY);
+}
+
 export function readMomentAnswers(moment: LifeMoment): Record<string, string> {
   if (typeof window === "undefined") return {};
   const raw = sessionStorage.getItem(MOMENT_ANSWERS_KEY);
@@ -410,4 +416,10 @@ export function markMomentAnswers(
   }
   all[moment] = answers;
   sessionStorage.setItem(MOMENT_ANSWERS_KEY, JSON.stringify(all));
+}
+
+/** Clear C1 answers so a new persona starts a fresh ask. */
+export function clearMomentAnswers(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(MOMENT_ANSWERS_KEY);
 }
