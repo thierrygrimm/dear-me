@@ -1,3 +1,5 @@
+import { getPersona, readPersonaId } from "@/lib/personas";
+
 const CERT_KEY = "dm-has-cert";
 const CERT_VALUES_KEY = "dm-cert-values";
 const SIGNED_IN_KEY = "dm-signed-in";
@@ -8,6 +10,13 @@ const NAME_KEY = "dm-name";
 const INTAKE_KEY = "dm-intake";
 const SHARE_PAX_KEY = "dm-share-pax";
 const SCOPE_KEY = "dm-planning-scope";
+
+/** First name from the active demo persona (e.g. "Ruth" from "Ruth, 61"). */
+function nameFromActivePersona(): string {
+  const who = getPersona(readPersonaId()).who;
+  const first = who.split(",")[0]?.trim();
+  return first || "Lena";
+}
 
 export type PlanningScope = "me" | "us" | "family";
 export type AuthProvider = "pax" | "apple" | "google" | "email" | "guest";
@@ -221,8 +230,16 @@ export function markSignedIn(provider: AuthProvider): void {
   if (provider === "pax") {
     // With myPax, cover arrives with login — no certificate scan.
     markCertificate();
-    sessionStorage.setItem(NAME_KEY, "Lena");
+    // Age-banded moment tiles key off this name (Lena/Noah/Sandra/Ruth).
+    sessionStorage.setItem(NAME_KEY, nameFromActivePersona());
   }
+}
+
+/** Keep dm-name aligned when "Try another life" switches persona. */
+export function syncNameFromPersona(): void {
+  if (typeof window === "undefined") return;
+  if (readProvider() !== "pax") return;
+  sessionStorage.setItem(NAME_KEY, nameFromActivePersona());
 }
 
 export function isPaxConnected(): boolean {
