@@ -6,9 +6,22 @@ import { Squirrel } from "@/components/brand/Squirrel";
 import { HomeHero } from "@/components/home/HomeHero";
 import { NextStep } from "@/components/home/NextStep";
 import { copy } from "@/lib/copy";
-import { hasCertificate, readName } from "@/lib/session";
+import { seedForAsk } from "@/lib/lifeMoments";
+import {
+  hasCertificate,
+  readAskedMoments,
+  readMoments,
+  readName,
+} from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+function goAsk(router: ReturnType<typeof useRouter>, research?: string) {
+  const seed = seedForAsk(readMoments(), readAskedMoments(), research);
+  if (seed) sessionStorage.setItem("dm-ask-q", seed);
+  else sessionStorage.removeItem("dm-ask-q");
+  router.push("/ask");
+}
 
 export function HomeScreen() {
   const router = useRouter();
@@ -46,19 +59,16 @@ export function HomeScreen() {
           title={copy.home.estimateTitle}
           duration={copy.home.estimateMeta}
           actionLabel="Use an estimate"
-          onAction={() => {
-            sessionStorage.setItem(
-              "dm-ask-q",
-              "Can I go to 60 % after the baby?",
-            );
-            router.push("/ask");
-          }}
+          onAction={() =>
+            goAsk(router, "Can I go to 60 % after the baby?")
+          }
         />
 
         <AskBar
           sticky
           onAttach={() => router.push("/certificate")}
           onSubmit={(value) => {
+            // Their own words always win.
             sessionStorage.setItem("dm-ask-q", value);
             router.push("/ask");
           }}
@@ -70,10 +80,7 @@ export function HomeScreen() {
   return (
     <HomeHero
       name={name}
-      onLook={() => {
-        sessionStorage.setItem("dm-ask-q", "What if I couldn't work?");
-        router.push("/ask");
-      }}
+      onLook={() => goAsk(router, "What if I couldn't work?")}
       onBook={() => router.push("/me/book")}
       onLesson={() => router.push("/learn?lesson=part-time")}
     />

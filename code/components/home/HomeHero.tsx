@@ -2,7 +2,12 @@
 
 import { Logo } from "@/components/brand/Logo";
 import { copy } from "@/lib/copy";
-import { readName } from "@/lib/session";
+import { seedForAsk } from "@/lib/lifeMoments";
+import {
+  readAskedMoments,
+  readMoments,
+  readName,
+} from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -68,10 +73,13 @@ export function HomeHero({ name: nameProp, onLook, onBook, onLesson }: Props) {
             onLook();
             return;
           }
-          sessionStorage.setItem(
-            "dm-ask-q",
+          const seed = seedForAsk(
+            readMoments(),
+            readAskedMoments(),
             "What if I couldn't work?",
           );
+          if (seed) sessionStorage.setItem("dm-ask-q", seed);
+          else sessionStorage.removeItem("dm-ask-q");
           router.push("/ask");
         }}
       >
