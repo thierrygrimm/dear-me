@@ -40,6 +40,7 @@ type Props = {
 
 /**
  * Talk to Pax: advisor → pick a time → before you meet → booked.
+ * `.bk-info` is the laptop left column (Calendly split); hidden on phone.
  */
 export function AdvisorBooking({
   advisorName = "Sara Keller",
@@ -57,9 +58,41 @@ export function AdvisorBooking({
   );
 
   const when = `Tue ${day} Nov · ${slot ?? "10:30"}`;
+  const where =
+    channel === "Phone"
+      ? "Phone call"
+      : channel === "In person"
+        ? "At Pax, Basel"
+        : "Video call or at Pax";
+  const initials = advisorName
+    .split(/\s+/)
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className={cn("dm-signup", className)}>
+    <div className={cn(className)} style={{ display: "contents" }}>
+      <div className="bk-info">
+        <span className="av">{initials || "SK"}</span>
+        <b>{advisorName}</b>
+        <span>Pax advisor, Basel</span>
+        <dl>
+          <div>
+            <dt>Length</dt>
+            <dd>30 minutes</dd>
+          </div>
+          <div>
+            <dt>Where</dt>
+            <dd>{where}</dd>
+          </div>
+          <div>
+            <dt>About</dt>
+            <dd>Can I go to 60 % after the baby?</dd>
+          </div>
+        </dl>
+      </div>
+
       {step === 1 ? (
         <>
           <div className="dm-appbar">
@@ -72,7 +105,7 @@ export function AdvisorBooking({
             <span style={{ width: 36 }} />
           </div>
           <div className="dm-pro">
-            <span className="ph">SK</span>
+            <span className="ph">{initials || "SK"}</span>
             <h3>{advisorName}</h3>
             <span>{advisorRole}</span>
           </div>
