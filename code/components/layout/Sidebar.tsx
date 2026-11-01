@@ -33,7 +33,12 @@ export function Sidebar({ className }: Props) {
   const [persona, setPersona] = useState<Persona>(() => getPersona("lena"));
 
   useEffect(() => {
-    setPersona(getPersona(readPersonaId()));
+    function refresh() {
+      setPersona(getPersona(readPersonaId()));
+    }
+    refresh();
+    window.addEventListener("dm-persona", refresh);
+    return () => window.removeEventListener("dm-persona", refresh);
   }, [pathname]);
 
   return (
