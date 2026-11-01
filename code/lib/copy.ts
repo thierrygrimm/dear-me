@@ -1,5 +1,6 @@
-/** English product copy — keep strings here so German can follow. */
-export const copy = {
+/** Product copy — English source of truth; DE / FR / IT live beside it. */
+
+export const copyEn = {
   brand: "dear me",
   askPlaceholder: "What's on your mind?",
   askWriting: "Writing it down…",
@@ -182,6 +183,92 @@ export const copy = {
     why: "Why this?",
     book: "Talk it through with Pax",
   },
+  settings: {
+    groupUse: "What we use",
+    groupPeople: "People",
+    groupApp: "App",
+    groupPrivacy: "Privacy",
+    groupMore: "More",
+    whatWeKnow: "What we know",
+    factsCount: (n: number) => `${n} facts`,
+    documents: "Documents",
+    papersCount: (n: number) => `${n} papers`,
+    connected: "Connected",
+    mypaxConnected: "myPax is connected.",
+    sharesPlans: "Shares your plans",
+    partnerSees: (name: string) =>
+      `${name} sees shared plans, not your salary.`,
+    yourAdvisor: "Your advisor",
+    advisorMeta: "Sara Keller, Pax",
+    reminders: "Reminders",
+    appearance: "Appearance",
+    textSize: "Text size",
+    language: "Language",
+    privacy: "Privacy and data",
+    privacySub: "Sharing is off unless you turn it on",
+    help: "Help",
+    helpToast: "For demo help, ask in chat or book Sara.",
+    logOut: "Log out",
+    logOutToast: "Signed out of the demo.",
+    remDeadlines: "Deadlines and next steps",
+    remDeadlinesSub: "By email and in the chat",
+    remWeekly: "Weekly summary",
+    remWeeklySub: "Sunday evening",
+    remOn: "Reminders on",
+    remOff: "Reminders off",
+    remLabelOn: "On",
+    remLabelOff: "Off",
+    appearanceLight: "Light",
+    appearanceDark: "Dark",
+    appearanceSystem: "System",
+    appearanceSystemSub: "Follows your phone",
+    appearanceDarkOn: "Dark mode on",
+    appearanceToast: (v: string) => `Appearance: ${v}`,
+    sizeSmaller: "Smaller",
+    sizeStandard: "Standard",
+    sizeLarger: "Larger",
+    sizeLargerSub: "Easier to read",
+    sizeToast: (v: string) => `Text size: ${v}`,
+    done: "Done",
+    planningWith: (partner: string) => `Planning with ${partner} · since Oct 2026`,
+    planningAlone: "Planning alone · since Oct 2026",
+    meDeskEmpty: "Choose something from the list.",
+  },
 } as const;
 
-export type Copy = typeof copy;
+type DeepWritable<T> = T extends (...args: infer A) => infer R
+  ? (...args: A) => R
+  : T extends string
+    ? string
+    : T extends number
+      ? number
+      : T extends boolean
+        ? boolean
+        : T extends readonly (infer U)[]
+          ? DeepWritable<U>[]
+          : T extends object
+            ? { -readonly [K in keyof T]: DeepWritable<T[K]> }
+            : T;
+
+export type Copy = DeepWritable<typeof copyEn>;
+
+/** Active dictionary — LocaleProvider updates this when the language changes. */
+let activeCopy: Copy = copyEn;
+
+export function setActiveCopy(next: Copy): void {
+  activeCopy = next;
+}
+
+export function getActiveCopy(): Copy {
+  return activeCopy;
+}
+
+/**
+ * Live product copy. Always reads the active language (Proxy), so existing
+ * `import { copy }` call sites pick up DE / FR / IT after a language switch.
+ */
+export const copy: Copy = new Proxy(copyEn as Copy, {
+  get(_target, prop, receiver) {
+    return Reflect.get(activeCopy, prop, receiver);
+  },
+}) as Copy;
