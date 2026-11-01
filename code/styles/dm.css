@@ -337,9 +337,11 @@
 .dm-tabs button{all:unset;cursor:pointer;padding:8px 0;font:600 15px/20px var(--font-text);color:var(--ink-muted);box-shadow:inset 0 -2px 0 transparent;transition:color var(--dm-mid),box-shadow var(--dm-mid)}
 .dm-tabs button[aria-checked="true"]{color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
 .dm-who{display:flex;gap:10px}
-.dm-who button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:88px;padding:12px 6px;border-radius:var(--radius-card);background:var(--surface-card);font:600 13px/16px var(--font-text);box-shadow:inset 0 0 0 1.5px transparent;transition:background var(--dm-mid)}
+.dm-who button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:88px;padding:12px 6px;border-radius:var(--radius-card);background:var(--surface-card);font:600 13px/16px var(--font-text);box-shadow:inset 0 0 0 1.5px transparent;transition:background var(--dm-mid),color var(--dm-mid)}
 .dm-who button[aria-checked="true"]{background:var(--signal);color:var(--on-signal);box-shadow:inset 0 0 0 1.5px var(--ink)}
-.dm-who svg{height:28px;fill:currentColor}
+.dm-who svg{height:28px;width:auto;fill:currentColor;display:block}
+.dm-who .dm-who-flip,.dm-who .dm-who-flip svg{transform:scaleX(-1)}
+.dm-who .dm-row{align-items:flex-end;justify-content:center;min-height:28px}
 
 /* Consent variants */
 .dm-cb{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--line-strong);transition:background var(--dm-mid)}
