@@ -294,9 +294,16 @@ export function DocumentDetail({
   const router = useRouter();
   const toast = useToast();
   const [delOpen, setDelOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [replaceOpen, setReplaceOpen] = useState(false);
+  const [hideAmounts, setHideAmounts] = useState(true);
+  const [replacing, setReplacing] = useState(false);
   const [photoGone, setPhotoGone] = useState(false);
+  const [showAllValues, setShowAllValues] = useState(false);
 
   const lines = [70, null, "hl", null, "hl80", null, 60, "hl", null] as const;
+  const values = doc.values ?? [];
+  const visibleValues = showAllValues ? values : values.slice(0, 3);
 
   return (
     <div className={cn("dm-vault dm-vault--detail", className)}>
@@ -338,19 +345,13 @@ export function DocumentDetail({
           </span>
           {copy.vault.explain}
         </button>
-        <button
-          type="button"
-          onClick={() => toast.show({ message: copy.vault.shareSoon })}
-        >
+        <button type="button" onClick={() => setShareOpen(true)}>
           <span>
             <Share strokeWidth={1.75} />
           </span>
           {copy.vault.share}
         </button>
-        <button
-          type="button"
-          onClick={() => toast.show({ message: copy.vault.replaceSoon })}
-        >
+        <button type="button" onClick={() => setReplaceOpen(true)}>
           <span>
             <ArrowLeftRight strokeWidth={1.75} />
           </span>
@@ -368,25 +369,116 @@ export function DocumentDetail({
         </button>
       </div>
 
-      {doc.values && doc.values.length > 0 ? (
+      {values.length > 0 ? (
         <div>
           <span className="dm-label">
             {copy.vault.whatWeRead}
             {doc.scannedAt ? ` · ${doc.scannedAt}` : ""}
           </span>
           <div className="dm-vals">
-            {doc.values.map((v) => (
+            {visibleValues.map((v) => (
               <div key={v.label}>
                 {v.label}
                 <b>{v.value}</b>
               </div>
             ))}
           </div>
-          <Button variant="text" size="sm" style={{ marginTop: 6 }}>
-            {copy.vault.seeAll(doc.values.length)}
-          </Button>
+          {values.length > 3 ? (
+            <Button
+              variant="text"
+              size="sm"
+              style={{ marginTop: 6 }}
+              onClick={() => setShowAllValues((v) => !v)}
+            >
+              {showAllValues
+                ? copy.vault.seeLess
+                : copy.vault.seeAll(values.length)}
+            </Button>
+          ) : null}
         </div>
       ) : null}
+
+      <BottomSheet
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={copy.vault.shareTitle}
+        description={copy.vault.shareBody}
+      >
+        <label
+          className="dm-row"
+          style={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            margin: "8px 0 16px",
+            font: "500 15px/20px var(--font-text)",
+          }}
+        >
+          {copy.vault.shareHideAmounts}
+          <input
+            type="checkbox"
+            checked={hideAmounts}
+            onChange={(e) => setHideAmounts(e.target.checked)}
+          />
+        </label>
+        <Button
+          variant="primary"
+          block
+          onClick={() => {
+            try {
+              void navigator.clipboard?.writeText(
+                `https://dearme.ch/share/${doc.id}`,
+              );
+            } catch {
+              /* ignore */
+            }
+            setShareOpen(false);
+            toast.show({
+              message: hideAmounts
+                ? copy.vault.shareDone
+                : copy.vault.shareDoneOpen,
+            });
+          }}
+        >
+          {copy.vault.shareConfirm}
+        </Button>
+      </BottomSheet>
+
+      <BottomSheet
+        open={replaceOpen}
+        onClose={() => {
+          if (!replacing) setReplaceOpen(false);
+        }}
+        title={copy.vault.replaceTitle}
+        description={
+          replacing ? copy.vault.replaceReading : copy.vault.replaceBody
+        }
+      >
+        <Button
+          variant="primary"
+          block
+          disabled={replacing}
+          onClick={() => {
+            setReplacing(true);
+            window.setTimeout(() => {
+              setReplacing(false);
+              setReplaceOpen(false);
+              setShowAllValues(true);
+              toast.show({ message: copy.vault.replaceDone });
+            }, 1400);
+          }}
+        >
+          {replacing ? copy.vault.replaceReading : copy.vault.replaceConfirm}
+        </Button>
+        <Button
+          variant="text"
+          block
+          disabled={replacing}
+          onClick={() => setReplaceOpen(false)}
+        >
+          {copy.vault.keepPhoto}
+        </Button>
+      </BottomSheet>
 
       <BottomSheet
         open={delOpen}
