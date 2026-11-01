@@ -7,7 +7,6 @@ const ONBOARDED_KEY = "dm-onboarded";
 const NAME_KEY = "dm-name";
 const INTAKE_KEY = "dm-intake";
 const SHARE_PAX_KEY = "dm-share-pax";
-
 export type AuthProvider = "pax" | "apple" | "google" | "email" | "guest";
 
 export type LifeMoment =
@@ -180,6 +179,11 @@ export function planHeadline(name: string, moments: LifeMoment[]): string {
   if (moments.includes("less")) return `${who} look at working less together.`;
   if (moments.includes("home")) return `${who} look at the home together.`;
   if (moments.includes("together")) return `${who} look at living together.`;
+  if (moments.includes("firstjob")) return `${who} look at your first job together.`;
+  if (moments.includes("selfemployed")) return `${who} look at working for yourself.`;
+  if (moments.includes("separating")) return `${who} look at the new numbers together.`;
+  if (moments.includes("bonus")) return `${who} look at that money together.`;
+  if (moments.includes("caring")) return `${who} look at caring and your pension.`;
   return `${who} get your plan started.`;
 }
 
@@ -213,4 +217,57 @@ export function readSharePax(): boolean {
 export function markSharePax(on: boolean): void {
   if (on) sessionStorage.setItem(SHARE_PAX_KEY, "1");
   else sessionStorage.removeItem(SHARE_PAX_KEY);
+}
+
+const MOMENT_ASKED_KEY = "dm-moment-asked";
+const MOMENT_ANSWERS_KEY = "dm-moment-answers";
+
+/** Moments that already finished the LifeMoments C1 ask-before-telling flow. */
+export function readAskedMoments(): LifeMoment[] {
+  if (typeof window === "undefined") return [];
+  const raw = sessionStorage.getItem(MOMENT_ASKED_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((x): x is LifeMoment => typeof x === "string" && isLifeMoment(x));
+  } catch {
+    return [];
+  }
+}
+
+export function markMomentAsked(moment: LifeMoment): void {
+  const next = Array.from(new Set([...readAskedMoments(), moment]));
+  sessionStorage.setItem(MOMENT_ASKED_KEY, JSON.stringify(next));
+}
+
+export function readMomentAnswers(moment: LifeMoment): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const raw = sessionStorage.getItem(MOMENT_ANSWERS_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as Record<string, Record<string, string>>;
+    return parsed[moment] ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export function markMomentAnswers(
+  moment: LifeMoment,
+  answers: Record<string, string>,
+): void {
+  let all: Record<string, Record<string, string>> = {};
+  if (typeof window !== "undefined") {
+    const raw = sessionStorage.getItem(MOMENT_ANSWERS_KEY);
+    if (raw) {
+      try {
+        all = JSON.parse(raw) as Record<string, Record<string, string>>;
+      } catch {
+        all = {};
+      }
+    }
+  }
+  all[moment] = answers;
+  sessionStorage.setItem(MOMENT_ANSWERS_KEY, JSON.stringify(all));
 }
