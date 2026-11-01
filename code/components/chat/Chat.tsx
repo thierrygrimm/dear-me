@@ -17,6 +17,7 @@ import {
 } from "@/lib/chatDemo";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { emphasizeMoney } from "@/lib/emphasizeMoney";
 import {
   useCallback,
   useEffect,
@@ -307,8 +308,11 @@ export function Chat({
   // Legacy layout-only mode for older call sites.
   if (legacyMessages) {
     return (
-      <div className={cn("dm-chat", className)} style={{ flex: 1, minHeight: 0 }}>
-        <div className="dm-scroll" style={{ flex: 1 }}>
+      <div
+        className={cn("dm-chat", className)}
+        style={{ flex: 1, minHeight: 0, overflow: "hidden" }}
+      >
+        <div className="dm-scroll" style={{ flex: 1, minHeight: 0 }}>
           {legacyMessages.map((m) => (
             <div
               key={m.id}
@@ -317,7 +321,7 @@ export function Chat({
                 m.role === "me" ? "dm-bubble--me" : "dm-bubble--us",
               )}
             >
-              {m.content}
+              {m.role === "assistant" ? emphasizeMoney(m.content) : m.content}
             </div>
           ))}
           {footer}
@@ -330,9 +334,19 @@ export function Chat({
   return (
     <div
       className={cn("dm-chat", className)}
-      style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+      style={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
     >
-      <div ref={scrollRef} className="dm-scroll" style={{ flex: 1 }}>
+      <div
+        ref={scrollRef}
+        className="dm-scroll"
+        style={{ flex: 1, minHeight: 0 }}
+      >
         <span className="dm-daytag">Today</span>
 
         {turns.length === 0 && !busy ? (
@@ -414,7 +428,7 @@ function TurnBlock({
 
       {showAnswer ? (
         <div className="dm-bubble dm-bubble--us">
-          {turn.visibleText}
+          {emphasizeMoney(turn.visibleText)}
           {phase === "streaming" ? <span className="dm-caret" aria-hidden /> : null}
         </div>
       ) : null}
