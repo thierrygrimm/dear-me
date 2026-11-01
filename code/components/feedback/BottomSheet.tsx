@@ -25,6 +25,11 @@ type Props = {
   description?: string;
   /** Start (or force) full-height explain mode. Grab still toggles. */
   full?: boolean;
+  /**
+   * Prefer the app shell host (default). Set `body` to always pin the sheet
+   * to the viewport/phone frame bottom (`.dm-bs--fixed`).
+   */
+  portal?: "host" | "body";
   children: ReactNode;
   className?: string;
 };
@@ -43,6 +48,7 @@ export function BottomSheet({
   title,
   description,
   full: fullProp = false,
+  portal = "host",
   children,
   className,
 }: Props) {
@@ -64,10 +70,14 @@ export function BottomSheet({
 
   useLayoutEffect(() => {
     setMounted(true);
+    if (portal === "body") {
+      setHost(null);
+      return;
+    }
     const el = anchorRef.current;
     if (!el) return;
     setHost(el.closest(HOST_SELECTOR));
-  }, [open]);
+  }, [open, portal]);
 
   useEffect(() => {
     if (!open) {
