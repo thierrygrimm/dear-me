@@ -811,6 +811,51 @@ tr.seen .dm-hot{background:var(--neonweste);color:var(--espressosatz);animation:
 .ig-done .medal{position:relative;width:150px;height:150px;border-radius:50%;background:var(--espressosatz);display:grid;place-items:center;color:var(--neonweste)}
 .ig-done .medal::before{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px dashed var(--espressosatz);animation:dm-spin 14s linear infinite}
 
+/* ---------- Lesson infographics (pillars, AHV) ---------- */
+.lp{position:absolute;inset:0;width:100%;height:100%}
+.dm-step.on .lp-col,.dm-step.on .lp-row{animation:lpUp 620ms cubic-bezier(.2,.7,.2,1) both}
+.dm-step.on .lp-dot{animation:lpPop 360ms cubic-bezier(.3,1.4,.5,1) both;transform-box:fill-box;transform-origin:center}
+.dm-step.on .lp-grow{animation:lpGrow 900ms cubic-bezier(.2,.7,.2,1) both;transform-box:fill-box;transform-origin:left bottom}
+.dm-step.on .lp-band{animation:lpBand 1s cubic-bezier(.2,.7,.2,1) both;transform-box:fill-box;transform-origin:left center}
+.dm-step.on .lp-cut{animation:lpFade 600ms ease 900ms both}
+.dm-step.on .lp-pop,.dm-step.on .lp-pin{animation:lpPop 520ms cubic-bezier(.3,1.5,.5,1) 600ms both;transform-box:fill-box;transform-origin:center}
+.dm-step.on .lp-arrow{stroke-dasharray:80;animation:lpDraw 700ms ease 700ms both}
+@keyframes lpUp{from{opacity:0;transform:translateY(24px)}}
+@keyframes lpPop{from{opacity:0;transform:scale(.3)}}
+@keyframes lpGrow{from{transform:scaleX(.2);opacity:.3}}
+@keyframes lpBand{from{transform:scaleX(.05)}}
+@keyframes lpFade{from{opacity:0}}
+@keyframes lpDraw{from{stroke-dashoffset:80}}
+.lp-big{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:30px 28px 0;gap:6px;color:var(--espressosatz)}
+.lp-big b{font:700 64px/1 var(--font-display);letter-spacing:-.04em}
+.lp-big span{font:600 15px/20px var(--font-text)}
+.lp-big i{font-style:normal;font:400 13px/18px var(--font-text);opacity:.75;max-width:260px;margin-top:6px}
+.dm-step.on .lp-big b{animation:lpUp 600ms cubic-bezier(.2,.7,.2,1) both}
+.lq{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.lq button{all:unset;cursor:pointer;padding:12px 14px;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--line-strong);font:500 14px/18px var(--font-text)}
+.lq button.right{background:var(--neonweste);box-shadow:inset 0 0 0 1.5px var(--espressosatz)}
+.lq button.wrong{opacity:.45}
+.lq button:focus-visible{outline:2px solid var(--brombeerkompott);outline-offset:2px}
+.dm-libtile .art em.new{position:absolute;top:10px;left:10px;font-style:normal;padding:3px 9px;border-radius:999px;background:var(--neuschnee);color:var(--espressosatz);font:600 11px/14px var(--font-text)}
+@media (prefers-reduced-motion:reduce){.dm-step.on .lp-col,.dm-step.on .lp-row,.dm-step.on .lp-dot,.dm-step.on .lp-grow,.dm-step.on .lp-band,.dm-step.on .lp-cut,.dm-step.on .lp-pop,.dm-step.on .lp-pin,.dm-step.on .lp-arrow,.dm-step.on .lp-big b{animation:none}}
+.dm-lesson[data-gen] .dm-lesson__art{flex:none;height:280px}
+.dm-lesson[data-gen] .dm-step:has(.lq) .dm-lesson__art{height:220px}
+@container vp (min-width:900px){
+ /* lesson player */
+ .dm-app.flowapp .pg.lesson{max-width:1000px;padding:40px 40px 48px}
+ .dm-app .pg.lesson .dm-lesson{background:none;height:auto}
+ .dm-app .pg.lesson .dm-lesson__top{position:static;max-width:560px;margin:0 auto 36px;width:100%}
+ .dm-app .pg.lesson .dm-lesson__top button{background:var(--surface-card)}
+ .dm-app .pg.lesson .dm-step.on{display:grid!important;grid-template-columns:440px minmax(0,1fr);gap:56px;align-items:center;height:auto!important}
+ .dm-app .pg.lesson .dm-lesson__art{height:440px!important;border-radius:28px}
+ .dm-app .pg.lesson .dm-lesson__body{padding:0;gap:14px}
+ .dm-app .pg.lesson .dm-lesson__body h4{font-size:36px;line-height:42px}
+ .dm-app .pg.lesson .dm-lesson__body p{font-size:17px;line-height:26px;max-width:460px}
+ .dm-app .pg.lesson .nx{margin-top:18px!important;max-width:320px}
+ .dm-app .pg.lesson .lq{max-width:420px}
+ .dm-app .pg.lesson .dm-lesson[data-gen] .dm-lesson__art{height:440px!important}
+}
+
 /* Navigation (refs: Acorns, Revolut, ChatGPT tab and menu patterns) */
 .dm-tabbar{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;margin:0;padding:8px 6px calc(14px + env(safe-area-inset-bottom,0px));background:var(--surface);box-shadow:0 -1px 0 var(--line);width:100%}
 .dm-tabbar.four{grid-template-columns:repeat(4,1fr)}
@@ -2593,6 +2638,13 @@ html{background:var(--surface)}
 .dm-app .fl-top{display:none}
 .fl-prog{display:none}
 .fl-exit{all:unset;cursor:pointer;box-sizing:border-box}
+/* Phone: flow pane is just a full-height host; fl-top stays hidden */
+.dm-app.flowapp .pg.fl{
+  flex:1;display:flex;flex-direction:column;min-height:0;width:100%
+}
+.dm-app.flowapp .pg.fl > .dm-signup{
+  flex:1;width:100%;min-height:0
+}
 @media (min-width:900px){
  .dm-app-shell.flowapp,
  .dm-app.flowapp{
