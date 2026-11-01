@@ -36,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${hostGrotesk.variable} ${geist.variable} ${chivoMono.variable} h-full`}
     >
-      <body className="min-h-full">
+      <body className="h-full min-h-full">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
