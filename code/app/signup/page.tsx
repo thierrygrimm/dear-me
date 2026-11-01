@@ -9,6 +9,7 @@ import {
   YourPlanScreen,
 } from "@/components/auth/SignUp";
 import { SigningIn, Splash } from "@/components/brand/Loading";
+import { useDemoPulse } from "@/hooks/useDemoPulse";
 import {
   isOnboarded,
   isSignedIn,
@@ -20,7 +21,7 @@ import {
   type LifeMoment,
 } from "@/lib/session";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Step =
   | "splash"
@@ -40,11 +41,40 @@ const signingLabels: Record<AuthProvider, string> = {
   guest: "Getting things ready",
 };
 
+/** DS Flows: next tap target pulses lime. */
+function hintsFor(
+  step: Step,
+  moments: LifeMoment[],
+): string[] {
+  switch (step) {
+    case "welcome":
+      return ["Get started"];
+    case "choose":
+      return ["myPax"];
+    case "connect":
+      return ["Continue to myPax"];
+    case "moments":
+      return moments.length === 0
+        ? ["Expecting a child"]
+        : ["Continue"];
+    case "plan":
+      return ["Let's start"];
+    default:
+      return [];
+  }
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("splash");
   const [provider, setProvider] = useState<AuthProvider>("pax");
-  const [moments, setMoments] = useState<LifeMoment[]>(["child", "less"]);
+  const [moments, setMoments] = useState<LifeMoment[]>([]);
+
+  const pulseHints = useMemo(
+    () => hintsFor(step, moments),
+    [step, moments],
+  );
+  const pulseRef = useDemoPulse(pulseHints, [step, moments]);
 
   useEffect(() => {
     if (isSignedIn() && isOnboarded()) {
@@ -100,7 +130,7 @@ export default function SignUpPage() {
 
   function finishIntake() {
     markOnboarded();
-    router.replace("/answer");
+    router.replace("/");
   }
 
   if (step === "splash") {
@@ -135,7 +165,7 @@ export default function SignUpPage() {
   const name = provider === "pax" ? readName() : "there";
 
   return (
-    <div className="dm-signup-shell">
+    <div className="dm-signup-shell" ref={pulseRef}>
       {step === "welcome" ? (
         <WelcomeScreen
           onGetStarted={() => setStep("choose")}
