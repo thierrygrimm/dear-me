@@ -67,7 +67,7 @@ export function LearnScreen() {
                 <LessonArt art={l.art} />
                 {isDone ? (
                   <span className="done">
-                    <Check strokeWidth={2.5} />
+                    <Check size={12} strokeWidth={2.5} />
                   </span>
                 ) : isNew ? (
                   <em className="new">New</em>
