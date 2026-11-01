@@ -12,18 +12,41 @@ import { SigningIn, Splash } from "@/components/brand/Loading";
 import { AppShell } from "@/components/layout/AppShell";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { needsNumericIntake } from "@/lib/lifeMoments";
+import { getPersona, readPersonaId } from "@/lib/personas";
 import {
   isOnboarded,
   isSignedIn,
   markMoments,
   markOnboarded,
   markSignedIn,
+  momentLabels,
+  momentsForAge,
   readName,
   type AuthProvider,
   type LifeMoment,
 } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+
+/** Demo ages from personas when myPax (or a try-another-life) name is known. */
+const AGE_BY_NAME: Record<string, number> = {
+  Lena: 34,
+  Noah: 24,
+  Sandra: 41,
+  Ruth: 61,
+};
+
+function ageFromWho(who: string): number | null {
+  const m = who.match(/(\d{2})\s*$/);
+  return m ? Number(m[1]) : null;
+}
+
+function resolveSignupAge(name: string): number | null {
+  if (name in AGE_BY_NAME) return AGE_BY_NAME[name];
+  const fromPersona = ageFromWho(getPersona(readPersonaId()).who);
+  if (name !== "there" && fromPersona != null) return fromPersona;
+  return null;
+}
 
 type Step =
   | "splash"
@@ -47,6 +70,7 @@ const signingLabels: Record<AuthProvider, string> = {
 function hintsFor(
   step: Step,
   moments: LifeMoment[],
+  firstSuggestLabel?: string,
 ): string[] {
   switch (step) {
     case "welcome":
@@ -57,7 +81,7 @@ function hintsFor(
       return ["Continue to myPax"];
     case "moments":
       return moments.length === 0
-        ? ["Expecting a child"]
+        ? [firstSuggestLabel ?? "Expecting a child"]
         : ["Continue"];
     case "plan":
       return ["Let's start"];
@@ -72,11 +96,13 @@ export default function SignUpPage() {
   const [provider, setProvider] = useState<AuthProvider>("pax");
   const [moments, setMoments] = useState<LifeMoment[]>([]);
 
-  const pulseHints = useMemo(
-    () => hintsFor(step, moments),
-    [step, moments],
-  );
-  const pulseRef = useDemoPulse(pulseHints, [step, moments]);
+  const pulseHints = useMemo(() => {
+    if (step !== "moments") return hintsFor(step, moments);
+    const n = provider === "pax" ? readName() : "there";
+    const first = momentsForAge(resolveSignupAge(n)).suggested[0];
+    return hintsFor(step, moments, first ? momentLabels[first] : undefined);
+  }, [step, moments, provider]);
+  const pulseRef = useDemoPulse(pulseHints, [step, moments, provider]);
 
   useEffect(() => {
     if (isSignedIn() && isOnboarded()) {
@@ -194,11 +220,13 @@ export default function SignUpPage() {
   }
 
   if (step === "moments") {
+    const age = resolveSignupAge(name);
     return (
       <AppShell variant="onb" hideNav flush>
         <div ref={pulseRef} style={{ display: "contents" }}>
           <YourMomentsScreen
             name={name}
+            age={age}
             value={moments}
             onChange={setMoments}
             onBack={() => setStep("choose")}
