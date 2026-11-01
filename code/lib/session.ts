@@ -382,6 +382,9 @@ export function pushChatHistory(question: string): void {
   if (!q) return;
   const next = [q, ...readChatHistory().filter((x) => x !== q)].slice(0, 12);
   sessionStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(next));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dm-chat-history"));
+  }
 }
 
 export function readPlanningScope(): PlanningScope {
