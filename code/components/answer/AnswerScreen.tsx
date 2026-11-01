@@ -127,7 +127,6 @@ export function AnswerScreen() {
       </div>
 
       <p
-        className="dm-insight"
         style={{
           margin: 0,
           font: "400 15px/22px var(--font-text)",
