@@ -12,7 +12,7 @@ import { LifeMomentAsk } from "@/components/chat/LifeMomentAsk";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import {
   resolveDemoAnswer,
-  STARTER_REPLIES,
+  starterReplies,
   type DemoAnswer,
 } from "@/lib/chatDemo";
 import { cn } from "@/lib/cn";
@@ -100,15 +100,33 @@ type Props = {
 
 function isNavReply(text: string): "compare" | "book" | null {
   const t = text.toLowerCase();
-  if (t.includes("see all") || t.startsWith("open")) return "compare";
-  if (t.includes("sara") || t.includes("talk to") || t.includes("book")) {
+  if (
+    t.includes("see all") ||
+    t.startsWith("open") ||
+    t.includes("alles anzeigen") ||
+    t.includes("tout voir") ||
+    t.includes("vedi tutto")
+  ) {
+    return "compare";
+  }
+  if (
+    t.includes("sara") ||
+    t.includes("talk to") ||
+    t.includes("book") ||
+    t.includes("sprechen") ||
+    t.includes("parler") ||
+    t.includes("parla") ||
+    t.includes("buchen") ||
+    t.includes("réserver") ||
+    t.includes("prenota")
+  ) {
     return "book";
   }
   return null;
 }
 
 function startersFor(moment: LifeMoment | null): string[] {
-  if (!moment) return STARTER_REPLIES;
+  if (!moment) return starterReplies();
   return scriptFor(moment).startersAfter;
 }
 
@@ -218,7 +236,7 @@ export function Chat({
           visibleText: "",
           liveSteps: waitingSteps,
           stepsOpen: true,
-          stepsSummary: "Working on it",
+          stepsSummary: copy.home.workingOnIt,
           usedSteps: useSteps,
         },
       ]);
@@ -486,7 +504,9 @@ export function Chat({
           : undefined
       }
     >
-      <span className={shell ? "dm-daylbl" : "dm-daytag"}>Today</span>
+      <span className={shell ? "dm-daylbl" : "dm-daytag"}>
+        {copy.home.today}
+      </span>
 
       {pendingMoment ? (
         <LifeMomentAsk

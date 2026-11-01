@@ -6,6 +6,7 @@ import { Squirrel } from "@/components/brand/Squirrel";
 import { HomeHero } from "@/components/home/HomeHero";
 import { NextStep } from "@/components/home/NextStep";
 import { copy } from "@/lib/copy";
+import { starterReplies } from "@/lib/chatDemo";
 import { seedForAsk } from "@/lib/lifeMoments";
 import { lessonPathForPersona } from "@/lib/personas";
 import {
@@ -75,10 +76,8 @@ export function HomeScreen() {
         <NextStep
           title={copy.home.estimateTitle}
           duration={copy.home.estimateMeta}
-          actionLabel="Use an estimate"
-          onAction={() =>
-            goAsk(router, "Can I go to 60 % after the baby?")
-          }
+          actionLabel={copy.home.useEstimate}
+          onAction={() => goAsk(router, starterReplies()[0])}
         />
 
         <AskBar

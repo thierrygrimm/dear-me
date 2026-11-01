@@ -183,14 +183,29 @@ export function LifeMomentAsk({
       { kind: "me", id: `next-${Date.now()}`, text: label },
     ]);
 
-    if (label === "What could help?" && primaryOffer) {
+    const helpLabels = [
+      copy.home.whatCouldHelp,
+      "What could help?",
+      "Was könnte helfen?",
+      "Qu'est-ce qui pourrait aider ?",
+      "Cosa potrebbe aiutare?",
+    ];
+    const howLabels = [
+      copy.home.howDidYouGetThis,
+      "How did you get this?",
+      "Wie kommt ihr auf diese Zahl?",
+      "Comment as-tu obtenu ce chiffre ?",
+      "Come avete ottenuto questo numero?",
+    ];
+
+    if (helpLabels.includes(label) && primaryOffer) {
       window.setTimeout(() => {
         setLines((prev) => [
           ...prev,
           {
             kind: "say",
             id: "offer-intro",
-            text: "One idea fits this gap. Only if you want it.",
+            text: copy.home.offerIntro,
           },
         ]);
         openPrimarySheet();
@@ -198,7 +213,7 @@ export function LifeMomentAsk({
       return;
     }
 
-    if (label === "How did you get this?") {
+    if (howLabels.includes(label)) {
       window.setTimeout(() => {
         setLines((prev) => [
           ...prev,

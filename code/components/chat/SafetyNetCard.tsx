@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -19,7 +20,7 @@ export function SafetyNetCard({ className, minimized, onActivate }: Props) {
       className={cn("dm-netw", minimized && "min", className)}
       role="button"
       tabIndex={0}
-      aria-label="Open your safety net"
+      aria-label={copy.home.safetyNetOpen}
       aria-hidden={minimized || undefined}
       onClick={() => {
         onActivate?.();
@@ -37,7 +38,7 @@ export function SafetyNetCard({ className, minimized, onActivate }: Props) {
         className="dm-spider"
         viewBox="0 0 140 140"
         role="img"
-        aria-label="Your coverage shape"
+        aria-label={copy.home.safetyNet}
       >
         <polygon
           className="web"
@@ -67,20 +68,20 @@ export function SafetyNetCard({ className, minimized, onActivate }: Props) {
         <circle className="pt" cx="40.2" cy="66.3" r="6" />
       </svg>
       <div>
-        <h4>Your safety net</h4>
+        <h4>{copy.home.safetyNet}</h4>
         <div className="dm-hl">
           <span>
             <i style={{ background: "var(--espressosatz)" }} />
-            <b>Later in life</b>
-            <small>Strong side</small>
+            <b>{copy.home.safetyLater}</b>
+            <small>{copy.home.safetyLaterSub}</small>
           </span>
           <span>
             <i style={{ background: "var(--abschlusspink)" }} />
-            <b>If you can&apos;t work</b>
-            <small>Soft spot</small>
+            <b>{copy.home.safetyWork}</b>
+            <small>{copy.home.safetyWorkSub}</small>
           </span>
         </div>
-        <div className="go">See it</div>
+        <div className="go">{copy.home.safetySee}</div>
       </div>
     </div>
   );
@@ -115,7 +116,7 @@ export function SafetyNetPill({
           stroke="var(--ink)"
         />
       </svg>
-      Safety net
+      {copy.home.safetyNetShort}
     </button>
   );
 }
