@@ -8,7 +8,6 @@ import {
   MemoryChip,
 } from "@/components/chat/ChatWidgets";
 import { ChatSteps, type StepLog } from "@/components/chat/ChatSteps";
-import { Chip } from "@/components/ui/Chip";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import {
   resolveDemoAnswer,
@@ -49,7 +48,9 @@ type Turn = {
 type Props = {
   /** Seed a first question (e.g. from Home AskBar) */
   initialQuestion?: string | null;
-  onOpenAnswer?: () => void;
+  onOpenAnswer?: (question?: string) => void;
+  /** Navigate to advisor booking (suggestion chips) */
+  onBook?: () => void;
   onAttach?: () => void;
   onSend?: (value: string) => void;
   className?: string;
@@ -57,6 +58,15 @@ type Props = {
   messages?: ChatMessage[];
   footer?: ReactNode;
 };
+
+function isNavReply(text: string): "compare" | "book" | null {
+  const t = text.toLowerCase();
+  if (t.includes("see all") || t.startsWith("open")) return "compare";
+  if (t.includes("sara") || t.includes("talk to") || t.includes("book")) {
+    return "book";
+  }
+  return null;
+}
 
 function ThinkingRow({ label }: { label: string }) {
   return (
@@ -84,6 +94,7 @@ function clearTimers(timers: number[]) {
 export function Chat({
   initialQuestion,
   onOpenAnswer,
+  onBook,
   onAttach,
   onSend,
   className,
@@ -321,7 +332,9 @@ export function Chat({
                 m.role === "me" ? "dm-bubble--me" : "dm-bubble--us",
               )}
             >
-              {m.role === "assistant" ? emphasizeMoney(m.content) : m.content}
+              {m.role === "assistant" && typeof m.content === "string"
+                ? emphasizeMoney(m.content)
+                : m.content}
             </div>
           ))}
           {footer}
@@ -372,11 +385,27 @@ export function Chat({
         ))}
 
         {quickReplies && quickReplies.length > 0 && !busy ? (
-          <div className="dm-row dm-fadein">
+          <div className="dm-sugg dm-fadein">
             {quickReplies.map((r) => (
-              <Chip key={r} onClick={() => runAnswer(r)}>
+              <button
+                key={r}
+                type="button"
+                onClick={() => {
+                  const nav = isNavReply(r);
+                  const lastQ = turns[turns.length - 1]?.question;
+                  if (nav === "compare") {
+                    onOpenAnswer?.(lastQ);
+                    return;
+                  }
+                  if (nav === "book") {
+                    onBook?.();
+                    return;
+                  }
+                  runAnswer(r);
+                }}
+              >
                 {r}
-              </Chip>
+              </button>
             ))}
           </div>
         ) : null}
@@ -398,7 +427,7 @@ function TurnBlock({
   onStepsOpenChange,
 }: {
   turn: Turn;
-  onOpenAnswer?: () => void;
+  onOpenAnswer?: (question?: string) => void;
   onStepsOpenChange: (open: boolean) => void;
 }) {
   const { answer, phase } = turn;
@@ -444,7 +473,7 @@ function TurnBlock({
           verdict={answer.widget.verdict}
           detail={answer.widget.detail}
           bars={answer.widget.bars}
-          onOpen={onOpenAnswer}
+          onOpen={() => onOpenAnswer?.(turn.question)}
         />
       ) : null}
 
