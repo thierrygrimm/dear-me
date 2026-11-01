@@ -51,10 +51,37 @@ function formatTimer(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** DS AskBar: `n = Math.floor(el.clientWidth / 6)` so bars fill the voice slot. */
 function Waveform({ levels }: { levels: number[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [barCount, setBarCount] = useState(() =>
+    Math.max(8, levels.length || 40),
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const sync = () => {
+      const n = Math.floor(el.clientWidth / 6) || 40;
+      setBarCount(Math.max(8, n));
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const bars =
+    levels.length >= barCount
+      ? levels.slice(-barCount)
+      : [
+          ...Array.from({ length: barCount - levels.length }, () => 0.12),
+          ...levels,
+        ];
+
   return (
-    <div className="dm-wave" aria-hidden>
-      {levels.map((level, i) => (
+    <div className="dm-wave" ref={ref} aria-hidden>
+      {bars.map((level, i) => (
         <i
           key={i}
           style={{ height: `${Math.max(3, Math.round(level * 26))}px` }}
@@ -114,7 +141,7 @@ export function AskBar({
     simulated,
     start: startMeter,
     stop: stopMeter,
-  } = useVoiceMeter(40);
+  } = useVoiceMeter(120);
   const canSend = value.trim().length > 0;
   const isBusy = mode !== "idle";
 
