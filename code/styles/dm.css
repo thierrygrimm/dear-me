@@ -1965,9 +1965,20 @@ button.dm-covr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   box-sizing:border-box
 }
+/* Phone welcome: illustration + CTAs (art pane stays hidden) */
+.dm-app.signapp .pg.auth.wel{
+  gap:12px;
+  padding-top:0
+}
+.dm-app.signapp .pg.auth.wel .dm-welcome{flex:none}
+.dm-app.signapp .pg.auth.wel .dm-signup__cta{margin-top:auto;width:100%}
+/* SSO hover affordance */
+.dm-sso{transition:transform 160ms var(--dm-ease),box-shadow 160ms var(--dm-ease),background 160ms var(--dm-ease)}
+.dm-sso:hover{transform:translateY(-1px)}
+.dm-sso:active{transform:none}
 /* Phone: float the SSO block between appbar and terms (terms keep margin:auto 0 0) */
 @media (max-width:899px){
-  .dm-app.signapp .pg.auth > .dm-q{margin-top:auto}
+  .dm-app.signapp .pg.auth:not(.wel) > .dm-q{margin-top:auto}
 }
 .dm-app.onb{
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
@@ -2328,13 +2339,20 @@ html{background:var(--surface)}
    overflow:hidden;box-sizing:border-box;
  }
  .dm-app .auth-lk{position:absolute;left:clamp(16px,3vw,40px);top:clamp(16px,3vh,36px);z-index:2}
- .dm-app .auth-art .say{font:500 17px/24px var(--font-text)!important;letter-spacing:0;margin-top:clamp(4px,1vh,10px)}
+ .dm-app .auth-art .say{
+   font:500 17px/24px var(--font-text)!important;letter-spacing:0;
+   margin-top:clamp(4px,1vh,10px);min-height:1.4em;
+   transition:opacity 180ms var(--dm-ease),transform 220ms var(--dm-ease)
+ }
+ .dm-app .auth-art .say.is-swap{opacity:0;transform:translateY(4px)}
+ .auth-sq .auth-sq__mark{display:block;width:100%;height:100%}
+ .auth-sq .auth-sq__mark .dm-sq{width:100%!important;height:100%!important;transition:transform 200ms var(--dm-ease)}
  .auth-copy{
    order:1;margin:auto 0 0;padding:0 clamp(20px,4vw,40px);
    max-width:min(400px,90%);flex:0 1 auto;min-height:0;
  }
  .auth-copy h2{font:700 clamp(26px,4.2vh,36px)/1.15 var(--font-display);letter-spacing:-.025em}
- .auth-copy .say{min-height:0;font:500 clamp(14px,2.2vh,17px)/1.4 var(--font-text)}
+ .auth-copy .say{min-height:2.8em;font:500 clamp(14px,2.2vh,17px)/1.4 var(--font-text)}
  .auth-stage{
    order:2;position:relative;width:100%;
    flex:1 1 auto;min-height:0;
@@ -2382,7 +2400,8 @@ html{background:var(--surface)}
  .dm-app .pg.auth .dm-stack{gap:8px!important}
 }
 @media (min-width:900px) and (max-height:640px){
- .auth-copy .say{display:none}
+ /* Keep say visible — hover copy is the point of the art pane */
+ .auth-copy .say{font-size:13px!important;line-height:1.3!important}
  .auth-stage{max-height:min(34vh,160px)}
  .auth-sq{--auth-sq:84px}
  .dm-app .pg.auth .dm-appbar{margin:0!important}
@@ -2568,6 +2587,108 @@ html{background:var(--surface)}
    width:100%;max-width:480px;min-height:100%;
    padding-bottom:max(24px,env(safe-area-inset-bottom,0px));
  }
+}
+
+/* ---------- Start flow on laptop (DS ResponsiveStart · flowapp) ---------- */
+.dm-app .fl-top{display:none}
+.fl-prog{display:none}
+.fl-exit{all:unset;cursor:pointer;box-sizing:border-box}
+@media (min-width:900px){
+ .dm-app-shell.flowapp,
+ .dm-app.flowapp{
+   display:flex;flex-direction:column;background:var(--surface);
+   overflow:auto;height:100dvh;max-height:100dvh;min-height:0;
+   grid-template-columns:none;
+ }
+ .dm-app-shell.flowapp > .dm-side,
+ .dm-app-shell.flowapp > .dm-app-tabbar{display:none !important}
+ .dm-app.flowapp .fl-top{
+   display:grid;grid-template-columns:1fr minmax(0,420px) 1fr;align-items:center;
+   gap:24px;padding:18px 32px;box-shadow:0 1px 0 var(--line);flex:none;
+   background:var(--surface);position:relative;z-index:2
+ }
+ .dm-app.flowapp .fl-top .fl-lk,
+ .dm-app.flowapp .fl-top .dm-lockup{font-size:18px}
+ .fl-mid{display:flex;flex-direction:column;align-items:center;gap:6px}
+ .fl-prog{
+   display:block;width:100%;height:4px;border-radius:2px;
+   background:var(--hafermilch);overflow:hidden
+ }
+ .fl-prog i{display:block;height:100%;background:var(--espressosatz);border-radius:2px}
+ .fl-step{font:500 13px/18px var(--font-text);color:var(--ink-muted)}
+ .fl-exit{
+   justify-self:end;font:500 14px/20px var(--font-text);color:var(--ink);
+   text-decoration:none;padding:8px 14px;border-radius:999px;
+   box-shadow:inset 0 0 0 1.5px var(--line-strong)
+ }
+ .dm-app.flowapp .pg.fl{
+   flex:1;display:flex;flex-direction:column;gap:18px;width:100%;
+   max-width:560px;margin:0 auto;padding:56px 24px 64px;box-sizing:border-box;
+   overflow:visible
+ }
+ .dm-app.flowapp .pg.fl>.dm-appbar,
+ .dm-app.flowapp .pg.fl>.dm-qprog,
+ .dm-app.flowapp .pg.fl .dm-signup>.dm-appbar,
+ .dm-app.flowapp .pg.fl .dm-signup>.dm-qprog{display:none}
+ .dm-app.flowapp .pg .dm-btn--block{max-width:none}
+ /* Nested phone signup markup fills the flow pane */
+ .dm-app.flowapp .pg.fl > .dm-signup,
+ .dm-app.flowapp .pg.fl > .dm-signup-shell,
+ .dm-app.flowapp .pg.fl > .dm-signup-shell > .dm-signup{
+   max-width:none;width:100%;min-height:0;height:auto;margin:0;padding:0;
+   background:transparent;box-shadow:none
+ }
+ /* card: log in, email, myPax */
+ .dm-app.flowapp:has(.fl-card){background:var(--briefpapier)}
+ .dm-app.flowapp .fl-top:has(+.fl-card){background:var(--briefpapier);box-shadow:none}
+ .dm-app.flowapp .pg.fl-card{
+   flex:none;max-width:440px;margin:48px auto 64px;padding:36px;
+   border-radius:24px;background:var(--surface);
+   box-shadow:0 0 0 1px var(--line),0 24px 48px -24px rgba(10,5,7,.18)
+ }
+ /* centre: verify */
+ .dm-app.flowapp .pg.fl-center{
+   max-width:440px;justify-content:center;text-align:center;align-items:center
+ }
+ .dm-app.flowapp .pg.fl-center .dm-otp{justify-content:center;gap:10px}
+ .dm-app.flowapp .pg.fl-center .dm-otp input{width:56px;height:64px;font-size:26px}
+ .dm-app.flowapp .pg.fl-center .dm-q{font-size:34px!important;line-height:40px!important}
+ .dm-app.flowapp .pg.fl-center>.dm-btn{margin-top:12px!important;max-width:320px}
+ /* question: big number + footer bar */
+ .dm-app.flowapp .pg.fl-question{
+   max-width:640px;justify-content:center;text-align:center;align-items:center;
+   padding-bottom:120px;position:relative
+ }
+ .dm-app.flowapp .pg.fl-question .dm-q{font-size:36px!important;line-height:42px!important}
+ .dm-app.flowapp .pg.fl-question .dm-mode{align-self:center}
+ .dm-app.flowapp .pg.fl-question .dm-stepper{transform:scale(1.6);transform-origin:50% 50%;margin:24px 0}
+ .dm-app.flowapp .pg.fl-question .dm-row{justify-content:center}
+ .dm-app.flowapp .pg.fl-question .dm-signup > .dm-row:last-child,
+ .dm-app.flowapp .pg.fl-question > .dm-row:last-child{
+   position:fixed;left:0;right:0;bottom:0;padding:16px 32px;margin:0;
+   background:var(--surface);box-shadow:0 -1px 0 var(--line);
+   display:flex;justify-content:space-between;gap:12px;z-index:3
+ }
+ .dm-app.flowapp .pg.fl-question .dm-signup > .dm-row:last-child .dm-btn,
+ .dm-app.flowapp .pg.fl-question > .dm-row:last-child .dm-btn{
+   flex:none!important;width:auto!important;min-width:140px
+ }
+ /* full bleed: loaders, celebration */
+ .dm-app.flowapp.fl-bleed{background:none}
+ .dm-app.flowapp .pg.fl-full{
+   max-width:none;margin:0;padding:0;flex:1;
+   display:flex;align-items:center;justify-content:center
+ }
+ .dm-app.flowapp .pg.fl-full>*{
+   width:100%;max-width:none!important;flex:1 1 auto;align-self:stretch;margin:0 auto;
+   padding-left:max(24px,calc(50% - 240px))!important;
+   padding-right:max(24px,calc(50% - 240px))!important;box-sizing:border-box
+ }
+ /* welcome split right column */
+ .dm-app .pg.auth.wel{justify-content:center;gap:16px;max-width:440px}
+ .dm-app .pg.auth.wel .dm-btn--block{max-width:360px;margin-top:20px!important}
+ .dm-app .pg.auth.wel .dm-welcome,.dm-app .pg.auth.wel .dm-lockup{display:none}
+ .dm-app .pg.auth.wel .dm-q{font-size:40px!important;line-height:46px!important}
 }
 @media (max-height:700px){
  .dm-welcome{height:min(34dvh,240px);min-height:140px}
