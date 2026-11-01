@@ -125,7 +125,7 @@ export const copy = {
     continue: "Continue",
     planSub: "Three steps. About five minutes.",
     planStep1: "Bring in your numbers",
-    planStep2: "See what 60 % changes",
+    planStep2: "See what changes",
     planStep3: "Decide what's next",
     letsStart: "Let's start",
   },
