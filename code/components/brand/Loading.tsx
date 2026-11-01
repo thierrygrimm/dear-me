@@ -141,40 +141,13 @@ export function CalculatingPanel({
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100dvh",
-        padding: "20px 16px 16px",
-        gap: 18,
-        boxSizing: "border-box",
-        background: "var(--surface)",
-      }}
+      className={cn("dm-calc-panel", className)}
       role="status"
       aria-live="polite"
     >
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 18,
-          textAlign: "center",
-        }}
-      >
+      <div className="dm-calc-panel__body">
         <Squirrel state="thinking" size={72} />
-        <p
-          style={{
-            margin: 0,
-            font: "600 20px/26px var(--font-display)",
-            maxWidth: 280,
-          }}
-        >
-          {label}
-        </p>
+        <p className="dm-calc-panel__label">{label}</p>
         <p className="dm-small dm-muted" style={{ margin: 0, minHeight: 18 }}>
           {detail}
         </p>
