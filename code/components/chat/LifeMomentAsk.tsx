@@ -14,7 +14,7 @@ import {
   markMomentAsked,
   type LifeMoment,
 } from "@/lib/session";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 type Phase = "ask" | "reveal" | "done";
 
@@ -82,6 +82,7 @@ export function LifeMomentAsk({
   const [choseNext, setChoseNext] = useState(false);
   const [remembered, setRemembered] = useState<string | null>(null);
   const [booted, setBooted] = useState(false);
+  const offerTitleId = useId();
 
   const step = script.questions[qIndex];
   const showingChoices =
@@ -333,6 +334,7 @@ export function LifeMomentAsk({
 
       <BottomSheet
         open={offerOpen}
+        labelledBy={offer ? offerTitleId : undefined}
         onClose={() => {
           setOfferOpen(false);
           setWhyOpen(false);
@@ -348,7 +350,9 @@ export function LifeMomentAsk({
               </span>
               <span className="dm-small dm-muted">Partner idea</span>
             </div>
-            <h4 className="lmq-offer__title">{offer.title}</h4>
+            <h4 id={offerTitleId} className="lmq-offer__title">
+              {offer.title}
+            </h4>
             <p className="lmq-offer__body">{offer.body}</p>
             <ul className="lmq-offer__facts">
               {offer.facts.map((f) => (
