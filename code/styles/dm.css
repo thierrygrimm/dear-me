@@ -482,9 +482,9 @@
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* AskBar voice inside the bar */
-.dm-ask--voice{grid-template-columns:44px minmax(0,1fr) auto}
-.dm-voice{position:relative;display:flex;align-items:center;gap:10px;min-width:0;padding:0 4px}
-.dm-voice .dm-wave{flex:1;min-width:0;justify-content:flex-end}
+.dm-ask--voice{grid-template-columns:44px minmax(0,1fr) auto;width:100%}
+.dm-voice{position:relative;display:flex;align-items:center;gap:10px;min-width:0;width:100%;padding:0 4px}
+.dm-voice .dm-wave{flex:1;min-width:0;width:100%;justify-content:flex-start}
 .dm-rec{flex:none;width:10px;height:10px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 1.5px var(--ink);animation:dm-rec 1.2s ease-in-out infinite}
 @keyframes dm-rec{50%{transform:scale(.6)}}
 .dm-wave.is-frozen{opacity:.25;transition:opacity 300ms}
@@ -1897,11 +1897,18 @@ button.dm-covr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-
 .lmq-offer{display:flex;flex-direction:column;gap:12px}
 .lmq-offer__brand{display:flex;align-items:center;gap:10px}
 .lmq-offer__pax{font:800 22px/1 var(--font-display);color:var(--pax-purpur)}
+.lmq-offer__title{margin:0;font:700 22px/26px var(--font-display);letter-spacing:-.015em}
 .lmq-offer__body{margin:0;font:400 15px/21px var(--font-text);color:var(--ink-muted)}
-.lmq-offer__facts{list-style:none;margin:0;padding:0}
+.lmq-offer__facts{list-style:none;margin:4px 0 6px;padding:0}
 .lmq-offer__facts li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font:400 14px/20px var(--font-text)}
 .lmq-offer__facts li span{color:var(--ink-muted)}
 .lmq-offer__facts li b{font-weight:600;text-align:right}
+.lmq-offer__why{display:flex;flex-direction:column;gap:6px;margin-top:-2px}
+.lmq-offer__why-btn{all:unset;cursor:pointer;align-self:flex-start;font:500 13px/18px var(--font-text);color:var(--ink-muted);text-decoration:underline;text-underline-offset:2px}
+.lmq-offer__why-btn:hover{color:var(--ink)}
+.lmq-offer__why-body{margin:0;font:400 13px/18px var(--font-text);color:var(--ink-muted)}
+.lmq-offer__another{all:unset;cursor:pointer;align-self:center;margin-top:2px;font:500 13px/18px var(--font-text);color:var(--ink-muted);text-decoration:underline;text-underline-offset:2px}
+.lmq-offer__another:hover{color:var(--ink)}
 .dm-sugg button:hover{background:var(--action);color:var(--on-action)}
 
 
@@ -1957,6 +1964,10 @@ button.dm-covr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-
   display:flex;flex-direction:column;gap:14px;flex:1;width:100%;min-height:0;height:100%;
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   box-sizing:border-box
+}
+/* Phone: float the SSO block between appbar and terms (terms keep margin:auto 0 0) */
+@media (max-width:899px){
+  .dm-app.signapp .pg.auth > .dm-q{margin-top:auto}
 }
 .dm-app.onb{
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
