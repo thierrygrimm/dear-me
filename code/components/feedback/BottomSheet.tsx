@@ -1,17 +1,41 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type TouchEvent,
+} from "react";
+import { createPortal } from "react-dom";
+
+const HOST_SELECTOR =
+  ".dm-app-shell, .dm-signup-shell, .dm-cert-shell, .dm-cert-pane, .dm-phone, .dm-app-full";
+
+const SWIPE_CLOSE = 96;
+const SWIPE_COLLAPSE = 48;
 
 type Props = {
   open: boolean;
   onClose: () => void;
   title?: string;
   description?: string;
+  /** Start (or force) full-height explain mode. Grab still toggles. */
   full?: boolean;
   children: ReactNode;
   className?: string;
 };
+
+function focusables(root: HTMLElement) {
+  return Array.from(
+    root.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
+}
 
 export function BottomSheet({
   open,
@@ -22,46 +46,199 @@ export function BottomSheet({
   children,
   className,
 }: Props) {
+  const reactId = useId();
+  const titleId = `${reactId}-title`;
+  const descId = `${reactId}-desc`;
+
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const startY = useRef(0);
+  const dragYRef = useRef(0);
+  const dragging = useRef(false);
+
+  const [host, setHost] = useState<Element | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [full, setFull] = useState(fullProp);
+  const [dragY, setDragY] = useState(0);
+
+  useLayoutEffect(() => {
+    setMounted(true);
+    const el = anchorRef.current;
+    if (!el) return;
+    setHost(el.closest(HOST_SELECTOR));
+  }, [open]);
 
   useEffect(() => {
-    if (!open) setFull(fullProp);
+    if (!open) {
+      setFull(fullProp);
+      setDragY(0);
+      dragging.current = false;
+    }
   }, [open, fullProp]);
 
   useEffect(() => {
     if (!open) return;
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+
+    const nodes = focusables(sheet).filter(
+      (el) => !el.classList.contains("grab") && !el.classList.contains("scrim"),
+    );
+    const target = nodes[0] ?? sheet;
+    const t = window.setTimeout(() => target.focus(), 30);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const list = focusables(sheet);
+      if (list.length === 0) {
+        e.preventDefault();
+        sheet.focus();
+        return;
+      }
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || active === sheet)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+      const prev = triggerRef.current;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
   }, [open, onClose]);
 
-  return (
-    <div className={cn("dm-bs", open && "open", className)} aria-hidden={!open}>
+  useEffect(() => {
+    if (!open || !host) return;
+    const prev = (host as HTMLElement).style.overflow;
+    (host as HTMLElement).style.overflow = "hidden";
+    return () => {
+      (host as HTMLElement).style.overflow = prev;
+    };
+  }, [open, host]);
+
+  const endDrag = () => {
+    dragging.current = false;
+    const dy = dragYRef.current;
+    dragYRef.current = 0;
+    setDragY(0);
+    if (dy >= SWIPE_CLOSE) {
+      onClose();
+      return;
+    }
+    if (full && dy >= SWIPE_COLLAPSE) {
+      setFull(false);
+    }
+  };
+
+  const onTouchStart = (e: TouchEvent) => {
+    if (!open) return;
+    const sheet = sheetRef.current;
+    const t = e.target as HTMLElement | null;
+    const fromGrab = !!t?.closest(".grab");
+    const y = e.touches[0]?.clientY ?? 0;
+    const top = sheet?.getBoundingClientRect().top ?? 0;
+    const fromHandleZone = y - top <= 52 && (sheet?.scrollTop ?? 0) <= 0;
+    if (!fromGrab && !fromHandleZone) return;
+    startY.current = y;
+    dragging.current = true;
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    if (!dragging.current) return;
+    const y = e.touches[0]?.clientY ?? startY.current;
+    const dy = Math.max(0, y - startY.current);
+    if (dy > 8 && e.cancelable) e.preventDefault();
+    dragYRef.current = dy;
+    setDragY(dy);
+  };
+
+  const onTouchEnd = () => {
+    if (!dragging.current) return;
+    endDrag();
+  };
+
+  const sheetStyle =
+    dragY > 0
+      ? {
+          transform: `translateY(${dragY}px)`,
+          transition: "none" as const,
+        }
+      : undefined;
+
+  const sheet = (
+    <div
+      className={cn(
+        "dm-bs",
+        host ? "dm-bs--hosted" : "dm-bs--fixed",
+        open && "open",
+        className,
+      )}
+      aria-hidden={!open}
+    >
       <button
         type="button"
         className="scrim"
+        tabIndex={open ? 0 : -1}
         aria-label="Close"
         onClick={onClose}
       />
       <div
+        ref={sheetRef}
         className={cn("sheet", full && "full")}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? "dm-bs-title" : undefined}
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={description ? descId : undefined}
+        tabIndex={-1}
+        style={sheetStyle}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
       >
         <button
           type="button"
           className="grab"
-          aria-label="Expand"
+          tabIndex={open ? 0 : -1}
+          aria-label={full ? "Collapse" : "Expand"}
           onClick={() => setFull((v) => !v)}
         />
-        {title ? <h4 id="dm-bs-title">{title}</h4> : null}
-        {description ? <p>{description}</p> : null}
+        {title ? <h4 id={titleId}>{title}</h4> : null}
+        {description ? <p id={descId}>{description}</p> : null}
         {children}
       </div>
     </div>
+  );
+
+  return (
+    <>
+      <span ref={anchorRef} hidden aria-hidden />
+      {mounted
+        ? createPortal(sheet, host ?? document.body)
+        : null}
+    </>
   );
 }
 
