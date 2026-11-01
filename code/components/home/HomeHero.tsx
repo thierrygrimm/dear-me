@@ -9,7 +9,9 @@ import {
   WrappedEntry,
   WrappedStory,
 } from "@/components/home/WrappedStory";
+import { useLocale } from "@/components/locale/LocaleProvider";
 import { copy } from "@/lib/copy";
+import { homeOppsFor } from "@/lib/i18n/homeOpps";
 import { seedForAsk } from "@/lib/lifeMoments";
 import {
   applyPersona,
@@ -32,74 +34,6 @@ type Props = {
   onLook?: () => void;
   onBook?: () => void;
   onLesson?: () => void;
-};
-
-const HOME_STARTERS = [
-  "Can I go to 60 %?",
-  "Am I covered if I can't work?",
-  "What should I do this month?",
-] as const;
-
-const HOME_OPPS: Record<
-  PersonaId,
-  { id: string; title: string; body: string; href: string }[]
-> = {
-  lena: [
-    {
-      id: "3a",
-      title: "Top up pillar 3a",
-      body: "Before 31 December — about CHF 1'900 tax saved.",
-      href: "/learn?lesson=pillar-3a",
-    },
-    {
-      id: "cover",
-      title: "Check cover if you couldn't work",
-      body: "The soft spot after going part-time.",
-      href: "/answer?topic=disability",
-    },
-  ],
-  noah: [
-    {
-      id: "3a",
-      title: "Open a 3a while you're young",
-      body: "CHF 100 a month compounds hard from 24.",
-      href: "/learn?lesson=pillar-3a",
-    },
-    {
-      id: "cert",
-      title: "Bring in your certificate",
-      body: "Makes every number exact.",
-      href: "/certificate",
-    },
-  ],
-  sandra: [
-    {
-      id: "3a",
-      title: "Use the bigger 3a ceiling",
-      body: "Self-employed saving without a fund.",
-      href: "/learn?lesson=pillar-3a",
-    },
-    {
-      id: "cover",
-      title: "Income if you couldn't work",
-      body: "AHV/IV alone leaves a gap.",
-      href: "/answer?topic=disability",
-    },
-  ],
-  ruth: [
-    {
-      id: "payout",
-      title: "Lump sum or pension?",
-      body: "How you take CHF 380'000 changes how long it lasts.",
-      href: "/answer?topic=retire",
-    },
-    {
-      id: "ahv",
-      title: "AHV for couples at 65",
-      body: "A four-minute lesson before you decide.",
-      href: "/learn?lesson=ahv-part-2",
-    },
-  ],
 };
 
 function helloFor(hour: number) {
@@ -350,23 +284,25 @@ function EveningScene() {
  */
 export function HomeHero({ onLook, onBook, onLesson }: Props) {
   const router = useRouter();
+  const { language } = useLocale();
   const [hour, setHour] = useState(9);
   const [persona, setPersona] = useState<Persona>(() => getPersona("lena"));
   const [sheetOpen, setSheetOpen] = useState(false);
   const [wrappedOpen, setWrappedOpen] = useState(false);
   const [day1, setDay1] = useState(false);
   const [hasCert, setHasCert] = useState(false);
+  const opps = homeOppsFor(persona.id, language);
 
   useEffect(() => {
     setHour(new Date().getHours());
-    setPersona(getPersona(readPersonaId()));
+    setPersona(getPersona(readPersonaId(), language));
     setDay1(isHomeDay1());
     setHasCert(hasCertificate());
-  }, []);
+  }, [language]);
 
   function selectPersona(id: PersonaId) {
     applyPersona(id);
-    setPersona(getPersona(id));
+    setPersona(getPersona(id, language));
     setDay1(isHomeDay1());
     setHasCert(hasCertificate());
   }
@@ -405,7 +341,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
             type="button"
             className="dm-pair"
             data-ps="1"
-            aria-label="Switch profile"
+            aria-label={copy.home.switchProfile}
             onClick={() => setSheetOpen(true)}
           >
             {persona.avatars.map((a) => (
@@ -433,15 +369,12 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
 
       <div className="home-ask">
         <AskBar
-          placeholder="Ask anything about your pension"
+          placeholder={copy.home.askAnything}
           onAttach={() => router.push("/certificate")}
           onSubmit={(value) => goAskFree(router, value)}
         />
         <div className="chips">
-          {(persona.earlierChats.length
-            ? persona.earlierChats
-            : [...HOME_STARTERS]
-          ).map((q) => (
+          {persona.earlierChats.map((q) => (
             <button
               key={q}
               type="button"
@@ -480,7 +413,7 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
             <span className="art2">
               <NetArt />
             </span>
-            <b>Your safety net</b>
+            <b>{copy.home.safetyNet}</b>
             <span className="sub">{persona.net}</span>
           </button>
           <button type="button" className="plum" onClick={openLesson}>
@@ -496,9 +429,9 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
           <>
             <h2>{copy.home.feedHeading}</h2>
             <Opportunities
-              items={HOME_OPPS[persona.id]}
+              items={opps}
               onSelect={(id) => {
-                const hit = HOME_OPPS[persona.id].find((o) => o.id === id);
+                const hit = opps.find((o) => o.id === id);
                 if (hit) router.push(hit.href);
               }}
             />
@@ -584,8 +517,8 @@ export function HomeHero({ onLook, onBook, onLesson }: Props) {
 
             <h2>
               {persona.avatars.length > 1
-                ? "From the two of you"
-                : "From you"}
+                ? copy.home.fromTwoOfYou
+                : copy.home.fromYou}
             </h2>
             <div className="dm-letter" style={{ margin: "10px 4px 6px" }}>
               <small>{persona.letterTitle}</small>
