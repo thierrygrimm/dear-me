@@ -51,6 +51,7 @@ export const copy = {
     disclaimer:
       "Figures are calculated from what we know. Tap any number for its source.",
     disclaimerShort: "Guidance, not advice.",
+    whoLabel: "Who is planning",
   },
   plan: {
     title: "Your plan",
