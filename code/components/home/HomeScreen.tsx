@@ -79,8 +79,6 @@ export function HomeScreen() {
 
   return (
     <HomeHero
-      name={name}
-      onLook={() => goAsk(router, "What if I couldn't work?")}
       onBook={() => router.push("/me/book")}
       onLesson={() => router.push("/learn?lesson=part-time")}
     />
