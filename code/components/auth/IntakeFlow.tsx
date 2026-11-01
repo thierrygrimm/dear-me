@@ -7,12 +7,14 @@ import { Chip } from "@/components/ui/Chip";
 import { NumberEdit } from "@/components/ui/NumberEdit";
 import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
-import { cn } from "@/lib/cn";
+import { FlowShell } from "@/components/layout/FlowShell";
 import { formatSwiss } from "@/lib/format";
 import {
   isPaxConnected,
   markIntake,
+  markOnboarded,
   markPlanningScope,
+  markSignedIn,
   readCertificate,
   readPlanningScope,
   type IntakeValues,
@@ -20,6 +22,7 @@ import {
 } from "@/lib/session";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 type Phase = "ask" | "check" | "calc";
@@ -61,9 +64,10 @@ function StepProg({
 
 /**
  * First-answer intake: one workload question → check it once → calculating.
- * Matches Flows / IntakeCard A + D for the demo path.
+ * DS ResponsiveStart: flowapp + fl-question / fl-col / fl-bleed (not a phone column).
  */
 export function IntakeFlow({ onDone, onBack, className }: Props) {
+  const router = useRouter();
   const cert = useMemo(() => readCertificate(), []);
   const pax = isPaxConnected();
 
@@ -113,29 +117,51 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
     setEditId(null);
   }
 
-  if (phase === "calc") {
-    return (
-      <div className={cn("dm-stage dm-app-shell--bleed", className)}>
-        <CalculatingPanel
-          label="One moment, we're doing the maths with you."
-          steps={[
-            "Reading your pension certificate",
-            "Checking your AHV years",
-            "Calculating 100 % and 60 %",
-            "Comparing with your goal",
-            "Writing your answer",
-          ]}
-          onCancel={onDone}
-        />
-      </div>
-    );
+  function exitFlow() {
+    markSignedIn("guest");
+    markOnboarded();
+    router.replace("/");
   }
 
-  const shell = (body: ReactNode) => (
-    <div className={cn("dm-signup-shell", className)} ref={pulseRef}>
-      <div className="dm-signup">{body}</div>
+  const wrap = (
+    pane: "question" | "col" | "full",
+    stepLabel: string,
+    progress: number,
+    body: ReactNode,
+    bleed?: boolean,
+  ) => (
+    <div ref={pulseRef} className={className}>
+      <FlowShell
+        step={stepLabel}
+        progress={progress}
+        pane={pane}
+        bleed={bleed}
+        onExit={exitFlow}
+      >
+        <div className="dm-signup dm-signup--flow">{body}</div>
+      </FlowShell>
     </div>
   );
+
+  if (phase === "calc") {
+    return wrap(
+      "full",
+      "Calculating",
+      100,
+      <CalculatingPanel
+        label="One moment, we're doing the maths with you."
+        steps={[
+          "Reading your pension certificate",
+          "Checking your AHV years",
+          "Calculating 100 % and 60 %",
+          "Comparing with your goal",
+          "Writing your answer",
+        ]}
+        onCancel={onDone}
+      />,
+      true,
+    );
+  }
 
   if (phase === "check") {
     const rows = [
@@ -181,7 +207,10 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
       },
     ];
 
-    return shell(
+    return wrap(
+      "col",
+      "A few numbers · check",
+      80,
       <>
         <p className="dm-q">Here&apos;s what we heard.</p>
         <span className="dm-small dm-muted">Tap a number to change it.</span>
@@ -244,12 +273,17 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
 
   const value = q === 1 ? today : after;
   const setValue = q === 1 ? setToday : setAfter;
+  const stepOf = 2;
+  const progress = Math.round((q / 5) * 100) || 20;
 
-  return shell(
+  return wrap(
+    "question",
+    `A few numbers · ${q} of ${stepOf}`,
+    progress,
     <>
       <StepProg
         step={q}
-        of={2}
+        of={stepOf}
         onBack={() => {
           if (q === 2) {
             setQ(1);
@@ -342,7 +376,7 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
         />
       )}
 
-      <div className="dm-row" style={{ marginTop: "auto", flexWrap: "nowrap" }}>
+      <div className="dm-row dm-flow-footer" style={{ marginTop: "auto", flexWrap: "nowrap" }}>
         <Button
           variant="secondary"
           onClick={() => {
