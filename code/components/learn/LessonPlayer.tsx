@@ -162,7 +162,7 @@ export function LessonPlayer({
     (current.kind === "lp" || current.kind === "lq") && LpArt;
 
   return (
-    <div className="dm-app-full">
+    <div className="dm-app-full dm-lesson-host">
       <div
         className="dm-lesson"
         style={{ flex: 1, minHeight: 0 }}
@@ -254,6 +254,7 @@ export function LessonPlayer({
               </div>
             ) : null}
             <Button
+              className="nx"
               variant="primary"
               block
               style={{ marginTop: "auto" }}
