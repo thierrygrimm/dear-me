@@ -5,14 +5,18 @@ import { CalculatingPanel } from "@/components/brand/Loading";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { NumberEdit } from "@/components/ui/NumberEdit";
+import { WhoPlanning } from "@/components/ui/WhoPlanning";
 import { BottomSheet } from "@/components/feedback/BottomSheet";
 import { cn } from "@/lib/cn";
 import { formatSwiss } from "@/lib/format";
 import {
   isPaxConnected,
   markIntake,
+  markPlanningScope,
   readCertificate,
+  readPlanningScope,
   type IntakeValues,
+  type PlanningScope,
 } from "@/lib/session";
 import { useDemoPulse } from "@/hooks/useDemoPulse";
 import { Pencil } from "lucide-react";
@@ -70,6 +74,7 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
   const [q, setQ] = useState<1 | 2>(1);
   const [editId, setEditId] = useState<"today" | "after" | null>(null);
   const [editDraft, setEditDraft] = useState("");
+  const [scope, setScope] = useState<PlanningScope>(() => readPlanningScope());
 
   const salary = cert?.insuredSalary ? Math.round(cert.insuredSalary * 1.5) : 92000;
   const savings = cert?.savings ?? 84300;
@@ -254,6 +259,19 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
         }}
       />
 
+      {q === 1 ? (
+        <>
+          <span className="dm-label">Who is planning</span>
+          <WhoPlanning
+            value={scope}
+            onChange={(next) => {
+              setScope(next);
+              markPlanningScope(next);
+            }}
+          />
+        </>
+      ) : null}
+
       <div className="dm-mode" role="radiogroup" aria-label="Answer by">
         <button
           type="button"
@@ -282,7 +300,11 @@ export function IntakeFlow({ onDone, onBack, className }: Props) {
       </div>
 
       <p className="dm-q">
-        {q === 1 ? "How much do you work today?" : "And after the baby?"}
+        {q === 1
+          ? scope === "us" || scope === "family"
+            ? "How much does Lena work today?"
+            : "How much do you work today?"
+          : "And after the baby?"}
       </p>
 
       {mode === "type" ? (
