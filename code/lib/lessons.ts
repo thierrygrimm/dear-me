@@ -1,18 +1,60 @@
+import { ahvPart1Content } from "@/lib/lessons/ahv-part-1";
+import { ahvPart2Content } from "@/lib/lessons/ahv-part-2";
+import { threePillarsContent } from "@/lib/lessons/three-pillars";
+
 export type LessonId =
+  | "three-pillars"
+  | "ahv-part-1"
+  | "ahv-part-2"
   | "three-sources"
   | "part-time"
   | "certificate"
   | "pillar-3a";
 
+export type LessonArtKey =
+  | "pillars-equal"
+  | "three-pillars"
+  | "ahv"
+  | "thirteen"
+  | "pillars"
+  | "part-time"
+  | "certificate"
+  | "nut";
+
 export type LessonMeta = {
   id: LessonId;
   title: string;
   time: string;
-  art: "pillars" | "part-time" | "certificate" | "nut";
+  art: LessonArtKey;
   background: string;
+  isNew?: boolean;
 };
 
 export const LESSONS: LessonMeta[] = [
+  {
+    id: "three-pillars",
+    title: "The three pillars",
+    time: "4 min",
+    art: "pillars-equal",
+    background: "var(--rosa-brille)",
+    isNew: true,
+  },
+  {
+    id: "ahv-part-1",
+    title: "The state pension (AHV)",
+    time: "4 min · part 1",
+    art: "ahv",
+    background: "var(--neonweste)",
+    isNew: true,
+  },
+  {
+    id: "ahv-part-2",
+    title: "AHV for couples and at 65",
+    time: "4 min · part 2",
+    art: "thirteen",
+    background: "var(--brombeerkompott)",
+    isNew: true,
+  },
   {
     id: "three-sources",
     title: "Three sources of your pension",
@@ -43,13 +85,32 @@ export const LESSONS: LessonMeta[] = [
   },
 ];
 
+export type LessonStepKind =
+  | "stacks"
+  | "bars"
+  | "grow"
+  | "quiz"
+  | "certs"
+  | "tax"
+  | "lp"
+  | "lq";
+
 export type LessonStep = {
   artBg: string;
   headline: string;
   body: string;
   cta: string;
-  kind: "stacks" | "bars" | "grow" | "quiz" | "certs" | "tax";
+  kind: LessonStepKind;
+  /** Light quiz (.lq) or dark quiz options */
+  options?: string[];
+  correctIndex?: number;
+  /** Dark quiz question shown in the art panel */
+  question?: string;
+  okFeedback?: string;
+  noFeedback?: string;
 };
+
+export type LessonDataGen = "pillars" | "ahv1" | "ahv2";
 
 export type LessonContent = {
   id: LessonId;
@@ -58,9 +119,17 @@ export type LessonContent = {
   doneBody: string;
   doneCta: string;
   doneCtaHref: string;
+  /** DS data-gen for lp lessons */
+  dataGen?: LessonDataGen;
+  /** Lesson-level quiz feedback (DS data-ok / data-no) */
+  okFeedback?: string;
+  noFeedback?: string;
 };
 
 export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
+  "three-pillars": threePillarsContent as unknown as LessonContent,
+  "ahv-part-1": ahvPart1Content as unknown as LessonContent,
+  "ahv-part-2": ahvPart2Content as unknown as LessonContent,
   "three-sources": {
     id: "three-sources",
     steps: [
@@ -91,6 +160,18 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         headline: "Quick check",
         body: "One tap. No grades, just a nudge.",
         cta: "Finish",
+        question:
+          "Quick check: which source shrinks most when you go part-time?",
+        options: [
+          "The state (AHV)",
+          "Your employer's fund",
+          "Your own 3a",
+        ],
+        correctIndex: 1,
+        okFeedback:
+          "Right. The fixed deduction makes the fund shrink fastest.",
+        noFeedback:
+          "Close. It's the employer's fund, because of the fixed deduction.",
       },
     ],
     doneTitle: "You know the three sources.",
@@ -121,6 +202,17 @@ export const LESSON_CONTENT: Record<LessonId, LessonContent> = {
         headline: "Quick check",
         body: "One tap. No grades, just a nudge.",
         cta: "Finish",
+        question: "Quick check: when hours drop, which shrinks fastest?",
+        options: [
+          "The state (AHV)",
+          "Your employer's fund",
+          "Your own 3a",
+        ],
+        correctIndex: 1,
+        okFeedback:
+          "Right. The fixed deduction makes the fund shrink fastest.",
+        noFeedback:
+          "Close. It's the employer's fund, because of the fixed deduction.",
       },
     ],
     doneTitle: "You know why part-time costs more.",
