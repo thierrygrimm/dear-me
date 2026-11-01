@@ -81,6 +81,7 @@ export function Sidebar({ className }: Props) {
             onClick={() => {
               try {
                 sessionStorage.setItem("dm-ask-q", q);
+                sessionStorage.setItem("dm-ask-free", "1");
               } catch {
                 /* ignore */
               }
